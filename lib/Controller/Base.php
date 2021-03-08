@@ -39,23 +39,4 @@ class Base extends \OpenTHC\Controller\Base
 		return $data;
 	}
 
-	/**
-	 * PHP Script Render Helper
-	 */
-	function render($file)
-	{
-		$root = substr($file, 0, strlen(APP_ROOT));
-		if (APP_ROOT === $root) {
-			// Already a Valid Path
-		} else {
-			$file = trim($file, '/');
-			$file = sprintf('%s/view/%s', APP_ROOT, $file);
-		}
-
-		ob_start();
-		require_once($file);
-		$html = ob_get_clean();
-		return $html;
-	}
-
 }
