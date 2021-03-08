@@ -26,3 +26,5 @@ openlog('openthc-lab', LOG_ODELAY|LOG_PID, LOG_LOCAL0);
 error_reporting(E_ALL & ~ E_NOTICE);
 
 require_once(APP_ROOT . '/vendor/autoload.php');
+
+\OpenTHC\Config::init(APP_ROOT);
