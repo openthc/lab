@@ -8,7 +8,7 @@ namespace App\Controller\Auth\oAuth2;
 use Edoceo\Radix;
 use Edoceo\Radix\Session;
 
-class Back extends \App\Controller\Auth\oAuth2
+class Back extends \OpenTHC\Controller\Auth\oAuth2
 {
 	function __invoke($REQ, $RES, $ARG)
 	{
@@ -51,7 +51,6 @@ class Back extends \App\Controller\Auth\oAuth2
 
 			$x = $p->getResourceOwner($tok);
 			$x = $x->toArray();
-			// var_dump($x); exit;
 
 			$_SESSION['Company'] = $x['Company'];
 			$_SESSION['License'] = $x['License'][0];
