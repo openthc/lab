@@ -130,7 +130,7 @@ $app->map(['GET','POST'], '/intent', 'App\Controller\Intent')
 // Authentication
 $app->group('/auth', function() {
 	$this->get('/open', 'App\Controller\Auth\oAuth2\Open');
-	$this->get('/connect', 'App\Controller\Auth\Connect'); // would like to merge with Open or Back
+	$this->get('/connect', 'App\Controller\Auth\Connect')->setName('auth/connect'); // would like to merge with Open or Back
 	$this->get('/back', 'App\Controller\Auth\oAuth2\Back');
 	$this->get('/init', 'App\Controller\Auth\Init')->setName('auth/init');
 	$this->get('/ping', 'OpenTHC\Controller\Auth\Ping');
