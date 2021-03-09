@@ -114,8 +114,8 @@
 
 </div>
 
-<?= $this->block('block/modal-scan-qr.html') ?>
-<?= $this->block('block/modal-send-email.html') ?>
+<?= $this->block('modal-scan-qr.html') ?>
+<?= $this->block('modal-send-email.html') ?>
 
 
 <script>

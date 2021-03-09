@@ -142,12 +142,12 @@
 </head>
 <body>
 
-<?= $this->block('_block/menu-zero.php') ?>
-<?= $this->block('_block/flash-messages.php') ?>
+<?= $this->block('menu-zero.php') ?>
+<?= $this->block('flash-messages.php') ?>
 
 <?= $this->body ?>
 
-<?= $this->block('_block/footer-zero.php') ?>
+<?= $this->block('footer-zero.php') ?>
 
 <!-- Library Deps -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
