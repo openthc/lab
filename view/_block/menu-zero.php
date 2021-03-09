@@ -14,17 +14,16 @@
 
 <div class="navbar-collapse collapse" id="menu-zero">
 
-<ul class="navbar-nav mr-auto">
 <?php
-foreach ($data['menu']['main'] as $mi) {
-?>
-	<li class="nav-item"><a class="nav-link" href="<?= $mi['link'] ?>"><?= $mi['html'] ?></a></li>
-<?php
+if (!empty($data['menu']['main']) && is_array($data['menu']['main'])) {
+	echo '<ul class="navbar-nav mr-auto">';
+	foreach ($data['menu']['main'] as $mi) {
+		printf('<li class="nav-item"><a class="nav-link" href="%s">%s</a></li>', $mi['link'], $mi['html']);
+	}
+	echo '</ul>';
 }
-?>
-</ul>
 
-<?php
+// Search Option
 if ($data['menu']['show_search']) {
 ?>
 	<form action="/search" autocomplete="x" class="form-inline mr-auto" role="search">
