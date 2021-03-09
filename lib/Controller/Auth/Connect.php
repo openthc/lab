@@ -19,7 +19,7 @@ class Connect extends \OpenTHC\Controller\Auth\Connect
 			// OK
 			break;
 		default:
-			// _exit_text(sprintf('Invalid Session State "%d" [CAC#028]', $x), 500);
+			_exit_text(sprintf('Invalid Session State "%d" [CAC-022]', $x), 500);
 			return $RES;
 		}
 
@@ -69,7 +69,7 @@ class Connect extends \OpenTHC\Controller\Auth\Connect
 
 		// User Specifed Redirect?
 		if (!empty($_GET['r'])) {
-			if (preg_match('/^\/share\/\w+/', $_GET['r'])) {
+			if (preg_match('/^\/(pub|result|share)\/\w+/', $_GET['r'])) {
 				return $RES->withRedirect($_GET['r']);
 			}
 		}

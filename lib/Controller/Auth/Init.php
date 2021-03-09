@@ -5,8 +5,6 @@
 
 namespace App\Controller\Auth;
 
-use Edoceo\Radix\DB\SQL;
-
 class Init extends \OpenTHC\Controller\Auth\oAuth2
 {
 	function __invoke($REQ, $RES, $ARG)

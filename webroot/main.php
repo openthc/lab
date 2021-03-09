@@ -64,6 +64,15 @@ $con['DBC_User'] = function() {
 $app->group('/api', 'App\Module\API');
 
 
+// Legacy v0
+$app->get('/share/{id}', 'App\Controller\Result\Share')
+	->add('App\Middleware\Menu');
+
+
+// No Session
+$app->get('/pub/{id}', 'App\Controller\Pub'); // ->add('App\Middleware\Menu');
+
+
 // Sample Group
 $app->group('/sample', 'App\Module\Sample')
 	->add('App\Middleware\Menu')
@@ -89,10 +98,6 @@ $app->group('/result', 'App\Module\Result')
 $app->get('/search', 'App\Controller\Search')
 	->add('App\Middleware\Menu')
 	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
-
-$app->get('/share/{id}', 'App\Controller\Result\Share')
-	->add('App\Middleware\Menu')
 	->add('App\Middleware\Session');
 
 // Config Group
