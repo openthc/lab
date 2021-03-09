@@ -259,18 +259,12 @@ class View extends \App\Controller\Base
 
 			if (false === $chk_name) {
 				Session::flash('warn', 'Naming the file the same as the Lab Result is a good idea');
-				// _exit_text('Please put the Lab Result ID in the Filename for verification');
 			}
 
-			$mime = mime_content_type($_FILES['file']['tmp_name']);
-			switch ($mime) {
-				case 'application/pdf':
-				case 'image/jpeg':
-				case 'image/png':
-					// OK
-				break;
-				default:
-					_exit_html('<h1>COA File Type Not Supported [CRV#211]</h1>', 404);
+			try {
+				$LR->setCOAFile($_FILES['file']['tmp_name']);
+			} catch (\Exception $e) {
+				Session::flash('fail', $e->getMessage());
 			}
 
 			$LR->setCOAFile($_FILES['file']['tmp_name']);
@@ -284,6 +278,8 @@ class View extends \App\Controller\Base
 			$LR->save();
 			break;
 		case 'share':
+
+			// @todo Make Sure it's Published in MAIN
 
 			// $lab = new \OpenTHC\Service\OpenTHC('lab');
 			// $arg = [ 'form_params' => [
@@ -312,7 +308,7 @@ class View extends \App\Controller\Base
 			// 	throw new \Exception('Unexpected Response from Lab Portal');
 			// }
 
-			return $RES->withRedirect(sprintf('/share/%s.html', $LR['id']));
+			return $RES->withRedirect(sprintf('/pub/%s.html', $LR['id']));
 
 			break;
 		case 'sync':

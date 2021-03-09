@@ -16,7 +16,7 @@ class Home extends \OpenTHC\Controller\Base
 		// Check Connect
 		$dbc = $this->_container->DBC_User;
 		if (empty($dbc)) {
-			_exit_text('Invalid Session [CSH#019]', 500);
+			_exit_text('Invalid Session [CSH-019]', 500);
 		}
 
 		$data = array(

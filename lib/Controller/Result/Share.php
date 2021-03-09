@@ -22,7 +22,7 @@ class Share extends \App\Controller\Base
 		$LR = new Lab_Result($dbc_main, $ARG['id']);
 		if (empty($LR['id'])) {
 			$data = array(
-				'Page' => array('title' => 'Not Found [CRS#030]'),
+				'Page' => array('title' => 'Not Found [CRS-025]'),
 				'lab_result_id' => null,
 			);
 			$RES = $RES->withStatus(404);
@@ -32,7 +32,7 @@ class Share extends \App\Controller\Base
 		$data = $this->loadSiteData();
 		$meta = json_decode($LR['meta'], true);
 		$data = array_merge($data, $meta);
-		// _exit_text($data);
+
 		if ($_SESSION['License']['id'] == $LR['license_id']) {
 			// I'm the Owner
 			$data['mine'] = true;
@@ -58,7 +58,6 @@ class Share extends \App\Controller\Base
 			$data['Result']['coa_file'] = $coa_file;
 		}
 
-		$data['Sample'] = $meta['Sample'];
 		if (empty($data['Sample']['id'])) {
 			$data['Sample']['id'] = '- Not Found -';
 			$data['Sample']['id'] = $data['Result']['global_for_inventory_id'];
@@ -72,14 +71,11 @@ class Share extends \App\Controller\Base
 			'guid' => $chk['guid'],
 		];
 
-		$data['Product'] = $meta['Product'];
 		if (empty($data['Product']['name'])) {
 			$data['Product']['name'] = '- Not Found -';
 		}
 
-		$data['Strain']  = $meta['Variety']; // @deprecated
-		$data['Variety']  = $meta['Variety'];
-
+		// Output Type
 		switch ($ext) {
 		case '':
 		case 'html':
