@@ -45,10 +45,6 @@ class Menu extends \OpenTHC\Middleware\Base
 				'link' => '/result',
 				'html' => '<i class="fas fa-check-square"></i> Results',
 			);
-			// $menu['main'][] = array(
-			// 	'link' => '/share',
-			// 	'html' => '<i class="fas fa-share-alt"></i> Sharing',
-			// );
 
 			$menu['page'] = array(
 				[

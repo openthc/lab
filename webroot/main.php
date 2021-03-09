@@ -94,17 +94,9 @@ $app->get('/search', 'App\Controller\Search')
 	->add('App\Middleware\Auth')
 	->add('App\Middleware\Session');
 
-
-// No Session Here
-$app->get('/share', 'App\Controller\Share')
-	->add('App\Middleware\Menu')
-	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
-
 $app->get('/share/{id}', 'App\Controller\Result\Share')
 	->add('App\Middleware\Menu')
 	->add('App\Middleware\Session');
-
 
 // Config Group
 $app->group('/config', 'App\Module\Config')
@@ -158,10 +150,10 @@ $app->get('/index', function($REQ, $RES, $ARG) {
 
 
 // Custom Middleware?
-// $f = sprintf('%s/Custom/boot.php', APP_ROOT);
-// if (is_file($f)) {
-// 	require_once($f);
-// }
+$f = sprintf('%s/Custom/boot.php', APP_ROOT);
+if (is_file($f)) {
+	require_once($f);
+}
 
 
 // Execute
