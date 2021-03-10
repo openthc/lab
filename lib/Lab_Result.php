@@ -72,21 +72,33 @@ SQL;
 
 	}
 
-	function setCOAFile($pdf_source)
+	/**
+	 * Set the given PDF document as the COA
+	 */
+	function setCOAFile($coa_source)
 	{
-		$coa_file = $this->getCOAFile();
+		$pdf_output = $this->getCOAFile();
+		$png_ouptut = preg_replace('/\.pdf$/', '.png', $pdf_output);
 
-		$coa_path = dirname($coa_file);
+		$coa_path = dirname($pdf_output);
 		if (!is_dir($coa_path)) {
 			mkdir($coa_path, 0755, true);
 		}
 
-		// $pdf_source_type = mime_content_type($coa_file);
-		// case 'application/pdf':
-		// case 'image/png':
+		// Check Type
+		$mime = mime_content_type($coa_source);
+		switch ($mime) {
+		case 'application/pdf':
+			// OK
+			break;
 		// case 'image/jpeg':
+		// case 'image/png':
+			// @todo should we auto-convert or keep these?
+		default:
+			throw new \Exception('COA File Type Not Supported [LLR-096]');
+		}
 
-		rename($pdf_source, $coa_file);
+		rename($coa_source, $pdf_output);
 
 		// @todo Inspect the document
 
@@ -110,9 +122,9 @@ SQL;
 		// See http://milan.kupcevic.net/ghostscript-ps-pdf/#refs
 		// $cmd = array();
 		// $cmd[] = '/usr/bin/gs';
-		// $cmd[] = escapeshellarg($coa_file);
+		// $cmd[] = escapeshellarg($pdf_output);
 		// $buf = shell_exec(implode(' ', $cmd));
-		// $pdf_info = _pdf_get_info($coa_file);
+		// $pdf_info = _pdf_get_info($pdf_output);
 		// if ($pdf_info['MediaBox'] < 629)
 
 		// Resize the Document?
@@ -134,23 +146,35 @@ SQL;
 		// var_dump($buf); exit;
 		// rename($pdf_middle, $pdf_output);
 
+		// Create PNG Preview
+		$cmd = [];
+		$cmd[] = '/usr/bin/convert';
+		$cmd[] = escapeshellarg(sprintf('%s[0]', $pdf_output));
+		$cmd[] = '-resize 240x240';
+		$cmd[] = escapeshellarg($png_ouptut);
+		$cmd[] = '2>&1';
+		$cmd = implode(' ', $cmd);
+		$buf = shell_exec($cmd);
+
+		return true;
+
 	}
 
 	/**
 	 * Try to Import the COA
-	 * @param $ufb URL or FILE Path/Handle or Bytes of PDF as String
+	 * @param $coa_source URL or FILE Path/Handle or Bytes of PDF as String
 	 */
-	function importCOA($ufb)
+	function importCOA($coa_source)
 	{
-		if (empty($ufb)) {
+		if (empty($coa_source)) {
 			return(false);
 		}
 
 		$pdf_output = $this->getCOAFile();
 		$pdf_source = null;
 
-		if (is_string($ufb)) {
-			$type = strtolower(substr($ufb, 0, 4));
+		if (is_string($coa_source)) {
+			$type = strtolower(substr($coa_source, 0, 4));
 			switch ($type) {
 				case '%pdf':
 					// PDF Bytes
@@ -159,7 +183,7 @@ SQL;
 				break;
 				case 'http':
 					// Fetch This
-					$req = __curl_init($ufb);
+					$req = __curl_init($coa_source);
 					$raw = curl_exec($req);
 					$inf = curl_getinfo($req);
 					if (200 == $inf['http_code']) {
@@ -169,8 +193,8 @@ SQL;
 				break;
 				default:
 					// Ok, Likely a File String?
-					if (is_file($ufb)) {
-						$pdf_source = $ufb;
+					if (is_file($coa_source)) {
+						$pdf_source = $coa_source;
 					}
 				break;
 			}
