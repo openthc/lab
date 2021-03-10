@@ -18,7 +18,7 @@ class Single extends \OpenTHC\Controller\Base
 		if (empty($LR['id'])) {
 			return $RES->withJSON([
 				'data' => null,
-				'meta' => [ 'detail' => 'Not Found [ARS#021]' ],
+				'meta' => [ 'detail' => 'Not Found [ARS-021]' ],
 			], 404);
 		}
 
@@ -54,7 +54,7 @@ class Single extends \OpenTHC\Controller\Base
 		unset($ret['Page']);
 		unset($ret['Site']);
 
-		$ret['Result']['coa_link'] = sprintf('https://%s/share/%s.html', $_SERVER['SERVER_NAME'], $ARG['id']);
+		$ret['Result']['coa_link'] = sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $ARG['id']);
 
 		return $RES->withJSON($ret, 200, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
 

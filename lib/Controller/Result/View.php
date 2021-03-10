@@ -136,7 +136,7 @@ class View extends \App\Controller\Base
 		// https://stackoverflow.com/a/8940515
 		// $data['share_mail_link'] = http_build_query(array(
 		// 	'subject' => sprintf('Lab Results %s', $data['Result']['global_id']),
-		// 	'body' => sprintf("\n\nHere is the link: https://%s/share/%s.html", $_SERVER['SERVER_NAME'], $Lab_Result['id']),
+		// 	'body' => sprintf("\n\nHere is the link: https://%s/pub/%s.html", $_SERVER['SERVER_NAME'], $Lab_Result['id']),
 		// ), null, '&', PHP_QUERY_RFC3986);
 
 		// _exit_text($data);

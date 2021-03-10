@@ -30,9 +30,9 @@
 	<div class="form-group">
 		<label>Share Link</label>
 		<div class="input-group">
-			<input class="form-control" readonly value="https://<?= $data['Site']['hostname'] ?>/share/<?= $data['Result']['id'] ?>.html">
+			<input class="form-control" readonly value="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.html">
 			<div class="input-group-append">
-				<button class="btn btn-outline-secondary btn-clipcopy" data-clipboard-text="https://<?= $data['Site']['hostname'] ?>/share/<?= $data['Result']['id'] ?>.html" type="button"><i class="fas fa-clipboard"></i></button>
+				<button class="btn btn-outline-secondary btn-clipcopy" data-clipboard-text="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.html" type="button"><i class="fas fa-clipboard"></i></button>
 			</div>
 		</div>
 	</div>
@@ -48,7 +48,7 @@
 			<?php
 			if ($data['Result']['coa_file']) {
 			?>
-				<a class="btn btn-block btn-outline-primary" href="https://<?= $data['Site']['hostname'] ?>/share/<?= $data['Result']['id'] ?>.pdf" target="_blank"><i class="fas fa-print"></i> Print COA</a>
+				<a class="btn btn-block btn-outline-primary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.pdf" target="_blank"><i class="fas fa-print"></i> Print COA</a>
 			<?php
 			} else {
 				if ($data['mine']) {
@@ -109,7 +109,7 @@
 <!-- <div class="form-actions">
 	<button class="btn btn-outline-primary" name="a" data-toggle="modal" data-target="#modal-result-email" type="button"><i class="far fa-envelope"></i> Email</button>
 	<button class="btn btn-outline-primary" data-toggle="modal" data-target="#modal-scan-qr" type="button"><i class="fas fa-qrcode"></i> QR Code</button>
-	<a class="btn btn-outline-secondary" href="https://<?= $data['Site']['hostname'] ?>/share/<?= $data['Result']['id'] ?>.json"> JSON</a>
+	<a class="btn btn-outline-secondary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.json"> JSON</a>
 </div> -->
 
 </div>

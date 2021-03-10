@@ -65,12 +65,12 @@ $app->group('/api', 'App\Module\API');
 
 
 // Legacy v0
-$app->get('/share/{id}', 'App\Controller\Result\Share')
-	->add('App\Middleware\Menu');
+$app->get('/share/{id}', function($REQ, $RES, $ARG) {
+	return $RES->withRedirect(sprintf('/pub/%s', $ARG['id']), 301);
+});
 
-
-// No Session
-$app->get('/pub/{id}', 'App\Controller\Pub'); // ->add('App\Middleware\Menu');
+// No Menu or Session
+$app->get('/pub/{id}', 'App\Controller\Pub');
 
 
 // Sample Group

@@ -18,12 +18,11 @@ if (empty($data['MetricList']['Terpene'])) {
 		foreach ($data['MetricList']['Terpene'] as $k => $v) {
 		?>
 			<tr>
-				<td><?= __h($m['name']) ?></td>
-				<td class="r"><?= __h($m['qom']) ?></td>
+				<td><?= __h($v['name']) ?></td>
+				<td class="r"><?= __h($v['qom']) ?></td>
 			</tr>
 		<?php
 		}
 		?>
 	</tbody>
 </table>
-

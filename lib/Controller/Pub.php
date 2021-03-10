@@ -11,8 +11,6 @@ class Pub extends \App\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{
-		$data = $this->loadSiteData();
-
 		if (preg_match('/^(.+)\.(html|json|pdf|png)$/', $ARG['id'], $m)) {
 			$ARG['id'] = $m[1];
 			$ext = trim($m[2], '.');
@@ -24,17 +22,19 @@ class Pub extends \App\Controller\Base
 		$LR = new Lab_Result($dbc_main, $ARG['id']);
 		if (empty($LR['id'])) {
 			$data = array(
-				'Page' => array('title' => 'Not Found [CRS#030]'),
-				'lab_result_id' => null,
+				'Page' => array('title' => 'Not Found [CRS-030]'),
 			);
 			$RES = $RES->withStatus(404);
+			// return $RES->write( $this->render('pub/404.php', null) );
 			return $this->_container->view->render($RES, 'page/result/404.html', $data);
 		}
 
 		$data = $this->loadSiteData();
+		$data['menu0'] = 'hide';
+
 		$meta = json_decode($LR['meta'], true);
 		$data = array_merge($data, $meta);
-		// _exit_text($data);
+
 		if ($_SESSION['License']['id'] == $LR['license_id']) {
 			// I'm the Owner
 			$data['mine'] = true;
@@ -49,10 +49,7 @@ class Pub extends \App\Controller\Base
 		$data['Result']['sum'] = sprintf('%0.2f', $data['Result']['sum']);
 
 		if (empty($data['MetricList'])) {
-			if (!empty($data['Result']['meta']['for_inventory'])) {
-				$data = $this->_map_leafdata($data);
-				// _exit_text($data);
-			}
+			$data = $LR->getMetricsOpenTHC($data);
 		}
 
 		$coa_file = $LR->getCOAFile();
@@ -88,10 +85,7 @@ class Pub extends \App\Controller\Base
 			// Nothing
 			break;
 		case 'json':
-			unset($data['Page']);
-			$data = $this->_clean_data($data);
-			_ksort_r($data);
-			return $RES->withJSON($data, 200, JSON_PRETTY_PRINT);
+			return $RES->withJSON($this->cleanData($data), 200, JSON_PRETTY_PRINT);
 		case 'pdf':
 
 			if (empty($data['Result']['coa_file'])) {
@@ -112,7 +106,7 @@ class Pub extends \App\Controller\Base
 
 		case 'png':
 
-			$qrCode = new \Endroid\QrCode\QrCode(sprintf('https://%s/share/%s.html', $_SERVER['SERVER_NAME'], $ARG['id']));
+			$qrCode = new \Endroid\QrCode\QrCode(sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $ARG['id']));
 
 			$coa_name = sprintf('%s.png', $ARG['id']);
 
@@ -135,8 +129,62 @@ class Pub extends \App\Controller\Base
 		$file = 'pub.php';
 
 		// return $this->_container->view->render($RES, 'coa/default.html', $data);
-		// return $this->_container->view->render($RES, 'page/result/share.html', $data);
 
 		return $RES->write( $this->render($file, $data) );
 	}
+
+	private function cleanData($data)
+	{
+		// _ksort_r($data);
+
+		$ret = [];
+		$ret['License'] = [];
+		$ret['License']['id'] = $data['License']['id'];
+		$ret['License']['code'] = $data['License']['code'];
+		$ret['License']['guid'] = $data['License']['guid'];
+		$ret['License']['name'] = $data['License']['name'];
+
+		$ret['Lot'] = [
+			'id' => $data['Sample']['id'],
+			'guid' => $data['Sample']['guid'],
+		];
+		$ret['Product'] = [
+			'id' => $data['Product']['id'],
+			'guid' => $data['Product']['guid'],
+			'name' => $data['Product']['name'],
+			'package' => [
+				'type' => $data['Product']['package_type'],
+				'uom' => $data['Product']['package_unit_uom'],
+			],
+		];
+
+		$ret['Variety'] = [
+			'id' => $data['Variety']['id'],
+			'guid' => $data['Variety']['guid'],
+			'name' => $data['Variety']['name'],
+		];
+
+		$ret['Result'] = [
+			'id' => $data['Result']['id'],
+			'metric_list' => [], //  $data['MetricList'],
+		];
+
+		foreach ($data['metric_list'] as $m) {
+			if (null === $m['qom']) {
+				continue;
+			}
+			$ret['Result']['metric_list'][ $m['id'] ] = [
+				'id' => $m['id'],
+				'name' => $m['name'],
+				'type' => $m['type'],
+				'qom' => $m['qom'],
+				'uom' => $m['uom'],
+			];
+		}
+
+		_ksort_r($ret);
+
+		return $ret;
+	}
+
 }

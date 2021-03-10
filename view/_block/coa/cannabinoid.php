@@ -31,8 +31,8 @@
 		?>
 			<tr>
 				<!-- <td>{{ k }}</td> -->
-				<td><?= __h($m['name']) ?></td>
-				<td class="r"><?= __h($m['qom']) ?></td>
+				<td><?= __h($v['name']) ?></td>
+				<td class="r"><?= __h($v['qom']) ?></td>
 			</tr>
 		<?php
 		}
