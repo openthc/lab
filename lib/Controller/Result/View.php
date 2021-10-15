@@ -359,9 +359,7 @@ SQL;
 			}
 		}
 
+		return $RES->write( $this->render('result/coa.php', $data) );
 
-
-		$file = 'coa/default.html';
-		return $RES->write( $this->render($file, $data) );
 	}
 }
