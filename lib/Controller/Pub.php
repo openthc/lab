@@ -5,6 +5,7 @@
 
 namespace App\Controller;
 
+use \App\Lab_Metric;
 use \App\Lab_Result;
 
 class Pub extends \App\Controller\Base
