@@ -66,8 +66,8 @@
 						class="btn btn-block btn-outline-warning"
 						href="#"
 						x-href="https://<?= $data['Site']['hostname'] ?>/result/<?= $data['Result']['id'] ?>"
-						data-toggle="modal"
-						data-target="#modal-coa-upload"
+						data-bs-toggle="modal"
+						data-bs-target="#modal-coa-upload"
 						title="Upload the PDF COA Documents"><i class="fas fa-print"></i> Upload COA</a>
 				<?php
 				} else {
@@ -116,8 +116,8 @@
 
 
 <!-- <div class="form-actions">
-	<button class="btn btn-outline-primary" name="a" data-toggle="modal" data-target="#modal-result-email" type="button"><i class="far fa-envelope"></i> Email</button>
-	<button class="btn btn-outline-primary" data-toggle="modal" data-target="#modal-scan-qr" type="button"><i class="fas fa-qrcode"></i> QR Code</button>
+	<button class="btn btn-outline-primary" name="a" data-bs-toggle="modal" data-bs-target="#modal-result-email" type="button"><i class="far fa-envelope"></i> Email</button>
+	<button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal-scan-qr" type="button"><i class="fas fa-qrcode"></i> QR Code</button>
 	<a class="btn btn-outline-secondary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.json"> JSON</a>
 </div> -->
 

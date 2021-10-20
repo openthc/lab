@@ -17,16 +17,16 @@
 		?>
 			<div class="btn-group">
 				<button class="btn btn-outline-success" name="a" type="submit" value="coa-download"><i class="fas fa-download"></i> COA</button>
-				<button class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button>
+				<button class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button>
 				<div class="dropdown-menu dropdown-menu-right">
-					<a class="dropdown-item" data-toggle="modal" data-target="#modal-coa-upload" href="#"><i class="fas fa-upload"></i> Upload COA</a>
+					<a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-coa-upload" href="#"><i class="fas fa-upload"></i> Upload COA</a>
 				</div>
 			</div>
 		<?php
 		} else {
 		?>
 			<div class="btn-group">
-				<button class="btn btn-outline-warning" data-toggle="modal" data-target="#modal-coa-upload" name="a" title="No COA Uploaded" type="button" value="download-coa"><i class="fas fa-upload"></i> COA</button>
+				<button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modal-coa-upload" name="a" title="No COA Uploaded" type="button" value="download-coa"><i class="fas fa-upload"></i> COA</button>
 			</div>
 		<?php
 		}

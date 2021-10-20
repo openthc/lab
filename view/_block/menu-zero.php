@@ -14,7 +14,7 @@ if ('hide' == $data['menu0']) {
 
 <a class="navbar-brand" href="/dashboard"><?= $data['menu']['home_html'] ?></a>
 
-<button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#menu-zero" aria-expanded="false" aria-controls="menu-zero">
+<button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#menu-zero" aria-expanded="false" aria-controls="menu-zero">
 	<span class="navbar-toggler-icon"></span>
 </button>
 
