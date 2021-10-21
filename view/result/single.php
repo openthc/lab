@@ -7,8 +7,8 @@
 
 <div class="row mt-4" style="position: relative;">
 <div class="col-md-6">
-	<h1><?= $data['Result']['id'] ?></h1>
-	<h2>Sample: <a href="/sample/<?= $data['Sample']['id'] ?>"><?= $data['Sample']['id'] ?></a></h2>
+	<h1><?= $data['Result']['id_nice'] ?></h1>
+	<h2>Sample: <a href="/sample/<?= $data['Sample']['id'] ?>"><?= $data['Sample']['id_nice'] ?></a></h2>
 </div>
 <div class="col-md-6">
 	<h3>Status: <?= $data['Result']['status'] ?></h3>
