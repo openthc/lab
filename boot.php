@@ -31,7 +31,9 @@ error_reporting(E_ALL & ~ E_NOTICE);
 
 require_once(APP_ROOT . '/vendor/autoload.php');
 
-\OpenTHC\Config::init(APP_ROOT);
+if ( ! \OpenTHC\Config::init(APP_ROOT) ) {
+	_exit_html_fail('<h1>Invalid Application Configuration [ALB-035]</h1>', 500);
+}
 
 /**
  * Make a Nicer Looking ID
