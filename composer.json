@@ -11,6 +11,7 @@
 		}
 	},
 	"require": {
+		"chrome-php/chrome": "1.2.0",
 		"edoceo/lowline_php": "dev-master",
 		"edoceo/radix": "dev-master",
 		"endroid/qr-code": "4.2.1",
