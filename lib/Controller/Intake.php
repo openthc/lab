@@ -83,13 +83,13 @@ class Intake extends \App\Controller\Base
 					}
 
 					// Find Variety
-					$V0 = $dbc->fetchRow('SELECT id FROM strain WHERE name = :n', [ ':n' => $_POST['variety_name'][$idx] ]);
+					$V0 = $dbc->fetchRow('SELECT id FROM variety WHERE name = :n', [ ':n' => $_POST['variety_name'][$idx] ]);
 					if (empty($V0['id'])) {
 						$V0['id'] = _ulid();
 						$V0['guid'] = $V0['id'];
 						$V0['license_id'] = $_SESSION['License']['id'];
 						$V0['name'] = $_POST['variety_name'][$idx];
-						$dbc->insert('strain', $V0);
+						$dbc->insert('variety', $V0);
 					}
 
 					$L0 = [];
@@ -98,7 +98,7 @@ class Intake extends \App\Controller\Base
 					$L0['license_id'] = $_SESSION['License']['id'];
 					$L0['section_id'] = '018NY6XC00SECT10N000000000';
 					$L0['product_id'] = $P0['id'];
-					$L0['strain_id'] = $V0['id'];
+					$L0['variety_id'] = $V0['id'];
 					$L0['stat'] = 200;
 					$L0['qty'] = floatval($_POST['qty'][$idx]);
 					$L0['hash'] = md5(json_encode($L0));

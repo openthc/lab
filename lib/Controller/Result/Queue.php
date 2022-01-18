@@ -1,6 +1,8 @@
 <?php
 /**
  * Process Queue of COA Uploads
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\Result;
@@ -41,7 +43,7 @@ class Queue extends \App\Controller\Result\Upload
 
 		$data['file_list'] = $import_queue_list;
 
-		return $RES->write( $this->render('page/result/queue.html', $data) );
+		return $RES->write( $this->render('result/queue.php', $data) );
 	}
 
 	function linkCOA($RES, $arg)

@@ -1,6 +1,8 @@
 <?php
 /**
  * Create a Result
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\Result;
@@ -37,7 +39,7 @@ class Create extends \App\Controller\Base
 		$data['Lot_Meta'] = json_decode($data['Lot']['meta'], true);
 		$data['Product'] = $dbc->fetchRow('SELECT * FROM product WHERE id = :p', [ ':p' => $data['Lot']['product_id'] ]); // $meta['Product'];
 		$data['Product_Type'] = $dbc->fetchRow('SELECT * FROM product_type WHERE id = :p', [ ':p' => $data['Product']['product_type_id'] ]);
-		$data['Variety'] = $dbc->fetchRow('SELECT * FROM strain WHERE id = :v', [ ':v' => $data['Lot']['strain_id'] ]);
+		$data['Variety'] = $dbc->fetchRow('SELECT * FROM variety WHERE id = :v', [ ':v' => $data['Lot']['variety_id'] ]);
 
 		// Get authoriative lab metrics
 		$sql = 'SELECT * FROM lab_metric ORDER BY type,stat,name';

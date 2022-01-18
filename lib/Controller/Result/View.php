@@ -13,6 +13,9 @@ use App\Lab_Sample;
 
 class View extends \App\Controller\Base
 {
+	/**
+	 *
+	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
 		$id = $ARG['id'];
@@ -49,7 +52,7 @@ class View extends \App\Controller\Base
 
 		$Product = $dbc_user->fetchRow('SELECT * FROM product WHERE id = ?', [ $Lab_Sample['product_id'] ]);
 		$ProductType = $dbc_user->fetchRow('SELECT * FROM product_type WHERE id = ?', [ $Product['product_type_id'] ]);
-		$Variety = $dbc_user->fetchRow('SELECT * FROM strain WHERE id = ?', [ $Lab_Sample['strain_id'] ]);
+		$Variety = $dbc_user->fetchRow('SELECT * FROM variety WHERE id = ?', [ $Lab_Sample['variety_id'] ]);
 
 		// $meta = json_decode($Lab_Result['meta'], true);
 		// $Lab_Result->getMetrics();
@@ -133,17 +136,16 @@ SQL;
 		)));
 
 		// https://stackoverflow.com/a/8940515
-		// $data['share_mail_link'] = http_build_query(array(
-		// 	'subject' => sprintf('Lab Results %s', $data['Result']['global_id']),
-		// 	'body' => sprintf("\n\nHere is the link: https://%s/pub/%s.html", $_SERVER['SERVER_NAME'], $Lab_Result['id']),
-		// ), null, '&', PHP_QUERY_RFC3986);
+		$data['share_mail_link'] = http_build_query(array(
+			'subject' => sprintf('Lab Results %s', $data['Result']['global_id']),
+			'body' => sprintf("\n\nHere is the link: https://%s/pub/%s.html", $_SERVER['SERVER_NAME'], $Lab_Result['id']),
+		), null, '&amp;', PHP_QUERY_RFC3986);
 
-		// _exit_text($data);
+		// __exit_text($data);
 
 		if (!empty($_POST['a'])) {
 			return $this->_postHandler($REQ, $RES, $Lab_Result, $data);
 		}
-
 
 		return $RES->write( $this->render('result/single.php', $data) );
 
@@ -158,6 +160,7 @@ SQL;
 			case 'coa-create':
 			case 'coa-create-pdf':
 
+				// @note not implemented yet
 				$chk = $this->_container->DBC_User->fetchAll('SELECT * FROM lab_layout');
 				if (empty($chk)) {
 					// _exit_html('<p>You must <a href="/config/coa-layout">upload some COA Layouts</a> to get printable output</p>', 501);
@@ -336,15 +339,23 @@ SQL;
 	{
 		$data['Company'] = $_SESSION['Company'];
 		$data['License'] = $_SESSION['License'];
+		if (empty($data['License']['address_full'])) {
+			$m = json_decode($data['License']['meta'], true);
+			$data['License']['address_full'] = $m['address_full'];
+		}
 		// _exit_text($data);
 
 		// Filter out one for the auto-display
-		$data['metric_type_list'] = array_filter($data['metric_type_list'], function($v, $k) {
-			return ('General' != $v['name']);
-		}, ARRAY_FILTER_USE_BOTH);
+		// Fold so the NAME is the Key
+		// $data['metric_type_list'] = array_filter($data['metric_type_list'], function($v, $k) {
+		// 	return ('General' != $v['name']);
+		// }, ARRAY_FILTER_USE_BOTH);
 
-		// _exit_json($data);
-		// $metric_data_list = [];
+		$metric_type_list = [];
+		foreach ($data['metric_type_list'] as $i => $mt) {
+			$metric_type_list[ $mt['stub'] ] = $mt;
+		}
+		$data['metric_type_list'] = $metric_type_list;
 		// $metric_type_list = array_keys($data['MetricList']);
 		// foreach ($metric_type_list as $mt) {
 		// 	$metric_data_list[$mt] = [];
@@ -360,8 +371,45 @@ SQL;
 				$data['MetricList'][$mt][$mdi] = $mdd;
 			}
 		}
+		$data['metric_list'] = $data['MetricList'];
 
-		return $RES->write( $this->render('result/coa.php', $data) );
+		// $data['metric_type_list'] = array_filter($data['metric_list'], _filter_types);
+		$data['metric_type_list'] = [
+			// 'General',
+			'Cannabinoid',
+			'Terpene',
+			'Pesticide',
+			'Solvent',
+			'Metals',
+			'Microbe',
+			'Mycotoxin',
+		];
+
+		if ('stub' == $_GET['_']) {
+			$stub = file_get_contents(APP_ROOT . '/etc/coa/lab-result-stub.json');
+			$data['metric_list'] = json_decode($stub, true);
+		}
+
+		// Render from HTML Template?
+
+		// Render from PHP Template?
+		ob_start();
+		// require_once(APP_ROOT . '/etc/coa/openthc-default.php');
+		require_once(APP_ROOT . '/etc/coa/template-b.php');
+		// require_once(APP_ROOT . '/view/result/coa.php');
+		$html = ob_get_clean();
+
+		// Render from Twig Template?
+		// $html = _twig(path/to/user/provided/twig/template.twig.html);
+
+		// Or Trap HTML, write to file then call /bin/print-coa.php
+		// Or directly use right in this code to make a PDF w/o shelling out to PHP (which itself shellout to chromium)
+
+		// render as HTML or as PDF?
+		_exit_html($html);
+		// _exit_pdf($pdf_file);
+
+		// return $RES->write( $this->render('result/coa.php', $data) );
 
 	}
 }

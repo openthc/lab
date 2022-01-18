@@ -47,7 +47,7 @@ class View extends \App\Controller\Base
 		$Lot = $dbc->fetchRow('SELECT * FROM inventory WHERE id = ?', [ $Lab_Sample['lot_id'] ]);
 		$Product = $dbc->fetchRow('SELECT * FROM product WHERE id = ?', [ $Lot['product_id'] ]);
 		$ProductType = $dbc->fetchRow('SELECT * FROM product_type WHERE id = ?', [ $Product['product_type_id'] ]);
-		$Variety = $dbc->fetchRow('SELECT * FROM strain WHERE id = ?', [ $Lot['strain_id'] ]);
+		$Variety = $dbc->fetchRow('SELECT * FROM variety WHERE id = ?', [ $Lot['variety_id'] ]);
 
 		$Lab_Sample_Meta = json_decode($Lab_Sample['meta'], true);
 
@@ -239,7 +239,7 @@ class View extends \App\Controller\Base
 		if (!empty($_POST['variety-id'])) {
 			$arg = [];
 			$arg[':v0'] = $_POST['variety-id'];
-			$VT = $dbc->fetchRow('SELECT id FROM strain WHERE id = :v0', $arg);
+			$VT = $dbc->fetchRow('SELECT id FROM variety WHERE id = :v0', $arg);
 			if (empty($VT['id'])) {
 				$VT = [
 					'id' => $_POST['variety-id'],
@@ -247,10 +247,10 @@ class View extends \App\Controller\Base
 					'guid' => $_POST['variety-id'],
 					'name' => $_POST['variety-name'],
 				];
-				$dbc->insert('strain', $VT);
+				$dbc->insert('variety', $VT);
 			}
 			if (!empty($VT['id'])) {
-				$Lab_Sample['strain_id'] = $VT['id'];
+				$Lab_Sample['variety_id'] = $VT['id'];
 			}
 		}
 
