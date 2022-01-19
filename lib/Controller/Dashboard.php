@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with OpenTHC Laboratory Portal.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller;
@@ -30,8 +32,6 @@ class Dashboard extends \App\Controller\Base
 			'Contact' => $_SESSION['Contact'],
 		);
 		$data = $this->loadSiteData($data);
-
-		// $file = 'page/home-supply.html'; // @deprecated, merge to main dashboard
 
 		return $RES->write( $this->render('dashboard.php', $data) );
 
