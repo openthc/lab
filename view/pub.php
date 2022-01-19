@@ -1,6 +1,8 @@
 <?php
 /**
  * Public View of a Lab Result
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 ?>
@@ -29,8 +31,9 @@
 
 
 <div class="container mt-4">
-<h1>Lab Result: <?= __h($data['Result']['id']) ?></h1>
-<h3>Lab Sample: <?= __h($data['Sample']['id']) ?></h3>
+
+<h1>Result: <?= __h($data['Result']['id']) ?></h1>
+<h2>Sample: <?= __h($data['Sample']['id']) ?></h2>
 
 <?= $this->block('product-summary.php') ?>
 
@@ -40,9 +43,7 @@
 		<label>Share Link</label>
 		<div class="input-group">
 			<input class="form-control" readonly value="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.html">
-			<div class="input-group-append">
-				<button class="btn btn-outline-secondary btn-clipcopy" data-clipboard-text="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.html" type="button"><i class="fas fa-clipboard"></i></button>
-			</div>
+			<button class="btn btn-outline-secondary btn-clipcopy" data-clipboard-text="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.html" type="button"><i class="fas fa-clipboard"></i></button>
 		</div>
 	</div>
 </div>

@@ -1,6 +1,7 @@
 <?php
 /**
  *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 use \App\Lab_Metric;
@@ -51,25 +52,19 @@ foreach ($this->data['metric_list'] as $m) {
 		<td class="r">
 			<div class="input-group input-group-sm" style="width: 8em;">
 				<input class="form-control form-control-sm r" name="<?= sprintf('%s-lod', $m['id']) ?>" value="<?= h($m['meta']['lod']) ?>">
-				<div class="input-group-append">
-					<div class="input-group-text">ppm</div>
-				</div>
+				<div class="input-group-text">ppm</div>
 			</div>
 		</td>
 		<td class="r">
 			<div class="input-group input-group-sm" style="width: 8em;">
 				<input class="form-control form-control-sm r" name="<?= sprintf('%s-loq', $m['id']) ?>" value="<?= h($m['meta']['loq']) ?>">
-				<div class="input-group-append">
-					<div class="input-group-text">ppm</div>
-				</div>
+				<div class="input-group-text">ppm</div>
 			</div>
 		</td>
 		<td class="r">
 			<div class="input-group input-group-sm" style="width: 8em;">
 				<input class="form-control form-control-sm r" name="<?= sprintf('%s-max', $m['id']) ?>" value="<?= h($m['meta']['max']) ?>">
-				<div class="input-group-append">
-					<div class="input-group-text">ppm</div>
-				</div>
+				<div class="input-group-text">ppm</div>
 			</div>
 		</td>
 		<td><label><input <?= ($m['flag'] & Lab_Metric::FLAG_FLOWER) ? 'checked' : null ?> name="<?= sprintf('%s-bud', $m['id']) ?>" type="checkbox"> Flower</label></td>

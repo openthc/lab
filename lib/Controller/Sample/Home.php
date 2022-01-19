@@ -1,6 +1,8 @@
 <?php
 /**
  * Show the Active Inventory Samples
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\Sample;

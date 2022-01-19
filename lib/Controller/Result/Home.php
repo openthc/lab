@@ -1,6 +1,8 @@
 <?php
 /**
  * Show Result List
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\Result;
@@ -14,9 +16,15 @@ class Home extends \App\Controller\Base
 			_exit_text('Invalid Session [CRH-014]', 500);
 		}
 
+		$_GET['p'] = max(1, intval($_GET['p']));
+
 		$data = array(
 			'Page' => array('title' => 'Lab Results'),
 			'result_list' => array(),
+			'result_page' => [
+				'older' => (intval($_GET['p']) - 1),
+				'newer' => (intval($_GET['p']) + 1),
+			],
 			'result_stat' => [
 				'100' => 0,
 				'200' => 0,
@@ -28,7 +36,9 @@ class Home extends \App\Controller\Base
 
 		$sql_limit = 100;
 		$sql_offset = 0;
+
 		if (!empty($_GET['p'])) {
+
 			$p = intval($_GET['p']) - 1;
 			if ('ALL' == $_GET['p']) $p = 0;
 			$sql_offset = $p * 100;

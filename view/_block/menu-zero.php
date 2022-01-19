@@ -1,6 +1,8 @@
 <?php
 /**
  * Menu Zero
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 if ('hide' == $data['menu0']) {

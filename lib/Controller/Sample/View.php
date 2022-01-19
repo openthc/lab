@@ -1,6 +1,8 @@
 <?php
 /**
  * Only works if you OWN the Sample
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\Sample;
