@@ -24,11 +24,79 @@ class View extends \App\Controller\Base
 		if (empty($id)) {
 			_exit_text('Invalid Request [CRV-020]', 400);
 		}
-		$id = preg_replace('/\.(html|js|json|txt)$/', '', $id);
 
-		$dbc_main = $this->_container->DBC_Main;
-		$Lab_Result1 = new Lab_Result($dbc_main, $id);
+		$data = $this->load_lab_result_full($id);
 
+		// Data
+		$data = $this->loadSiteData($data);
+		$data['Page'] = array('title' => 'Result :: View');
+		$data['Sample'] = $data['Lab_Sample']->toArray();
+		$data['Sample']['id_nice'] = _nice_id($data['Sample']['id'], $data['Sample']['guid']);
+		$data['Result'] = $data['Lab_Result']->toArray();
+		$data['Result']['id_nice'] = _nice_id($data['Result']['id'], $data['Result']['guid']);
+		// $data['Product'] = $Product;
+		// $data['Product_Type'] = $ProductType;
+		// $data['Variety'] = $Variety;
+		// $data['Sample'] = $LS->toArray();
+		// $data['Sample']  = $meta['Sample'];
+		// $data['Result']  = $meta['Result'];
+		$data['Result']['coa_file'] = $data['Lab_Result']->getCOAFile();
+		if (!is_file($data['Result']['coa_file'])) {
+			$data['Result']['coa_file'] = null;
+		}
+
+		// if (!empty($LR['license_id_lab'])) {
+		// 	$x = \OpenTHC\License::findByGUID($LR['license_id_lab']);
+		// 	if ($x) {
+		// 		$data['Laboratory'] = $x->toArray();
+		// 	}
+		// }
+
+		// // @todo whats the difference?
+		// if (!empty($LR['license_id']))
+		// {
+		// 	$x = new \OpenTHC\License($dbc, $LR['license_id']);
+		// 	if (!empty($x)) {
+		// 		$data['License'] = $x->toArray();
+		// 		$data['License']['phone'] = _phone_nice($data['License']['phone']);
+		// 	}
+		// }
+
+		// if (!empty($Lab_Result['license_id_lab'])) {
+		// 	$x = \OpenTHC\License::findByGUID($Lab_Result['license_id_lab']);
+		// 	if ($x) {
+		// 		$data['Laboratory'] = $x->toArray();
+		// 	}
+		// }
+
+		// @todo use dbc_auth and create an auth_context_ticket
+		$data['coa_upload_hash'] = _encrypt(json_encode(array(
+			'a' => 'coa-upload',
+			'r' => $data['Lab_Result']['id'],
+			'x' => $_SERVER['REQUEST_TIME'] + (86400 * 4)
+		)));
+
+		// https://stackoverflow.com/a/8940515
+		$data['share_mail_link'] = http_build_query(array(
+			'subject' => sprintf('Lab Results %s', $data['Result']['global_id']),
+			'body' => sprintf("\n\nHere is the link: https://%s/pub/%s.html", $_SERVER['SERVER_NAME'], $data['Lab_Result']['id']),
+		), null, '&amp;', PHP_QUERY_RFC3986);
+
+		// __exit_text($data);
+
+		if (!empty($_POST['a'])) {
+			return $this->_postHandler($REQ, $RES, $data['Lab_Result'], $data);
+		}
+
+		return $RES->write( $this->render('result/single.php', $data) );
+
+	}
+
+	/**
+	 * Load the Full Lab Result Data
+	 */
+	function load_lab_result_full($id)
+	{
 		// Get Result
 		$dbc_user = $this->_container->DBC_User;
 		$chk = $dbc_user->fetchRow('SELECT * FROM lab_result WHERE (id = :lr0 OR guid = :lr0)', [ ':lr0' => $id ]);
@@ -82,74 +150,24 @@ SQL;
 			$lab_result_metric_list[$rec['type']][$rec['lab_metric_id']] = $rec;
 		}
 
-		// Data
-		$data = $this->loadSiteData();
-		$data['Page'] = array('title' => 'Result :: View');
-		$data['Sample'] = $Lab_Sample->toArray();
-		$data['Sample']['id_nice'] = _nice_id($data['Sample']['id'], $data['Sample']['guid']);
-		$data['Result'] = $Lab_Result->toArray();
-		$data['Result']['id_nice'] = _nice_id($data['Result']['id'], $data['Result']['guid']);
-		$data['Product'] = $Product;
-		$data['Product_Type'] = $ProductType;
-		$data['Variety'] = $Variety;
-		// $data['Sample'] = $LS->toArray();
-		// $data['Sample']  = $meta['Sample'];
-		// $data['Result']  = $meta['Result'];
-		$data['Result']['coa_file'] = $Lab_Result->getCOAFile();
-		if (!is_file($data['Result']['coa_file'])) {
-			$data['Result']['coa_file'] = null;
-		}
 		$Lab_Metric = new Lab_Metric($dbc_user);
-		$data['metric_type_list'] = $Lab_Metric->getTypes();
-		$data['MetricList'] = $lab_result_metric_list;
 
 		$data['License'] = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id'] ]);
+
+		$dbc_main = $this->_container->DBC_Main;
+
 		$data['License_Source'] = $dbc_main->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id_source'] ]);
 
-		// if (!empty($LR['license_id_lab'])) {
-		// 	$x = \OpenTHC\License::findByGUID($LR['license_id_lab']);
-		// 	if ($x) {
-		// 		$data['Laboratory'] = $x->toArray();
-		// 	}
-		// }
-
-		// // @todo whats the difference?
-		// if (!empty($LR['license_id']))
-		// {
-		// 	$x = new \OpenTHC\License($dbc, $LR['license_id']);
-		// 	if (!empty($x)) {
-		// 		$data['License'] = $x->toArray();
-		// 		$data['License']['phone'] = _phone_nice($data['License']['phone']);
-		// 	}
-		// }
-
-		// if (!empty($Lab_Result['license_id_lab'])) {
-		// 	$x = \OpenTHC\License::findByGUID($Lab_Result['license_id_lab']);
-		// 	if ($x) {
-		// 		$data['Laboratory'] = $x->toArray();
-		// 	}
-		// }
-
-		// @todo use dbc_auth and create an auth_context_ticket
-		$data['coa_upload_hash'] = _encrypt(json_encode(array(
-			'a' => 'coa-upload',
-			'r' => $Lab_Result['id'],
-			'x' => $_SERVER['REQUEST_TIME'] + (86400 * 4)
-		)));
-
-		// https://stackoverflow.com/a/8940515
-		$data['share_mail_link'] = http_build_query(array(
-			'subject' => sprintf('Lab Results %s', $data['Result']['global_id']),
-			'body' => sprintf("\n\nHere is the link: https://%s/pub/%s.html", $_SERVER['SERVER_NAME'], $Lab_Result['id']),
-		), null, '&amp;', PHP_QUERY_RFC3986);
-
-		// __exit_text($data);
-
-		if (!empty($_POST['a'])) {
-			return $this->_postHandler($REQ, $RES, $Lab_Result, $data);
-		}
-
-		return $RES->write( $this->render('result/single.php', $data) );
+		return [
+			'Lot' => [],
+			'Lab_Sample' => $Lab_Sample,
+			'Lab_Result' => $Lab_Result,
+			'Lab_Result_Metric_list' => $lab_result_metric_list,
+			'Lab_Metric_Type_list' => $Lab_Metric->getTypes(),
+			'Product' => $Product,
+			'Product_Type' => $ProductType,
+			'Variety' => $Variety
+		];
 
 	}
 
@@ -277,6 +295,16 @@ SQL;
 
 			break;
 
+		case 'commit':
+
+			// Commits to a CRE
+			// require_once(__DIR__ . '/Create_LeafData.php');
+			// $x = new \App\Controller\Result\Create_LeafData($this->_container);
+			// $_POST['result_id'] = $LR['id'];
+			// return $x->_commit($REQ, $RES, $ARG);
+
+			break;
+
 		case 'mute':
 			$LR->setFlag(\App\Lab_Result::FLAG_MUTE);
 			$LR->save();
@@ -284,6 +312,12 @@ SQL;
 		case 'share':
 
 			// @todo Make Sure it's Published in MAIN
+
+			// $dbc_main = $this->_container->DBC_Main;
+			// $Lab_Result1 = new Lab_Result($dbc_main, $id);
+
+			// Load all the Lab Result Fully
+			// $data -=
 
 			// $lab = new \OpenTHC\Service\OpenTHC('lab');
 			// $arg = [ 'form_params' => [
@@ -312,6 +346,38 @@ SQL;
 			// 	throw new \Exception('Unexpected Response from Lab Portal');
 			// }
 
+			// Build All Necessary Datas
+			// INSERT/UPDATE to openthc_main.lab_result with a HUGE meta
+
+			$data['Sample']['meta'] = json_decode($data['Sample']['meta'], true);
+			$data['Result']['meta'] = json_decode($data['Result']['meta'], true);
+			$data['Product']['meta'] = json_decode($data['Product']['meta'], true);
+			$data['Product_Type']['meta'] = json_decode($data['Product_Type']['meta'], true);
+			$data['Variety']['meta'] = json_decode($data['Variety']['meta'], true);
+			$data['License']['meta'] = json_decode($data['License']['meta'], true);
+
+			unset($data['OpenTHC']);
+			unset($data['Site']);
+			unset($data['Page']);
+			unset($data['menu']);
+			unset($data['coa_upload_hash']);
+			unset($data['share_mail_link']);
+			unset($data['Lab_Sample']);
+			unset($data['Lab_Result']);
+
+			// Get Result
+			$dbc_main = $this->_container->DBC_Main;
+			$Lab_Result1 = new Lab_Result($dbc_main, $LR['id']);
+			$Lab_Result1['id'] = $LR['id'];
+			$Lab_Result1['license_id'] = $LR['license_id'];
+			$Lab_Result1['flag'] = $LR['flag'];
+			$Lab_Result1['stat'] = $LR['stat'];
+			$Lab_Result1['type'] = '-system-';
+			$Lab_Result1['name'] = 'Lab Result';
+			$Lab_Result1['meta'] = json_encode($data);
+			$Lab_Result1->save();
+
+			// return $RES->withRedirect(sprintf('/pub/%s.html', $LR['guid']));
 			return $RES->withRedirect(sprintf('/pub/%s.html', $LR['id']));
 
 			break;
@@ -349,34 +415,28 @@ SQL;
 
 		// Filter out one for the auto-display
 		// Fold so the NAME is the Key
-		// $data['metric_type_list'] = array_filter($data['metric_type_list'], function($v, $k) {
+		// $data['Lab_Metric_Type_list'] = array_filter($data['Lab_Metric_Type_list'], function($v, $k) {
 		// 	return ('General' != $v['name']);
 		// }, ARRAY_FILTER_USE_BOTH);
 
 		$metric_type_list = [];
-		foreach ($data['metric_type_list'] as $i => $mt) {
+		foreach ($data['Lab_Metric_Type_list'] as $i => $mt) {
 			$metric_type_list[ $mt['stub'] ] = $mt;
 		}
-		$data['metric_type_list'] = $metric_type_list;
-		// $metric_type_list = array_keys($data['MetricList']);
-		// foreach ($metric_type_list as $mt) {
-		// 	$metric_data_list[$mt] = [];
-		// 	foreach ($data['MetricList'][$mt] as $mi => $md) {
-		// 	}
-		// }
+		$data['Lab_Metric_Type_list'] = $metric_type_list;
 
 		// Fix Unit Display
-		foreach ($data['MetricList'] as $mt => $mtd_list) {
+		foreach ($data['Lab_Result_Metric_list'] as $mt => $mtd_list) {
 			foreach ($mtd_list as $mdi => $mdd) {
 				$mdd['qom'] = rtrim($mdd['qom'], '0');
 				$mdd['qom'] = rtrim($mdd['qom'], '.');
-				$data['MetricList'][$mt][$mdi] = $mdd;
+				$data['Lab_Result_Metric_list'][$mt][$mdi] = $mdd;
 			}
 		}
-		$data['metric_list'] = $data['MetricList'];
+		// $data['metric_list'] = $data['Lab_Result_Metric_list']; //
 
-		// $data['metric_type_list'] = array_filter($data['metric_list'], _filter_types);
-		$data['metric_type_list'] = [
+		// $data['Lab_Metric_Type_list'] = array_filter($data['Lab_Metric_Type_list'], _filter_types);
+		$data['Lab_Metric_Type_list'] = [
 			// 'General',
 			'Cannabinoid',
 			'Terpene',

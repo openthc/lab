@@ -1,23 +1,30 @@
 <?php
 /**
  * Render a Lab Result
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 ?>
 
 <div class="row mt-4" style="position: relative;">
 <div class="col-md-6">
-	<h1><?= $data['Result']['id_nice'] ?></h1>
+	<h1>Result: <?= $data['Result']['id_nice'] ?></h1>
 	<h2>Sample: <a href="/sample/<?= $data['Sample']['id'] ?>"><?= $data['Sample']['id_nice'] ?></a></h2>
 </div>
 <div class="col-md-6">
-	<h3>Status: <?= $data['Result']['status'] ?></h3>
+	<h3>Status: <?= _lab_result_status_nice($data['Result']['stat']) ?></h3>
 	<!-- @todo this is only relevant when it's a Lab showing this result -->
 	<!-- <h3>Origin: {{ Sample.lot_id_source }}</h3> -->
 </div>
 <div class="r" style="position: absolute; right:0; top:0;">
 	<form method="post" target="_blank">
-		<button class="btn btn-outline-primary" name="a" type="submit" value="share"><i class="fas fa-share-alt"></i> Share</button>
+
+		<div class="btn-group">
+			<button class="btn btn-outline-primary" name="a" type="submit" value="share"><i class="fas fa-share-alt"></i> Share</button>
+			<a class="btn btn-outline-secondary" href="mailto:?<?= $data['share_mail_link'] ?>"><i class="fas fa-envelope-open-text"></i></a>
+		</div>
+
 		<?php
 		if ($data['Result']['coa_file']) {
 		?>
@@ -71,9 +78,9 @@
 
 <div>
 <?php
-foreach ($data['metric_type_list'] as $metric_type) {
+foreach ($data['Lab_Metric_Type_list'] as $metric_type) {
 
-	if (empty($data['MetricList'][ $metric_type['stub'] ])) {
+	if (empty($data['Lab_Result_Metric_list'][ $metric_type['stub'] ])) {
 		continue;
 	}
 
@@ -83,7 +90,7 @@ foreach ($data['metric_type_list'] as $metric_type) {
 		<h3><?= $metric_type['name'] ?></h3>
 		<div class="result-metric-wrap">
 			<?php
-			foreach ($data['MetricList'][ $metric_type['stub'] ] as $result_data) {
+			foreach ($data['Lab_Result_Metric_list'][ $metric_type['stub'] ] as $idx => $result_data) {
 				switch ($result_data['qom']) {
 					case -3:
 						$result_data['qom'] = '-ND-';
@@ -121,3 +128,22 @@ foreach ($data['metric_type_list'] as $metric_type) {
 
 <?= $this->block('modal-coa-upload.php') ?>
 <?= $this->block('modal-send-email.php') ?>
+
+<?php
+/**
+ *
+ */
+function _lab_result_status_nice($x)
+{
+       switch ($x) {
+               case 100:
+                       return 'Pending';
+                       break;
+               case 200:
+                       return '<span class="text-success">Passed</span>';
+                       break;
+               default:
+                       return '<span class="text-danger">Failed</span>';
+                       break;
+       }
+}

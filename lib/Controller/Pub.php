@@ -1,6 +1,8 @@
 <?php
 /**
  * Public View
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller;
@@ -10,18 +12,15 @@ use \App\Lab_Result;
 
 class Pub extends \App\Controller\Base
 {
+	protected $type_want = 'text/html';
+
 	function __invoke($REQ, $RES, $ARG)
 	{
-		// Discover Preferred Output Format
-		if (preg_match('/^(.+)\.(html|json|pdf|png)$/', $ARG['id'], $m)) { // EXT in URL
-			$ARG['id'] = $m[1];
-			$ext = $m[2];
-		} elseif (preg_match('/^(html|json|pdf|png)$/', $_GET['of'], $m)) { // v1
-			$ext = trim($m[1]);
-		} elseif (preg_match('/^(html|json|pdf|png)$/', $_GET['f'], $m)) { // v0
-			$ext = trim($m[1]);
-		}
+		$this->type_want = $this->_get_type_want();
 
+		if (preg_match('/^(.+)\.(html|json|pdf|png|txt)$/', $ARG['id'], $m)) { // EXT in URL
+			$ARG['id'] = $m[1];
+		}
 
 		$dbc_main = $this->_container->DBC_Main;
 
@@ -58,9 +57,9 @@ class Pub extends \App\Controller\Base
 		$lm0 = new Lab_Metric($dbc_main);
 		$metric_type_list = $lm0->getTypes();
 
-		if (empty($data['MetricList'])) {
-			$data = $LR->getMetricsOpenTHC($data);
-		}
+		// if (empty($data['Lab_Result_Metric_list'])) {
+		// 	$data = $LR->getMetricsOpenTHC($data);
+		// }
 
 		$coa_file = $LR->getCOAFile();
 		if (!empty($coa_file) && is_file($coa_file) && is_readable($coa_file)) {
@@ -88,14 +87,17 @@ class Pub extends \App\Controller\Base
 
 		$data['Variety']  = $meta['Variety'];
 
-		switch ($ext) {
-		case '':
+		switch ($this->type_want) {
+		case 'text/html':
 		case 'html':
-			// Nothing
 			break;
-		case 'json':
+		case 'application/json':
 			return $RES->withJSON($this->cleanData($data), 200, JSON_PRETTY_PRINT);
-		case 'pdf':
+		case 'application/json+wcia':
+			// return $this->render();
+			// return $RES->withJSON($this->cleanData($data), 200, JSON_PRETTY_PRINT);
+			break;
+		case 'application/pdf':
 
 			// If PDF is gone
 			// Redirect to the same page, HTML version
@@ -117,13 +119,14 @@ class Pub extends \App\Controller\Base
 			// And clear some parameters (or else it would loop)
 			unset($_GET['of']);
 			unset($_GET['f']);
-			$url = sprintf('/pub/%s?%s', $ARG['id'], http_build_query($_GET));
+			$url = sprintf('/pub/%s.html?%s', $ARG['id'], http_build_query($_GET));
 			$url = rtrim($url, '?');
+
 			return $RES->withRedirect($url);
 
 			break;
 
-		case 'png':
+		case 'image/png':
 
 			$qrCode = new \Endroid\QrCode\QrCode(sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $ARG['id']));
 
@@ -145,9 +148,7 @@ class Pub extends \App\Controller\Base
 		$data['Page'] = array('title' => sprintf('Result :: %s', $LR['id']));
 		$data['License_Current'] = $_SESSION['License'];
 
-		$file = 'pub.php';
-
-		return $RES->write( $this->render($file, $data) );
+		return $RES->write( $this->render('pub.php', $data) );
 
 	}
 
@@ -187,7 +188,7 @@ class Pub extends \App\Controller\Base
 
 		$ret['Result'] = [
 			'id' => $data['Result']['id'],
-			'metric_list' => [], //  $data['MetricList'],
+			'metric_list' => [],
 		];
 
 		foreach ($data['metric_list'] as $m) {
@@ -204,6 +205,58 @@ class Pub extends \App\Controller\Base
 		}
 
 		_ksort_r($ret);
+
+		return $ret;
+	}
+
+	protected function _get_type_want()
+	{
+		$ret = $this->type_want;
+
+		$x = $_SERVER['HTTP_ACCEPT'];
+		$x = explode(',', $x);
+		$ret = trim($x[0]);
+
+		// Discover Preferred Output Format
+		$ext = null;
+		if (preg_match('/^(.+)\.(html|json|pdf|png|txt)$/', $ARG['id'], $m)) { // EXT in URL
+			$ARG['id'] = $m[1];
+			$ext = $m[2];
+		} elseif (preg_match('/^(html|json|pdf|png|txt)$/', $_GET['of'], $m)) { // v1
+			$ext = trim($m[1]);
+		} elseif (preg_match('/^(html|json|pdf|png|txt)$/', $_GET['f'], $m)) { // v0
+			$ext = trim($m[1]);
+		}
+
+		switch ($ext) {
+			case 'html':
+				$ret = 'text/html';
+				break;
+			case 'json':
+				$ret = 'application/json';
+				break;
+			case 'pdf':
+				$ret = 'application/pdf';
+				break;
+			case 'png':
+				$ret = 'image/png';
+				break;
+			case 'txt':
+				$ret = 'text/plain';
+				break;
+		}
+
+		switch ($ret) {
+			case 'application/pdf':
+			case 'application/json':
+			case 'image/png':
+			case 'text/html':
+			case 'text/plain':
+				// OK
+				break;
+			default:
+				$ret = 'text/html';
+		}
 
 		return $ret;
 	}

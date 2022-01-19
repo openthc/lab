@@ -74,7 +74,7 @@ class Create extends \App\Controller\Base
 			$MetricList[$type][$key] = $metric;
 		}
 
-		$data['MetricList'] = $MetricList;
+		$data['Lab_Result_Metric_list'] = $MetricList;
 
 		return $RES->write( $this->render('result/create.php', $data) );
 
