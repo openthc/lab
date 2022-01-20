@@ -16,8 +16,9 @@ class Pub extends \App\Controller\Base
 
 	function __invoke($REQ, $RES, $ARG)
 	{
-		$this->type_want = $this->_get_type_want();
+		$this->type_want = $this->_get_type_want($ARG);
 
+		// Map Extension Out
 		if (preg_match('/^(.+)\.(html|json|pdf|png|txt)$/', $ARG['id'], $m)) { // EXT in URL
 			$ARG['id'] = $m[1];
 		}
@@ -46,19 +47,16 @@ class Pub extends \App\Controller\Base
 			$data['mine'] = true;
 		}
 
-		// @deprecated should be on Result Create
-		// if (empty($data['Result']['sum'])) {
-		// 	$data['Result']['sum'] = $data['Result']['thc'] + $data['Result']['cbd'];
-		// }
+		// Promoted Vars
 		$data['Result']['thc'] = sprintf('%0.2f', $data['Result']['thc']);
 		$data['Result']['cbd'] = sprintf('%0.2f', $data['Result']['cbd']);
 		$data['Result']['sum'] = sprintf('%0.2f', $data['Result']['sum']);
 
-		$lm0 = new Lab_Metric($dbc_main);
-		$metric_type_list = $lm0->getTypes();
+		// $lm0 = new Lab_Metric($dbc_main);
+		// $metric_type_list = $lm0->getTypes();
 
 		// if (empty($data['Lab_Result_Metric_list'])) {
-		// 	$data = $LR->getMetricsOpenTHC($data);
+			// $data = $LR->getMetricsOpenTHC($data);
 		// }
 
 		$coa_file = $LR->getCOAFile();
@@ -69,7 +67,7 @@ class Pub extends \App\Controller\Base
 		$data['Sample'] = $meta['Sample'];
 		if (empty($data['Sample']['id'])) {
 			$data['Sample']['id'] = '- Not Found -';
-			$data['Sample']['id'] = $data['Result']['global_for_inventory_id'];
+			$data['Sample']['id'] = $data['Result']['global_for_inventory_id']; // v0
 		}
 
 		$chk = $dbc_main->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $data['License_Source']['id'] ]);
@@ -91,12 +89,24 @@ class Pub extends \App\Controller\Base
 		case 'text/html':
 		case 'html':
 			break;
-		case 'application/json':
-			return $RES->withJSON($this->cleanData($data), 200, JSON_PRETTY_PRINT);
-		case 'application/json+wcia':
-			// return $this->render();
-			// return $RES->withJSON($this->cleanData($data), 200, JSON_PRETTY_PRINT);
+		case 'text/plain':
+			require_once(APP_ROOT . '/view/pub/text.php');
+			exit(0);
 			break;
+		case 'application/json':
+
+			$output_data = [];
+
+			if ('wcia' == $_GET['f']) {
+				$output_data = require_once(APP_ROOT . '/view/pub/json.wcia.php');
+			} else {
+				$output_data = $this->cleanData($data);
+			}
+
+			return $RES->withJSON($output_data, 200, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+			break;
+
 		case 'application/pdf':
 
 			// If PDF is gone
@@ -157,8 +167,6 @@ class Pub extends \App\Controller\Base
 	 */
 	private function cleanData($data)
 	{
-		// _ksort_r($data);
-
 		$ret = [];
 		$ret['License'] = [];
 		$ret['License']['id'] = $data['License']['id'];
@@ -191,17 +199,19 @@ class Pub extends \App\Controller\Base
 			'metric_list' => [],
 		];
 
-		foreach ($data['metric_list'] as $m) {
-			if (null === $m['qom']) {
-				continue;
+		if ( ! empty($data['metric_list'])) {
+			foreach ($data['metric_list'] as $m) {
+				if (null === $m['qom']) {
+					continue;
+				}
+				$ret['Result']['metric_list'][ $m['id'] ] = [
+					'id' => $m['id'],
+					'name' => $m['name'],
+					'type' => $m['type'],
+					'qom' => $m['qom'],
+					'uom' => $m['uom'],
+				];
 			}
-			$ret['Result']['metric_list'][ $m['id'] ] = [
-				'id' => $m['id'],
-				'name' => $m['name'],
-				'type' => $m['type'],
-				'qom' => $m['qom'],
-				'uom' => $m['uom'],
-			];
 		}
 
 		_ksort_r($ret);
@@ -209,7 +219,7 @@ class Pub extends \App\Controller\Base
 		return $ret;
 	}
 
-	protected function _get_type_want()
+	protected function _get_type_want($ARG)
 	{
 		$ret = $this->type_want;
 
@@ -218,9 +228,8 @@ class Pub extends \App\Controller\Base
 		$ret = trim($x[0]);
 
 		// Discover Preferred Output Format
-		$ext = null;
+		$ext = $ARG['type'];
 		if (preg_match('/^(.+)\.(html|json|pdf|png|txt)$/', $ARG['id'], $m)) { // EXT in URL
-			$ARG['id'] = $m[1];
 			$ext = $m[2];
 		} elseif (preg_match('/^(html|json|pdf|png|txt)$/', $_GET['of'], $m)) { // v1
 			$ext = trim($m[1]);
