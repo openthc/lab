@@ -22,7 +22,7 @@ class Lab_Metric extends \OpenTHC\SQL\Record
 
 	function getTypes()
 	{
-		$res = $this->_dbc->fetchAll('SELECT id, name, stub FROM lab_metric_type ORDER BY name');
+		$res = $this->_dbc->fetchAll('SELECT id, name, stub FROM lab_metric_type ORDER BY sort, name');
 		return $res;
 	}
 

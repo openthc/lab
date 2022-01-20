@@ -42,6 +42,24 @@ class Pub extends \App\Controller\Base
 
 		$data = array_merge($data, $meta);
 
+
+		// Which Type v2022, v2021-WCIA, v2018, v2015?
+		$key_list = array_keys($data['Lab_Result_Metric_list']);
+		$chk = $key_list[0];
+		if (preg_match('/^0[0-9A-Z]{25}$/', $chk)) { // v2016
+			// OK, do Nothing
+		} else {
+			// Sub-Subs (Version 0)
+			// It's a Nested List, Un Flatten, it's Grouped
+			$lab_result_metric = [];
+			foreach ($data['Lab_Result_Metric_list'] as $lab_group_name => $lab_group_data) {
+				foreach ($lab_group_data as $lm_id => $lrm) {
+					$lab_result_metric[ $lm_id ] = $lrm;
+				}
+			}
+			$data['Lab_Result_Metric_list'] = $lab_result_metric;
+		}
+
 		if ($_SESSION['License']['id'] == $LR['license_id']) {
 			// I'm the Owner
 			$data['mine'] = true;
@@ -192,6 +210,13 @@ class Pub extends \App\Controller\Base
 			'id' => $data['Variety']['id'],
 			'guid' => $data['Variety']['guid'],
 			'name' => $data['Variety']['name'],
+		];
+
+		$ret['Sample'] = [
+			'id' => $data['Sample']['id'],
+			'guid' => $data['Sample']['guid'],
+			'name' => $data['Sample']['name'],
+			'qty' => $data['Sample']['qty'],
 		];
 
 		$ret['Result'] = [

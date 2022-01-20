@@ -135,15 +135,15 @@ foreach ($data['Lab_Metric_Type_list'] as $metric_type) {
  */
 function _lab_result_status_nice($x)
 {
-       switch ($x) {
-               case 100:
-                       return 'Pending';
-                       break;
-               case 200:
-                       return '<span class="text-success">Passed</span>';
-                       break;
-               default:
-                       return '<span class="text-danger">Failed</span>';
-                       break;
-       }
+	switch ($x) {
+		case 100:
+			return 'Pending';
+			break;
+		case 200:
+			return '<span class="text-success">Passed</span>';
+			break;
+		default:
+			return '<span class="text-danger">Failed</span>';
+			break;
+	}
 }

@@ -1,34 +1,21 @@
 <?php
 /**
- * Public View
+ * View Data in WCIA Preferred JSON Format
  *
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-$lab_result_metric = [];
+$lab_result_metric = $data['Lab_Result_Metric_list'];
 
-// Shitty Detection for Old Version
-if ( ! empty($data['Lab_Result_Metric_list']['Cannabinoid'])
-	|| ! empty($data['Lab_Result_Metric_list']['Terpene'])
-	|| ! empty($data['Lab_Result_Metric_list']['Solvent'])
-	) {
-	// It's a Nested List, Un Flatten
-	foreach ($data['Lab_Result_Metric_list'] as $lab_group_name => $lab_group_data) {
-		foreach ($lab_group_data as $lm_id => $lrm) {
-			$lab_result_metric[ $lm_id ] = $lrm;
-		}
-	}
-}
-
-//
+// Data to Return
 $wcia = [
 	'document_name' => 'WCIA Lab Result Schema',
 	'document_schema_version' => '1.0.0.0',
 	'sample' => [
-		'id' => $lab_sample['id'],
-		'source_id' => $lot['id'],
+		'id' => $data['Sample']['id'],
+		'source_id' => $data['Lot']['id'],
 	],
-	'labresult_id' => $lab_result['guid'],
+	'labresult_id' => $data['Result']['id'],
 	'status' => 'pass',
 	// 'coa' => sprintf('https://%s/pub/%s/coa.pdf', $_SERVER['SERVER_NAME'], $lab_result['id']),
 	'metric_list' => [
@@ -57,8 +44,16 @@ $wcia = [
 		// 'Water Activity' => [],
 		// 'Foreign Matter' => [],
 		// 'Loss on Drying' => [],
-		'Pesticides' => [],
-		'Solvents' => [],
+		'Pesticides' => [
+			'test_id' => 'Pesticides',
+			'test_type' => 'Pesticides',
+			'metrics' => [],
+		],
+		'Solvents' => [
+			'test_id' => 'Solvents',
+			'test_type' => 'Solvents',
+			'metrics' => [],
+		],
 	],
 ];
 
@@ -203,8 +198,10 @@ $wcia['metric_list']['Pesticides']['metrics'] = $lmg;
 
 // Solvents
 $lmg = [];
-foreach ($data['Lab_Result_Metric_list']['Solvent'] as $k => $v) {
-	$lmg[] = _wcia_lab_metric($k, $v['name'], 'Solvents', $lab_result_metric);
+foreach ($data['Lab_Result_Metric_list'] as $k => $v) {
+	if ('Solvent' == $v['type']) {
+		$lmg[] = _wcia_lab_metric($k, $v['name'], 'Solvents', $lab_result_metric);
+	}
 }
 $wcia['metric_list']['Solvents']['metrics'] = $lmg;
 // __exit_text($lab_result_metric);

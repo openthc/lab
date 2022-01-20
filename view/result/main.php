@@ -21,6 +21,10 @@
 		<a class="btn btn-outline-danger" href="?stat=400">Failed: <?= $data['result_stat']['400'] ?></a>
 		<a class="btn btn-outline-secondary" href="?stat=*">All</a>
 	</div>
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['older']) ?>"><i class="fas fa-arrow-left"></i></a>
+		<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['newer']) ?>"><i class="fas fa-arrow-right"></i></a>
+	</div>
 </div>
 
 <!-- <p>A List of all Active and Recent Results, use Filters or Search to find old stuff.</p> -->
