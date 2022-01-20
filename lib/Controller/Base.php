@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with OpenTHC Laboratory Portal.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller;
@@ -23,7 +25,6 @@ class Base extends \OpenTHC\Controller\Base
 {
 	function loadSiteData($data=[])
 	{
-		$cfg = \OpenTHC\Config::get('application');
 		$base = [
 			'Site' => [
 				'hostname' => $_SERVER['SERVER_NAME'],
@@ -31,9 +32,6 @@ class Base extends \OpenTHC\Controller\Base
 			'OpenTHC' => [],
 			'menu' => $this->_container->view['menu']
 		];
-
-		$base['OpenTHC']['dir'] = \OpenTHC\Config::get('openthc/dir');
-		$base['OpenTHC']['sso'] = \OpenTHC\Config::get('openthc/sso');
 
 		$data = array_merge($base, $data);
 
