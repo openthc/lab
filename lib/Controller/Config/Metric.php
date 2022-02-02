@@ -1,6 +1,8 @@
 <?php
 /**
  * Configure Metrics
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\Config;
@@ -13,7 +15,7 @@ class Metric extends \App\Controller\Base
 	{
 		$dbc = $this->_container->DBC_User;
 
-		$data = $this->loadSiteData($data);
+		$data = $this->loadSiteData();
 		$data['Page'] = [ 'title' => 'Config :: Metrics' ];
 
 		$metric_list = [];

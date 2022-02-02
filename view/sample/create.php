@@ -1,3 +1,10 @@
+<?php
+/**
+ * View to Single Sample
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+?>
 
 <h1>Sample :: Create</h1>
 
@@ -37,7 +44,7 @@
 
 	<div class="mb-2">
 		<div class="input-group">
-			<div class="input-group-text">Product:</div>
+			<div class="input-group-text">Product Name:</div>
 			<input name="product" class="form-control product-autocomplete">
 			<input id="product-id" name="product-id" type="hidden" value="">
 			<!-- <div class="input-group-append">

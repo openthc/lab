@@ -147,7 +147,7 @@ SQL;
 		];
 		$res = $dbc_user->fetchAll($sql, $arg);
 		foreach ($res as $rec) {
-			$lab_result_metric_list[$rec['type']][$rec['lab_metric_id']] = $rec;
+			$lab_result_metric_list[ $rec['lab_metric_id'] ] = $rec;
 		}
 
 		$Lab_Metric = new Lab_Metric($dbc_user);
@@ -283,6 +283,7 @@ SQL;
 				Session::flash('warn', 'Naming the file the same as the Lab Result is a good idea');
 			}
 
+			// @todo NO, Fix this, write to well-known location
 			try {
 				$LR->setCOAFile($_FILES['file']['tmp_name']);
 			} catch (\Exception $e) {
@@ -365,7 +366,7 @@ SQL;
 			unset($data['Lab_Sample']);
 			unset($data['Lab_Result']);
 
-			// Get Result
+			// Publish to Main/Global/Public
 			$dbc_main = $this->_container->DBC_Main;
 			$Lab_Result1 = new Lab_Result($dbc_main, $LR['id']);
 			$Lab_Result1['id'] = $LR['id'];
@@ -382,16 +383,22 @@ SQL;
 
 			break;
 		case 'sync':
-			_exit_html('Not Implemented', 501);
+
+			_exit_html_fail('<h1>Not Implemented [CRV-387]', 501);
+
 			$S = new Sync($this->_container);
 			return $S->__invoke(null, $RES, array('id' => $data['Result']['id']));
+
 			break;
 		case 'void':
-			_exit_html('Not Implemented', 501);
+
+			_exit_html_fail('<h1>Not Implemented [CRV-395]</h1>', 501);
+
 			// $cre = new \OpenTHC\CRE($_SESSION['pipe-token']);
 			// $res = $cre->qa()->delete($data['Result']['id']);
 			// var_dump($res);
 			// exit;
+
 			break;
 		default:
 			var_dump($_POST);

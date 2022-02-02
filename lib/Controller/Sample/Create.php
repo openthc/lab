@@ -1,6 +1,8 @@
 <?php
 /**
  * Create a Sample
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\Sample;
@@ -51,7 +53,7 @@ class Create extends \App\Controller\Base
 				}
 				// $ls['product_id'] = $P1['id'];
 
-				$S1 = $dbc->fetchRow('SELECT * FROM strain WHERE license_id = :l0 AND name = :n0', [
+				$S1 = $dbc->fetchRow('SELECT * FROM variety WHERE license_id = :l0 AND name = :n0', [
 					':l0' => $_SESSION['License']['id'],
 					':n0' => $_POST['variety-name'],
 				]);
@@ -62,7 +64,7 @@ class Create extends \App\Controller\Base
 						'name' => $_POST['variety-name'],
 					];
 					$S1['guid'] = $S1['id'];
-					$dbc->insert('strain', $S1);
+					$dbc->insert('variety', $S1);
 				}
 				// $ls['strain_id'] = $S1['id'];
 
@@ -70,7 +72,7 @@ class Create extends \App\Controller\Base
 					// 'id' => $ls['id'],
 					'license_id' => $_SESSION['License']['id'],
 					'product_id' => $P1['id'],
-					'strain_id' => $S1['id'],
+					'variety_id' => $S1['id'],
 					'section_id' => '018NY6XC00SECT10N000000000',
 					'guid' => $ls['id'],
 					'stat' => 200,
