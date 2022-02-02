@@ -20,9 +20,11 @@
 
 --ignore-dir=.git
 --ignore-dir=coa
+--ignore-dir=coa-sample
 --ignore-dir=doxygen
 --ignore-dir=node_modules
 --ignore-dir=scrape
+--ignore-dir=tmp
 --ignore-dir=var
 --ignore-dir=vendor
 --ignore-dir=webroot/assets

@@ -4,3 +4,4 @@ coa-sample/
 node_modules/
 var/
 vendor/
+webroot/pub

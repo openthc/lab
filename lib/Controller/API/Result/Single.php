@@ -1,6 +1,8 @@
 <?php
 /**
  * Return One Lab Result, Inflated
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\API\Result;
@@ -24,6 +26,13 @@ class Single extends \OpenTHC\Controller\Base
 
 		$ret = [];
 		$ret = json_decode($LR['meta'], true);
+
+		if (empty($rec['coa'])) {
+			$x = sprintf('%s/var/%s/coa.pdf', APP_ROOT, $LR['id']);
+			if (is_file($x)) {
+				$ret['Result']['coa_link'] = sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $LR['id']);
+			}
+		}
 
 		// $Result = $QAR->_Result['Result']; // wtf?
 		// $Result = $this->_map_metric($Result);
@@ -51,12 +60,13 @@ class Single extends \OpenTHC\Controller\Base
 		// 	'Sample' => $Sample,
 		// 	'Result' => $Result,
 		// );
+
+		// $LR->save();
+
 		unset($ret['Page']);
 		unset($ret['Site']);
 
-		$ret['Result']['coa_link'] = sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $ARG['id']);
-
-		return $RES->withJSON($ret, 200, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+		return $RES->withJSON($ret, 200, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
 	}
 
