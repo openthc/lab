@@ -1,3 +1,11 @@
+<?php
+/**
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+?>
+
 <form enctype="multipart/form-data" method="post">
 <div class="modal" id="modal-coa-upload" role="dialog" tabindex="-1">
 	<div class="modal-dialog modal-lg" role="document">
@@ -5,7 +13,7 @@
 
 			<div class="modal-header">
 				<h4 class="modal-title">COA Upload</h4>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 
 			<div class="modal-body">
@@ -21,20 +29,18 @@
 					<label>Request from Vendor or Lab</label>
 					<div class="input-group">
 						<input class="form-control" id="coa-upload-link" readonly value="">
-						<div class="input-group-append">
-							<a
-								class="btn btn-outline-secondary disabled"
-								disabled
-								href=""
-								id="coa-upload-mail"
-								target="_blank"><i class="fas fa-envelope-open-text"></i></a>
-							<button
-								class="btn btn-outline-secondary btn-clipcopy"
-								disabled
-								data-clipboard-text=""
-								id="coa-upload-copy"
-								type="button"><i class="fas fa-clipboard"></i></button>
-						</div>
+						<a
+							class="btn btn-outline-secondary disabled"
+							disabled
+							href=""
+							id="coa-upload-mail"
+							target="_blank"><i class="fas fa-envelope-open-text"></i></a>
+						<button
+							class="btn btn-outline-secondary btn-clipcopy"
+							disabled
+							data-clipboard-text=""
+							id="coa-upload-copy"
+							type="button"><i class="fas fa-clipboard"></i></button>
 					</div>
 				</div>
 			</div>
