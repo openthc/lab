@@ -13,9 +13,6 @@ class Result extends \OpenTHC\Module\Base
 	{
 		$a->get('', 'App\Controller\Result\Home');
 
-		$a->map(['GET','POST'], '/sync', 'App\Controller\Result\Sync');
-		$a->map(['GET','POST'], '/{id}/sync', 'App\Controller\Result\Sync');
-
 		$a->get('/create', 'App\Controller\Result\Create');
 		$a->post('/create/save', 'App\Controller\Result\Create:save');
 
