@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with OpenTHC Laboratory Portal.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 use Edoceo\Radix\DB\SQL;
@@ -31,25 +33,25 @@ $app = new \OpenTHC\App($cfg);
 $con = $app->getContainer();
 $con['DBC_Auth'] = function() {
 	$cfg = \OpenTHC\Config::get('database/auth');
-	$dsn = sprintf('pgsql:host=%s;dbname=%s', $cfg['hostname'], $cfg['database']);
+	$dsn = sprintf('pgsql:application_name=openthc-lab;host=%s;dbname=%s', $cfg['hostname'], $cfg['database']);
 	return new \Edoceo\Radix\DB\SQL($dsn, $cfg['username'], $cfg['password']);
 };
 $con['DBC_Main'] = function() {
 	$cfg = \OpenTHC\Config::get('database/main');
-	$dsn = sprintf('pgsql:host=%s;dbname=%s', $cfg['hostname'], $cfg['database']);
+	$dsn = sprintf('pgsql:application_name=openthc-lab;host=%s;dbname=%s', $cfg['hostname'], $cfg['database']);
 	return new \Edoceo\Radix\DB\SQL($dsn, $cfg['username'], $cfg['password']);
 };
 $con['DBC_User'] = function() {
 
 	static $dbc;
 	// $cfg = \OpenTHC\Config::get('database/main');
-	// $dsn = sprintf('pgsql:host=%s;dbname=%s', $cfg['hostname'], $cfg['database']);
+	// $dsn = sprintf('pgsql:application_name=openthc-lab;host=%s;dbname=%s', $cfg['hostname'], $cfg['database']);
 	// return new \Edoceo\Radix\DB\SQL($dsn, $cfg['username'], $cfg['password']);
 	if (!empty($_SESSION['dsn'])) {
 		$dbc = new SQL($_SESSION['dsn']);
 	// } else {
 	// 	$cfg = \OpenTHC\Config::get('database/main');
-	// 	$c = sprintf('pgsql:host=%s;dbname=%s', $cfg['hostname'], $cfg['database']);
+	// 	$c = sprintf('pgsql:application_name=openthc-lab;host=%s;dbname=%s', $cfg['hostname'], $cfg['database']);
 	// 	$u = $cfg['username'];
 	// 	$p = $cfg['password'];
 	// 	$dbc = new SQL($c, $u, $p);
@@ -100,12 +102,6 @@ $app->get('/search', 'App\Controller\Search')
 	->add('App\Middleware\Auth')
 	->add('App\Middleware\Session');
 
-// Config Group
-$app->group('/config', 'App\Module\Config')
-	->add('App\Middleware\Menu')
-	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
-
 
 // Sync
 // $app->get('/sync', 'App\Controller\Sync')
@@ -140,15 +136,6 @@ $app->group('/auth', function() {
 })
 	->add('App\Middleware\Menu')
 	->add('App\Middleware\Session');
-
-
-// Public Home Page
-$app->get('/index', function($REQ, $RES, $ARG) {
-	$data = array(
-		'Page' => array('title' => 'Laboratory Data Portal - OpenTHC'),
-	);
-	return $this->view->render($RES, 'page/home-pub.html', $data);
-})->add('App\Middleware\Menu');
 
 
 // Custom Middleware?
