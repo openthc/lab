@@ -13,6 +13,9 @@ class Result extends \OpenTHC\Module\Base
 	{
 		$a->get('', 'App\Controller\Result\Home');
 
+		$a->get('/create', 'App\Controller\Result\Create');
+		$a->post('/create/save', 'App\Controller\Result\Create:save');
+
 		$a->get('/download', 'App\Controller\Result\Download');
 		$a->map(['GET','POST'], '/upload', 'App\Controller\Result\Upload');
 		$a->get('/upload/preview', 'App\Controller\Result\Upload:preview');
