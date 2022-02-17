@@ -1,6 +1,8 @@
 <?php
 /**
  * oAuth2 Returns Here
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\Auth\oAuth2;
@@ -73,16 +75,10 @@ class Back extends \OpenTHC\Controller\Auth\oAuth2
 
 		}
 
-		// Maybe?
-		// $this->connectCRE();
-
-		// Redirect to Init?
-		$r = $_GET['r'];
-		if (empty($r)) {
-			$r = '/dashboard';
-		}
-
-		return $RES->withRedirect($r);
+		// Redirect to Init
+		return $RES->withRedirect(sprintf('/auth/init?%s', http_build_query([
+			'r' => $_GET['r']
+		])));
 
 	}
 
