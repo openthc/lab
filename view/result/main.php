@@ -1,29 +1,39 @@
 <?php
 /**
  * Show List of Result Objects
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 ?>
 
-<div style="position:relative;">
-<div style="position:absolute; right: 0.25em; top: 0.25em;">
-	<a class="btn btn-outline-secondary" href="/result/upload"><i class="fas fa-cloud-upload-alt"></i></a>
-</div>
-</div>
-
-
-<h1>Results</h1>
-
-<div class="result-stat mb-2">
-	<div class="btn-group">
-		<a class="btn btn-outline-secondary" href="?stat=100">Pending: <?= $data['result_stat']['100'] ?></a>
-		<a class="btn btn-outline-primary" href="?stat=200">Passed: <?= $data['result_stat']['200'] ?></a>
-		<a class="btn btn-outline-danger" href="?stat=400">Failed: <?= $data['result_stat']['400'] ?></a>
-		<a class="btn btn-outline-secondary" href="?stat=*">All</a>
+<div class="d-flex justify-content-between">
+	<div>
+		<h1>Results</h1>
 	</div>
-	<div class="btn-group">
-		<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['older']) ?>"><i class="fas fa-arrow-left"></i></a>
-		<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['newer']) ?>"><i class="fas fa-arrow-right"></i></a>
+	<div>
+		<a class="btn btn-outline-secondary" href="/result/upload"><i class="fas fa-cloud-upload-alt"></i></a>
+	</div>
+</div>
+
+
+<div class="d-flex mb-2">
+	<div>
+		<input class="form-control" name="q" placeholder="- search -">
+	</div>
+	<div class="ms-2">
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary" href="?stat=100">Pending: <?= $data['result_stat']['100'] ?></a>
+			<a class="btn btn-outline-primary" href="?stat=200">Passed: <?= $data['result_stat']['200'] ?></a>
+			<a class="btn btn-outline-danger" href="?stat=400">Failed: <?= $data['result_stat']['400'] ?></a>
+			<a class="btn btn-outline-secondary" href="?stat=*">All</a>
+		</div>
+	</div>
+	<div class="ms-2">
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['older']) ?>"><i class="fas fa-arrow-left"></i></a>
+			<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['newer']) ?>"><i class="fas fa-arrow-right"></i></a>
+		</div>
 	</div>
 </div>
 
