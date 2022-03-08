@@ -105,10 +105,10 @@ class Update extends \App\Controller\Result\View
 
 			case 'lab-result-save':
 
-				// var_dump($_POST);
-
 				$sql = "SELECT *, meta->>'uom' AS uom FROM lab_metric";
 				$res_lab_metric = $dbc->fetchAll($sql);
+
+				$dbc->query('BEGIN');
 
 				foreach ($res_lab_metric as $m) {
 
@@ -154,7 +154,9 @@ class Update extends \App\Controller\Result\View
 					]);
 				}
 
-				exit;
+				$dbc->query('COMMIT');
+
+				return $RES->withRedirect(sprintf('/result/%s', $LR['id']));
 
 		}
 
