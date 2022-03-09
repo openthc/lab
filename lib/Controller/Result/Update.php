@@ -84,8 +84,7 @@ class Update extends \App\Controller\Result\View
 
 				$dbc->query('BEGIN');
 
-				$dbc->query('DELETE FROM inventory_inventory_qa_sample WHERE inventory_qa_sample_id = :lr0', $arg);
-				// $dbc->query('DELETE FROM inventory_lab_result WHERE lab_result_id = :lr0', $arg);
+				$dbc->query('DELETE FROM inventory_lab_result WHERE lab_result_id = :lr0', $arg);
 				$dbc->query('DELETE FROM lab_result_metric WHERE lab_result_id = :lr0', $arg);
 				$dbc->query('DELETE FROM lab_result WHERE id = :lr0', $arg);
 
