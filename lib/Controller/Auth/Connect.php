@@ -45,8 +45,6 @@ class Connect extends \OpenTHC\Controller\Auth\Connect
 			return $RES;
 		}
 
-		$_SESSION['auth-action'] = [];
-
 		// Action
 		switch ($_GET['action']) {
 		case 'share-transfer':
@@ -61,7 +59,6 @@ class Connect extends \OpenTHC\Controller\Auth\Connect
 		case 'share-all': // @deprecated
 		case 'share-one': // @deprecated
 
-			$_SESSION['auth-action'][] = '/intent';
 			$_SESSION['intent'] = 'share-all';
 
 			if (!empty($this->_connect_info['lab-result'])) {
@@ -126,8 +123,8 @@ class Connect extends \OpenTHC\Controller\Auth\Connect
 		$sig1 = hash_hmac('sha256', sprintf('%s.%s', $jwt['head_b64'], $jwt['body_b64']), $App['hash'], true);
 		if ( ! hash_equals($jwt['sign'], $sig1)) {
 			return $RES->withJSON([
-					'data' => null,
-					'meta' => [ 'detail' => 'Invalid Signature [CAC-123]'],
+				'data' => null,
+				'meta' => [ 'detail' => 'Invalid Signature [CAC-123]'],
 			], 400);
 		}
 
