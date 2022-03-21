@@ -87,6 +87,17 @@ use Edoceo\Radix\DB\SQL;
 			</div>
 		</div>
 	</div>
+
+	<div class="row">
+
+		<h3><i class="far fa-comments"></i> Terp Notes:</h3>
+		<div class="input-group">
+			<textarea class="form-control" id="lab-result-terp-note" name="terp-note"><?= __h($Lab_Result['note']) ?></textarea>
+			<button class="btn btn-outline-secondary btn-terp-note-auto" type="button"><i class="fas fa-magic"></i> Auto</button>
+		</div>
+
+	</div>
+
 </section>
 
 <?php
@@ -112,13 +123,7 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) {
 				<div>
 					<div class="btn-group btn-group-sm">
 						<?php
-						$uom_list = [
-							'pct' => '%',
-							'mg'  => 'mg',
-							'mgg' => 'mg/g',
-							'mgs' => 'mg/s',
-						];
-						foreach ($uom_list as $k => $v) {
+						foreach (\App\UOM::$uom_list as $k => $v) {
 							printf('<button class="btn btn-outline-secondary lab-metric-uom-bulk" data-uom="%s" type="button">%s</button>'
 								, $k
 								, $v
@@ -132,7 +137,7 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) {
 			?>
 		</div>
 
-		<div class="lab-metric-grid" id="lab-matric-type-018NY6XC00LMT0BY5GND653C0C">
+		<div class="lab-metric-grid" id="lab-metric-type-<?= $lms['id'] ?>">
 		<?php
 		foreach ($lms['metric_list'] as $lm_id => $lm) {
 			switch ($lm['meta']['uom']) {
@@ -186,20 +191,21 @@ $(function() {
 
 	// Attempt Magic on the THC Values?
 	var auto_sum = true;
-	$('#lab-matric-type-018NY6XC00LMT0BY5GND653C0C input.lab-metric-qom').on('keyup', function() {
+	$('#lab-metric-type-018NY6XC00LMT0HRHFRZGY72C7 input.lab-metric-qom').on('keyup', function() {
 
+		debugger;
 		switch (this.id) {
 			case 'lab-metric-018NY6XC00V7ACCY94MHYWNWRN':
 			case 'lab-metric-018NY6XC00PXG4PH0TXS014VVW':
 			case 'lab-metric-018NY6XC00DEEZ41QBXR2E3T97':
 			case 'lab-metric-018NY6XC00SAE8Q4JSMF40YSZ3':
-				this.style.borderColor = '#f00';
+				// this.style.borderColor = '#f00';
 				// this.setAttribute('data-auto-sum', '0');
 				return;
 		}
 
 		var sum_all = sum_cbd = sum_thc = 0;
-		$('#lab-matric-type-018NY6XC00LMT0BY5GND653C0C input.lab-metric-qom').each(function(i, n) {
+		$('#lab-metric-type-018NY6XC00LMT0HRHFRZGY72C7 input.lab-metric-qom').each(function(i, n) {
 
 			var v = parseFloat(this.value, 10) || 0;
 			if (0 == v) {
@@ -248,6 +254,40 @@ $(function() {
 
 	});
 
+	$('.btn-terp-note-auto').on('click', function() {
+
+		var terp_list = [];
+		var text_line_list = [];
+
+		$('#lab-metric-type-018NY6XC00LMT07DPNKHQV2GRS input').each(function(i, n) {
+			var v = parseFloat(n.value, 10) || 0;
+			if (v > 0) {
+				terp_list.push({
+					node: n,
+					value: v,
+				});
+			}
+		});
+
+		// Big on Top
+		terp_list.sort(function(a, b) {
+			return b.value - a.value;
+		});
+
+		var idx = 0;
+		var max = Math.min(terp_list.length, 10);
+
+		for (idx=0; idx<max; idx++) {
+			var terp = terp_list[idx];
+			var node = terp['node'];
+			var text = $(node).closest('.input-group').find('.input-group-text').text();
+			text_line_list.push(`${text} ${terp.value}`);
+		}
+
+		$('#lab-result-terp-note').val(text_line_list.join(', '));
+
+	});
+
 });
 </script>
 
@@ -260,12 +300,7 @@ $(function() {
  */
 function _draw_metric($lm)
 {
-	$uom_list = [
-		'pct' => '%',
-		'mg'  => 'mg',
-		'mgg' => 'mg/g',
-		'mgs' => 'mg/s',
-	];
+	$uom = $lm['metric']['meta']['uom'] ?: $lm['metric']['uom'];
 
 ?>
 	<div class="lab-metric-item">
@@ -287,37 +322,11 @@ function _draw_metric($lm)
 				style="flex: 0 1 5em; width: 5em;"
 				tabindex="-1">
 			<?php
-			foreach ($uom_list as $v => $n) {
-				$sel = ($v == $lm['metric']['uom'] ? ' selected' : null);
+			foreach (\App\UOM::$uom_list as $v => $n) {
+				$sel = ($v == $uom ? ' selected' : null);
 				printf('<option%s value="%s">%s</option>', $sel, $v, $n);
 			}
 			?>
-			</select>
-		</div>
-	</div>
-<?php
-}
-
-
-
-/**
- *
- */
-function _draw_metric_select_pass_fail($lm)
-{
-	// $sel =  == 1 ? 'pass' : 'fail';
-	$sel = $lm['metric']['qom'];
-
-?>
-	<div class="lab-metric-item">
-		<div class="input-group">
-			<div class="input-group-prepend">
-				<div class="input-group-text"><?= __h($lm['name']) ?></div>
-			</div>
-			<select class="form-control" name="<?= sprintf('lab-metric-%s', $lm['id']) ?>">
-				<option <?= ($sel == '-1' ? 'selected' : null) ?> value="-1">n/a</option>
-				<option <?= ($sel == '0' ? 'selected' : null) ?> value="0">Fail</option>
-				<option <?= ($sel == '1' ? 'selected' : null) ?> value="1">Pass</option>
 			</select>
 		</div>
 	</div>

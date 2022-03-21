@@ -31,12 +31,12 @@ class Update extends \App\Controller\Result\View
 		// $chk = $dbc_user->fetchRow('SELECT * FROM lab_result WHERE (id = :lr0 OR guid = :lr0)', [ ':lr0' => $id ]);
 		$Lab_Result = new Lab_Result($dbc, $id);
 		if (empty($Lab_Result['id'])) {
-			_exit_text('WSHERE is RESULT');
+			_exit_text('Lab Result Not Found [CRU-034]', 400);
 		}
 
 		$Lab_Sample = new Lab_Sample($dbc, $Lab_Result['lab_sample_id']);
 		if (empty($Lab_Sample['id'])) {
-			_exit_text('WSHERE is SAMPLE');
+			// _exit_text('WSHERE is SAMPLE');
 		}
 
 		$data = $this->loadSiteData($data);
@@ -107,6 +107,9 @@ class Update extends \App\Controller\Result\View
 				$sql = "SELECT *, meta->>'uom' AS uom FROM lab_metric";
 				$res_lab_metric = $dbc->fetchAll($sql);
 
+				$cbd_list = [];
+				$thc_list = [];
+
 				$dbc->query('BEGIN');
 
 				foreach ($res_lab_metric as $m) {
@@ -140,8 +143,8 @@ class Update extends \App\Controller\Result\View
 					VALUES (:lr0, :lm0, :q0, :u0)
 					ON CONFLICT (lab_result_id, lab_metric_id)
 					DO UPDATE SET qom = :q0, uom = :u0
-					   WHERE lab_result_id = :lr0 AND lab_metric_id = :lm0
 					SQL;
+					// 					   WHERE lab_result_id = :lr0 AND lab_metric_id = :lm0
 					$dbc->query($sql, [
 						// 'id' => _ulid(),
 						':lr0' => $LR['id'],
@@ -151,7 +154,27 @@ class Update extends \App\Controller\Result\View
 						// 'lod' => $m['meta']['lod'],
 						// 'loq' => $m['meta']['loq'],
 					]);
+
+					// Special Case Lab Metrics for Up-Scaling to the Lab Result
+					switch ($m['id']) {
+						case '018NY6XC00PXG4PH0TXS014VVW': // total-thc
+						case '018NY6XC00LM49CV7QP9KM9QH9': // d9-thc
+						case '018NY6XC00LM877GAKMFPK7BMC': // d8-thc
+						case '018NY6XC00LMB0JPRM2SF8F9F2': // thca
+							$thc_list[] = $lrm1['qom'];
+							break;
+						case '018NY6XC00DEEZ41QBXR2E3T97': // total-cbd
+						case '018NY6XC00LMK7KHD3HPW0Y90N': // cbd
+						case '018NY6XC00LMENDHEH2Y32X903': // cbda
+							$cbd_list[] = $lrm1['qom'];
+							break;
+					}
 				}
+
+				$LR['cbd'] = max($cbd_list);
+				$LR['thc'] = max($thc_list);
+				$LR['note'] = trim($_POST['terp-note']);
+				$LR->save('Lab/Result/Update by User');
 
 				$dbc->query('COMMIT');
 
