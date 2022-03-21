@@ -71,7 +71,9 @@ $app->get('/share/{id}', function($REQ, $RES, $ARG) {
 	return $RES->withRedirect(sprintf('/pub/%s', $ARG['id']), 301);
 });
 
-// No Menu or Session
+// Public
+$app->get('/pub/{id}.{type:html|json|pdf|png|txt}', 'App\Controller\Pub');
+$app->get('/pub/{id}/{type:wcia.json}', 'App\Controller\Pub');
 $app->get('/pub/{id}', 'App\Controller\Pub');
 
 
