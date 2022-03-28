@@ -95,3 +95,28 @@ function _nice_id($x0, $x1=null)
 	return $r;
 
 }
+
+
+/**
+ *
+ */
+function _draw_metric_select_pass_fail($lm)
+{
+	// $sel =  == 1 ? 'pass' : 'fail';
+	$sel = $lm['metric']['qom'];
+
+?>
+	<div class="lab-metric-item">
+		<div class="input-group">
+			<div class="input-group-prepend">
+				<div class="input-group-text"><?= __h($lm['name']) ?></div>
+			</div>
+			<select class="form-control" name="<?= sprintf('lab-metric-%s', $lm['id']) ?>">
+				<option <?= ($sel == '-1' ? 'selected' : null) ?> value="-1">n/a</option>
+				<option <?= ($sel == '0' ? 'selected' : null) ?> value="0">Fail</option>
+				<option <?= ($sel == '1' ? 'selected' : null) ?> value="1">Pass</option>
+			</select>
+		</div>
+	</div>
+<?php
+}

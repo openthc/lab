@@ -1,6 +1,6 @@
 <?php
 /**
- * Create a Result
+ * Create a Lab Result
  *
  * SPDX-License-Identifier: GPL-3.0-only
  */
@@ -14,6 +14,9 @@ use App\Lab_Sample;
 
 class Create extends \App\Controller\Base
 {
+	/**
+	 *
+	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
 		$data = $this->loadSiteData();
@@ -29,48 +32,44 @@ class Create extends \App\Controller\Base
 		];
 		$chk = $dbc->fetchRow($sql, $arg);
 		if (empty($chk['id'])) {
-			_exit_text('Invalid Sample [CRC-022]', 400);
+			__exit_text('Invalid Sample [CRC-022]', 400);
 		}
 
 		$meta = \json_decode($chk['meta'], true);
 
 		$data['Sample'] = $chk;
+		$data['License_Source'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :ls0', [ $chk['license_id_source'] ]);
 		$data['Lot'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i', [ ':i' => $chk['lot_id'] ]);
 		$data['Lot_Meta'] = json_decode($data['Lot']['meta'], true);
 		$data['Product'] = $dbc->fetchRow('SELECT * FROM product WHERE id = :p', [ ':p' => $data['Lot']['product_id'] ]); // $meta['Product'];
 		$data['Product_Type'] = $dbc->fetchRow('SELECT * FROM product_type WHERE id = :p', [ ':p' => $data['Product']['product_type_id'] ]);
 		$data['Variety'] = $dbc->fetchRow('SELECT * FROM variety WHERE id = :v', [ ':v' => $data['Lot']['variety_id'] ]);
 
+		$data['lab_metric_list'] = $dbc->fetchAll('SELECT * FROM lab_metric WHERE stat = 200 ORDER BY sort, type, name');
+		$data['lab_metric_section_list'] = $dbc->fetchAll('SELECT * FROM lab_metric_type ORDER BY sort, stub');
+
+
 		// Get authoriative lab metrics
-		$sql = 'SELECT * FROM lab_metric ORDER BY type,stat,name';
+		$sql = 'SELECT * FROM lab_metric WHERE stat = 200 ORDER BY sort, type, name';
 		$metricTab = $dbc->fetchAll($sql);
 
 		$MetricList = array(); // This list is organized by the metric's type. I need it to make render the view eaiser.
 		// I could have made it type-flat and made the view branch on the incorrect type. I think this would have made
 		// it more difficult to refactor this for other RCEs.
-		foreach ($metricTab as $index => $metric) {
+		foreach ($data['lab_metric_list'] as $metric) {
+
+			$metric['meta'] = json_decode($metric['meta'], true);
 
 			$type = $metric['type'];
 			$key = $metric['id'];
-			$meta = json_decode($metric['meta'], true);
-			if (empty($meta['uom'])) {
-				$meta['uom'] = 'pct';
-			}
 
-			// Filter out read-only or RBE-calculated fields
-			$calculated = $meta['cre'][$creEngine]['calculated'] ?: false;
-			$readOnly = $meta['cre'][$creEngine]['readonly'] ?: false;
-			if ($calculated || $readOnly) {
-				continue;
+			if (empty($metric['meta']['uom'])) {
+				$metric['meta']['uom'] = 'pct';
 			}
-
-			// Promote the user's RCE metric path to the stub
-			$meta['stub'] = $metricPath;
 
 			// Add metric to it's type list, in the Metric List
 			if (empty($MetricList[$type])) $MetricList[$type] = array();
 
-			$metric['meta'] = $meta;
 			$MetricList[$type][$key] = $metric;
 		}
 
@@ -92,10 +91,11 @@ class Create extends \App\Controller\Base
 		switch ($_POST['a']) {
 		case 'commit':
 			// return $this->_commit($REQ, $RES, $ARG);
-			require_once(__DIR__ . '/Create_LeafData.php');
-			$x = new \App\Controller\Result\Create_LeafData($this->_container);
-			return $x->_commit($REQ, $RES, $ARG);
+			// require_once(__DIR__ . '/Create_LeafData.php');
+			// $x = new \App\Controller\Result\Create_LeafData($this->_container);
+			// return $x->_commit($REQ, $RES, $ARG);
 		case 'save':
+		case 'lab-result-save':
 			return $this->_save($REQ, $RES, $ARG);
 		default:
 			return $RES->withStatus(400);
@@ -103,7 +103,7 @@ class Create extends \App\Controller\Base
 	}
 
 	/**
-	 *
+	 * Save the Lab Result Data
 	 */
 	private function _save($REQ, $RES, $ARG)
 	{
@@ -111,27 +111,27 @@ class Create extends \App\Controller\Base
 
 		// Get and validate the QA Sample
 		$sql = 'SELECT * from lab_sample WHERE id = :id AND license_id = :lic';
-		$args = [
+		$arg = [
 			':id' => $_POST['sample_id'],
 			':lic' => $_SESSION['License']['id'],
 		];
-		$Sample = $dbc->fetchRow($sql, $args);
+		$Sample = $dbc->fetchRow($sql, $arg);
 		if (empty($Sample['id'])) {
 			_exit_text(sprintf('Could not find Sample Lot: %s [LPC-120]', $_POST['sample_id']), 409);
 		}
 
 		// Get the authorative lab metrics
 		// This list is type-flat, and it's IDs the row ULID
-		$sql = "SELECT *, meta->>'uom' AS uom FROM lab_metric"; //  ORDER BY type,stat,name';
+		$sql = "SELECT *, meta->>'uom' AS uom FROM lab_metric";
 		$res_lab_metric = $dbc->fetchAll($sql);
 
 		$dbc->query('BEGIN');
 
 		$LR = new Lab_Result($dbc);
 		$LR['id'] = _ulid();
-		$LR['guid'] = $LR['id'];
+		$LR['guid'] = substr($LR['id'], 0, 16);
 		$LR['license_id'] = $_SESSION['License']['id'];
-		$LR['inventory_id'] = $Sample['lot_id'];
+		// $LR['inventory_id_shit'] = $Sample['lot_id']; //fixed 2022-068 /mbw
 		$LR['lab_sample_id'] = $Sample['id'];
 		$LR['stat'] = 200;
 		$LR['flag'] = 0;
@@ -139,36 +139,114 @@ class Create extends \App\Controller\Base
 		$LR['name'] = sprintf('Lab Result for Sample Lot: %s', $Sample['id']);
 		$LR['uom'] = 'g';
 		$LR['hash'] = $LR->getHash();
-		$LR->save();
+		$LR->save('Lab_Result/Create');
 
 		// Save Metrics
 		foreach ($res_lab_metric as $m) {
-			$k = $m['id'];
+
+			$k = sprintf('lab-metric-%s', $m['id']);
+
+			$qom = trim($_POST[$k]);
+			if (strlen($qom) == 0) {
+				continue;
+			}
+
+			switch ($qom) {
+				case 'N/A':
+					$qom = -1;
+					break;
+				case 'N/D':
+					$qom = -2;
+					break;
+				case 'N/T':
+					$qom = -3;
+					break;
+			}
+
 			$dbc->insert('lab_result_metric', [
 				'id' => _ulid(),
 				'lab_result_id' => $LR['id'],
-				'lab_metric_id' => $k,
-				// 'flag' => 0,
-				'qom' => floatval($_POST[$k]),
+				'lab_metric_id' => $m['id'],
+				'qom' => floatval($qom),
 				'uom' => $m['uom'],
 				// 'lod' => $m['meta']['lod'],
 				// 'loq' => $m['meta']['loq'],
 			]);
+
+
+			// Special Case Lab Metrics for Up-Scaling to the Lab Result
+			switch ($m['id']) {
+				case '018NY6XC00PXG4PH0TXS014VVW': // total-thc
+				case '018NY6XC00LM49CV7QP9KM9QH9': // d9-thc
+				case '018NY6XC00LM877GAKMFPK7BMC': // d8-thc
+				case '018NY6XC00LMB0JPRM2SF8F9F2': // thca
+					$thc_list[] = $lrm1['qom'];
+					break;
+				case '018NY6XC00DEEZ41QBXR2E3T97': // total-cbd
+				case '018NY6XC00LMK7KHD3HPW0Y90N': // cbd
+				case '018NY6XC00LMENDHEH2Y32X903': // cbda
+					$cbd_list[] = $lrm1['qom'];
+					break;
+			}
+
 		}
 
+		$LR['cbd'] = max($cbd_list);
+		$LR['thc'] = max($thc_list);
+		$LR->save();
 
-		// Link Sample to this, Most Recent Result
-		// $sql = 'UPDATE lab_sample SET stat = :s1, lab_result_id = :lr1 WHERE id = :ls0';
-		// $arg = [
-		// 	':ls0' => $Sample['id'],
-		// 	':lr1' => $LR['id'],
-		// 	':s1' => Lab_Sample::STAT_DONE,
-		// ];
-		// $dbc->query($sql, $arg);
+		// Update Lab Sample?
+		$LS = new Lab_Sample($dbc, $LR['lab_sample_id']);
+		// $LS->delFlag();
+		// $LS->setFlag();
+		$LS['stat'] = Lab_Sample::STAT_DONE;
+		$LS->save('Lab_Sample/Update');
+		// $dbc->query('UPDATE lab_sample SET flag = flag & :f1, stat = :s1 WHERE id = :ls0', [
+		// 	':ls0' => $LS['id'],
+		// 	':f1' => (Lab_Sample::FLAG_... | Lab_Sample::FLAG_)
+		// 	':s1' => Lab_Sample::STAT_DONE
+		// ]);
+		// $LS->setFlag();
+		// $LS['stat'] =
+		// $LS->save('Lab_Sample/Create by User');
+
+		// Update Inventory Lot?
+		// $L = $Sample['lot_id'];
+		// $IL =
+		// $IL->delFlag();
+		// $IL->setFlag();
+		// $IL->save();
+
+		// switch ($this->_data['uom']) {
+		// case 'pct':
+		// 	$I['qa_cbd'] = sprintf('%0.2F%%', $this->_data['cbd']);
+		// 	$I['qa_thc'] = sprintf('%0.2F%%', $this->_data['thc']);
+		// 	break;
+		// default:
+		// 	$I['qa_cbd'] = sprintf('%0.2F %s', $this->_data['cbd'], $this->_data['uom']);
+		// 	$I['qa_thc'] = sprintf('%0.2F %s', $this->_data['thc'], $this->_data['uom']);
+		// }
+
+		// Link
+		$sql = 'INSERT INTO inventory_lab_result (lot_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		$res = $dbc->query($sql, [
+			':i0' => $Sample['lot_id'],
+			':lr0' => $LR['id']
+		]);
+
+		$sql = 'UPDATE inventory SET flag = flag | :f1, qa_cbd = :c1, qa_thc = :t1 WHERE id = :i0';
+		$arg = [
+			':i0' => $Sample['lot_id'],
+			':f1' => 0x00000400, // Inventory::FLAG_QA_PASS,
+			':c1' => $cbd,
+			':t1' => $thc,
+		];
+
+		// $I->save('Lot/Lab_Result/Link');
 
 		$dbc->query('COMMIT');
 
-		return $RES->withRedirect('/result/' . $LR['id']);
+		return $RES->withRedirect(sprintf('/result/%s', $LR['id']));
 
 	}
 
