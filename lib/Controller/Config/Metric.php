@@ -28,25 +28,45 @@ class Metric extends \App\Controller\Base
 
 		// Save
 		switch ($_POST['a']) {
+			case 'lab-metric-mute-toggle':
+
+				switch ($_POST['v']) {
+					case 'hide':
+						$dbc->query('UPDATE lab_metric SET stat = 410 WHERE id = :lm0', [
+							':lm0' => $_POST['lab_metric_id']
+						]);
+						$html = sprintf('<button class="btn btn-outline-secondary btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="show"><i class="fas fa-ban"></i></button>', $_POST['lab_metric_id']);
+						__exit_html($html);
+						break;
+					case 'show':
+						$dbc->query('UPDATE lab_metric SET stat = 200 WHERE id = :lm0', [
+							':lm0' => $_POST['lab_metric_id']
+						]);
+						$html = sprintf('<button class="btn btn-outline-success btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="hide"><i class="far fa-circle"></i></button>', $_POST['lab_metric_id']);
+						__exit_html($html);
+						break;
+				}
+				break;
 			case 'save':
 
 				foreach ($data['metric_list'] as $idx => $m) {
 
 					$m['meta'] = json_decode($m['meta'], true);
-					$m['meta']['lod'] = $_POST[sprintf('%s-lod', $m['id'])];
-					$m['meta']['loq'] = $_POST[sprintf('%s-loq', $m['id'])];
-					$m['meta']['max'] = $_POST[sprintf('%s-max', $m['id'])];
+					$m['meta']['uom'] = $_POST[sprintf('uom-%s', $m['id'])];
+					$m['meta']['lod'] = $_POST[sprintf('lod-%s', $m['id'])];
+					$m['meta']['loq'] = $_POST[sprintf('loq-%s', $m['id'])];
+					$m['meta']['max'] = $_POST[sprintf('max-%s', $m['id'])];
 					$m['meta'] = json_encode($m['meta']);
 
 					$f = $m['flag'];
 					$f = ($f & ~ (Lab_Metric::FLAG_FLOWER | Lab_Metric::FLAG_EDIBLE | Lab_Metric::FLAG_EXTRACT));
-					if ($_POST[sprintf('%s-bud', $m['id'])]) {
+					if ($_POST[sprintf('bud-%s', $m['id'])]) {
 						$f = ($f | Lab_Metric::FLAG_FLOWER);
 					}
-					if ($_POST[sprintf('%s-edi', $m['id'])]) {
+					if ($_POST[sprintf('edi-%s', $m['id'])]) {
 						$f = ($f | Lab_Metric::FLAG_EDIBLE);
 					}
-					if ($_POST[sprintf('%s-ext', $m['id'])]) {
+					if ($_POST[sprintf('ext-%s', $m['id'])]) {
 						$f = ($f | Lab_Metric::FLAG_EXTRACT);
 					}
 					$m['flag'] = $f;
