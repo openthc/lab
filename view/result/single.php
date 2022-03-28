@@ -7,47 +7,53 @@
 
 ?>
 
-<div class="row mt-4" style="position: relative;">
-<div class="col-md-6">
-	<h1>Result: <?= $data['Result']['id_nice'] ?></h1>
-	<h2>Sample: <a href="/sample/<?= $data['Sample']['id'] ?>"><?= $data['Sample']['id_nice'] ?></a></h2>
-</div>
-<div class="col-md-6">
-	<h3>Status: <?= _lab_result_status_nice($data['Result']['stat']) ?></h3>
-	<!-- @todo this is only relevant when it's a Lab showing this result -->
-	<!-- <h3>Origin: {{ Sample.lot_id_source }}</h3> -->
-</div>
-<div class="r" style="position: absolute; right:0; top:0;">
-	<form method="post" target="_blank">
+<div class="d-flex flex-row flex-wrap justify-content-between mt-2">
 
-		<div class="btn-group">
-			<button class="btn btn-outline-primary" name="a" type="submit" value="share"><i class="fas fa-share-alt"></i> Share</button>
-			<a class="btn btn-outline-secondary" href="mailto:?<?= $data['share_mail_link'] ?>"><i class="fas fa-envelope-open-text"></i></a>
-		</div>
+	<div>
+		<h1>Result: <?= $data['Lab_Result']['guid'] ?></h1>
+		<h2>Sample: <a href="/sample/<?= $data['Lab_Sample']['id'] ?>"><?= $data['Lab_Sample']['name'] ?></a></h2>
+	</div>
 
-		<?php
-		if ($data['Result']['coa_file']) {
-		?>
+	<div>
+		<h3>Status: <?= _lab_result_status_nice($data['Lab_Result']['stat']) ?></h3>
+		<!-- @todo this is only relevant when it's a Lab showing this result -->
+		<!-- <h3>Origin: {{ Sample.lot_id_source }}</h3> -->
+	</div>
+
+	<div class="r">
+		<form method="post" target="_blank">
+
 			<div class="btn-group">
-				<button class="btn btn-outline-success" name="a" type="submit" value="coa-download"><i class="fas fa-download"></i> COA</button>
-				<button class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button>
-				<div class="dropdown-menu dropdown-menu-right">
-					<a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modal-coa-upload" href="#"><i class="fas fa-upload"></i> Upload COA</a>
+				<a class="btn btn-outline-primary" href="/result/<?= $data['Lab_Result']['id'] ?>/update"><i class="far fa-edit"></i></a>
+			</div>
+
+			<div class="btn-group">
+				<button class="btn btn-outline-primary" name="a" type="submit" value="share"><i class="fas fa-share-alt"></i> Share</button>
+				<a class="btn btn-outline-secondary" href="mailto:?<?= $data['share_mail_link'] ?>"><i class="fas fa-envelope-open-text"></i></a>
+			</div>
+
+			<?php
+			if ($data['Lab_Result']['coa_file']) {
+			?>
+				<div class="btn-group">
+					<button class="btn btn-outline-success" name="a" type="submit" value="coa-download"><i class="fas fa-download"></i> COA</button>
+					<!-- <button class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button> -->
+					<button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modal-coa-upload" title="Upload COA" type="button"><i class="fas fa-upload"></i></button>
+					<!-- <button class="btn btn-outline-secondary" name="a" type="submit" value="coa-create"><i class="fas fa-print"></i></button> -->
 				</div>
-				<button class="btn btn-outline-secondary" name="a" type="submit" value="coa-create"><i class="fas fa-print"></i></button>
-			</div>
-		<?php
-		} else {
-		?>
-			<div class="btn-group">
-				<button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modal-coa-upload" name="a" title="No COA Uploaded" type="button" value="download-coa"><i class="fas fa-upload"></i> COA</button>
-				<button class="btn btn-outline-secondary" name="a" type="submit" value="coa-create"><i class="fas fa-print"></i></button>
-			</div>
-		<?php
-		}
-		?>
-	</form>
-</div>
+			<?php
+			} else {
+			?>
+				<div class="btn-group" id="dropzone-coa-upload">
+					<button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modal-coa-upload" name="a" title="No COA Uploaded" type="button" value="download-coa"><i class="fas fa-upload"></i> COA</button>
+					<!-- <button class="btn btn-outline-secondary" name="a" type="submit" value="coa-create"><i class="fas fa-print"></i></button> -->
+				</div>
+			<?php
+			}
+			?>
+		</form>
+	</div>
+
 </div>
 
 <div class="mb-2">
@@ -57,8 +63,6 @@
 <div class="mb-2">
 <?= $this->block('potency-summary.php') ?>
 </div>
-
-<hr>
 
 <style>
 .result-metric-wrap {
@@ -78,35 +82,87 @@
 
 <div>
 <?php
-foreach ($data['Lab_Metric_Type_list'] as $metric_type) {
+foreach ($data['Result_Metric_Group_list'] as $lms) {
 
-	if (empty($data['Lab_Result_Metric_list'][ $metric_type['stub'] ])) {
+	if (empty($lms['metric_list'])) {
 		continue;
+	}
+
+	if (empty($lms['name'])) {
+		$lms['name'] = '-system-';
 	}
 
 ?>
 	<hr>
 	<section>
-		<h3><?= $metric_type['name'] ?></h3>
+		<h3><?= $lms['name'] ?></h3>
 		<div class="result-metric-wrap">
 			<?php
-			foreach ($data['Lab_Result_Metric_list'][ $metric_type['stub'] ] as $idx => $result_data) {
-				switch ($result_data['qom']) {
+			// Spin too many times but, whatever /djb 20220222
+			$out = false;
+			foreach ($lms['metric_list'] as $lm_id => $result_data) {
+
+				if (empty($result_data['metric'])) {
+					continue;
+				}
+
+				$out = true;
+
+				$metric = $result_data['metric'];
+
+				switch ($metric['uom']) {
+					case 'bool':
+						// Something
+						$metric['uom'] = '';
+						switch ($metric['qom']) {
+							case 0:
+								$metric['qom'] = 'Fail';
+								break;
+							case 1:
+								$metric['qom'] = 'Pass';
+								break;
+						}
+						break;
+					case 'pct':
+						// Something Else
+						$metric['uom'] = '%';
+						break;
+				}
+
+				// Special QOM
+				switch ($metric['qom']) {
+					case -1:
+						$metric['qom'] = 'N/A';
+						$metric['uom'] = '';
+						break;
+					case -1:
+						$metric['qom'] = 'N/A';
+						$metric['uom'] = '';
+						break;
 					case -3:
-						$result_data['qom'] = '-ND-';
-						$result_data['uom'] = '';
+						$metric['qom'] = '-ND-';
+						$metric['uom'] = '';
 						break;
 				}
 			?>
 				<div class="result-metric-data">
 					<div class="input-group">
 						<div class="input-group-text"><?= __h($result_data['name']) ?></div>
-						<input class="form-control r" readonly style="font-weight: bold;" value="<?= __h($result_data['qom']) ?>">
-						<div class="input-group-text"><?= __h($result_data['uom']) ?></div>
+						<input class="form-control r" readonly style="font-weight: bold;" value="<?= __h($metric['qom']) ?>">
+						<?php
+						if (!empty($metric['uom'])) {
+							printf('<div class="input-group-text">%s</div>', __h($metric['uom']));
+						}
+						?>
 					</div>
 				</div>
 			<?php
 			}
+
+			if (!$out) {
+				echo '<div class="alert alert-info" style="flex: 1 1 auto; width: 100%;">No Metrics for this Section</div>';
+			}
+
 			?>
 		</div>
 	</section>
@@ -128,6 +184,77 @@ foreach ($data['Lab_Metric_Type_list'] as $metric_type) {
 
 <?= $this->block('modal-coa-upload.php') ?>
 <?= $this->block('modal-send-email.php') ?>
+
+
+<script>
+$(function() {
+
+	$('#dropzone-coa-upload').on('dragover', function(e) {
+		// $('.upload-drop-zone .progress-bar').css('width', '0%').text('0%');
+		// $(this).addClass('active');
+		// return false;
+	});
+
+	$('#dropzone-coa-upload').on('dragleave', function(e) {
+		$(this).removeClass('active');
+	});
+
+	$('#dropzone-coa-upload').on('drop', function(e) {
+
+		// Upload COA
+		$('#dropzone-coa-upload .btn').removeClass('btn-primary').addClass('btn-outline-warning');
+
+		var e0 = e.originalEvent;
+
+		const type_list = e0.dataTransfer.types;
+		console.log('dropped', type_list);
+
+		// Did we drop a file?
+		if (type_list.includes('Files')) {
+			var form = new FormData();
+			form.set('a', 'coa-upload');
+			form.append('file', e0.dataTransfer.files[0]);
+			fetch('', {
+				method: 'POST',
+				body: form,
+			}).then(res => {
+				if (res.redirected) {
+					window.location = res.url;
+					return false;
+				}
+				return res.json();
+			}).then(json => {
+				// debugger;
+				// alert(json);
+			});
+		}
+
+		// Did we drop a link?
+		if (type_list.includes('text/uri-list')) {
+			const drop_link = e0.dataTransfer.getData('text/uri-list');
+			if (drop_link) {
+				$('#drop-data-target').val( drop_link );
+				$('#b2b-incoming-next').val('b2b-incoming-import');
+				$('#b2b-incoming-next').click();
+			}
+			return;
+		}
+
+	});
+
+	// Prevent accidental drops
+	$(document).on('drop dragover', function (e) {
+		$('#dropzone-coa-upload .btn').removeClass('btn-outline-warning').addClass('btn-primary');
+		e.preventDefault();
+	});
+	$(document).on('dragleave', function() {
+		$('#dropzone-coa-upload .btn').removeClass('btn-primary').addClass('btn-outline-warning');
+	});
+
+});
+</script>
+
+
 
 <?php
 /**

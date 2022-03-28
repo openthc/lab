@@ -171,8 +171,8 @@ class Update extends \App\Controller\Result\View
 					}
 				}
 
-				$LR['cbd'] = max($cbd_list);
-				$LR['thc'] = max($thc_list);
+				$LR['cbd'] = floatval(max($cbd_list));
+				$LR['thc'] = floatval(max($thc_list));
 				$LR['note'] = trim($_POST['terp-note']);
 				$LR->save('Lab/Result/Update by User');
 

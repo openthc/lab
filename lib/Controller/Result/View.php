@@ -25,25 +25,34 @@ class View extends \App\Controller\Base
 			_exit_text('Invalid Request [CRV-020]', 400);
 		}
 
+		$dbc = $this->_container->DBC_User;
+
+		$Lab_Result = new Lab_Result($dbc, $id);
+		if (empty($Lab_Result['id'])) {
+			_exit_text('WSHERE is RESULT');
+		}
+
+		$Lab_Sample = new Lab_Sample($dbc, $Lab_Result['lab_sample_id']);
+		if (empty($Lab_Sample['id'])) {
+			// _exit_text('WSHERE is SAMPLE');
+		}
+
 		$data = $this->load_lab_result_full($id);
 
 		// Data
 		$data = $this->loadSiteData($data);
+
 		$data['Page'] = array('title' => 'Result :: View');
-		$data['Sample'] = $data['Lab_Sample']->toArray();
-		$data['Sample']['id_nice'] = _nice_id($data['Sample']['id'], $data['Sample']['guid']);
-		$data['Result'] = $data['Lab_Result']->toArray();
-		$data['Result']['id_nice'] = _nice_id($data['Result']['id'], $data['Result']['guid']);
-		// $data['Product'] = $Product;
-		// $data['Product_Type'] = $ProductType;
-		// $data['Variety'] = $Variety;
-		// $data['Sample'] = $LS->toArray();
-		// $data['Sample']  = $meta['Sample'];
-		// $data['Result']  = $meta['Result'];
-		$data['Result']['coa_file'] = $data['Lab_Result']->getCOAFile();
-		if (!is_file($data['Result']['coa_file'])) {
-			$data['Result']['coa_file'] = null;
+
+		$data['Lab_Result']['id_nice'] = _nice_id($data['Lab_Result']['id'], $data['Lab_Result']['guid']);
+		$data['Lab_Sample']['id_nice'] = _nice_id($data['Lab_Sample']['id'], $data['Lab_Sample']['guid']);
+
+		$data['Lab_Result']['coa_file'] = $data['Lab_Result']->getCOAFile();
+		if ( ! is_file($data['Lab_Result']['coa_file'])) {
+			$data['Lab_Result']['coa_file'] = null;
 		}
+
+		$data['Result_Metric_Group_list'] = $Lab_Result->getMetrics_Grouped();
 
 		// if (!empty($LR['license_id_lab'])) {
 		// 	$x = \OpenTHC\License::findByGUID($LR['license_id_lab']);
@@ -82,10 +91,8 @@ class View extends \App\Controller\Base
 			'body' => sprintf("\n\nHere is the link: https://%s/pub/%s.html", $_SERVER['SERVER_NAME'], $data['Lab_Result']['id']),
 		), null, '&amp;', PHP_QUERY_RFC3986);
 
-		// __exit_text($data);
-
 		if (!empty($_POST['a'])) {
-			return $this->_postHandler($REQ, $RES, $data['Lab_Result'], $data);
+			return $this->_postHandler($REQ, $RES, $Lab_Result, $data);
 		}
 
 		return $RES->write( $this->render('result/single.php', $data) );
@@ -103,42 +110,51 @@ class View extends \App\Controller\Base
 		$Lab_Result = new Lab_Result($dbc_user, $chk);
 
 		if (empty($Lab_Result['id'])) {
-			_exit_html(sprintf('Lab Result Not Found, please <a href="/result/%s/sync">sync this result</a>', $id), 404);
+			_exit_html_fail('<h1>Lab Result Not Found [CRV-106]</h1>', 404);
 		}
 
 		// Load Sample (or Lot)
+		// @note should ALWAYS have a proper Lab_Sample record, if not it needs a data-patch /djb 20220222
 		$Lab_Sample = new Lab_Sample();
 		if ( ! empty($Lab_Result['lab_sample_id'])) {
-			if ($Lab_Result['lab_sample_id'] == $Lab_Result['inventory_id']) {
-				$chk = $dbc_user->fetchRow('SELECT * FROM inventory WHERE id = :ls0', [ ':ls0' => $Lab_Result['inventory_id'] ]);
-				$Lab_Sample = new Lab_Sample(null, $chk);
-			} else {
+			// if ($Lab_Result['lab_sample_id'] == $Lab_Result['inventory_id']) {
+			// 	$chk = $dbc_user->fetchRow('SELECT * FROM inventory WHERE id = :ls0', [ ':ls0' => $Lab_Result['inventory_id'] ]);
+			// 	$Lab_Sample = new Lab_Sample(null, $chk);
+			// } else {
 				$Lab_Sample = new Lab_Sample($dbc_user, $Lab_Result['lab_sample_id']);
-			}
-		} elseif (!empty($Lab_Result['inventory_id'])) {
-			$chk = $dbc_user->fetchRow('SELECT * FROM inventory WHERE id = :ls0', [ ':ls0' => $Lab_Result['inventory_id'] ]);
-			$Lab_Sample = new Lab_Sample(null, $chk);
+			// }
+		// } elseif (!empty($Lab_Result['inventory_id'])) {
+		// 	$chk = $dbc_user->fetchRow('SELECT * FROM inventory WHERE id = :ls0', [ ':ls0' => $Lab_Result['inventory_id'] ]);
+		// 	$Lab_Sample = new Lab_Sample(null, $chk);
 		}
 
-		$Product = $dbc_user->fetchRow('SELECT * FROM product WHERE id = ?', [ $Lab_Sample['product_id'] ]);
+		$Lot = $dbc_user->fetchRow('SELECT id, product_id, variety_id FROM inventory WHERE id = :i0', [ ':i0' => $Lab_Sample['inventory_id'] ]);
+		$Product = $dbc_user->fetchRow('SELECT * FROM product WHERE id = ?', [ $Lot['product_id'] ]);
 		$ProductType = $dbc_user->fetchRow('SELECT * FROM product_type WHERE id = ?', [ $Product['product_type_id'] ]);
-		$Variety = $dbc_user->fetchRow('SELECT * FROM variety WHERE id = ?', [ $Lab_Sample['variety_id'] ]);
+		$Variety = $dbc_user->fetchRow('SELECT * FROM variety WHERE id = ?', [ $Lot['variety_id'] ]);
 
 		// $meta = json_decode($Lab_Result['meta'], true);
 		// $Lab_Result->getMetrics();
 
 		// Get authoriative lab metrics
-		$lab_metric_type_list = [];
 		$lab_result_metric_list = [];
+		$res = $dbc_user->fetchAll('SELECT id AS lab_metric_id, type, sort, name, meta FROM lab_metric WHERE stat = 200 ORDER BY sort, name');
+		foreach ($res as $rec) {
+			$rec['meta'] = json_decode($rec['meta'], true);
+			$lab_result_metric_list[ $rec['lab_metric_id'] ] = $rec;
+		}
 
+		// Get authoriative lab result metrics
+		// Over-Writes the ones Above
 		$sql = <<<SQL
 SELECT lab_result_metric.*
+	, lab_result_metric.id AS lab_result_metric_id
 	, lab_metric.type
 	, lab_metric.sort
 	, lab_metric.name
 	, lab_metric.meta
-FROM lab_result_metric
-JOIN lab_metric ON lab_result_metric.lab_metric_id = lab_metric.id
+FROM lab_metric
+JOIN lab_result_metric ON lab_metric.id = lab_result_metric.lab_metric_id
 WHERE lab_result_metric.lab_result_id = :lr0
 ORDER BY lab_metric.type, lab_metric.sort, lab_metric.stat, lab_metric.name
 SQL;
@@ -147,6 +163,7 @@ SQL;
 		];
 		$res = $dbc_user->fetchAll($sql, $arg);
 		foreach ($res as $rec) {
+			$rec['meta'] = json_decode($rec['meta'], true);
 			$lab_result_metric_list[ $rec['lab_metric_id'] ] = $rec;
 		}
 
@@ -290,8 +307,6 @@ SQL;
 				Session::flash('fail', $e->getMessage());
 			}
 
-			$LR->setCOAFile($_FILES['file']['tmp_name']);
-
 			return $RES->withRedirect(sprintf('/result/%s', $LR['id']));
 
 			break;
@@ -310,61 +325,42 @@ SQL;
 			$LR->setFlag(\App\Lab_Result::FLAG_MUTE);
 			$LR->save();
 			break;
+		case 'lab-result-share':
 		case 'share':
 
 			// @todo Make Sure it's Published in MAIN
+			// unset($data['OpenTHC']);
+			// unset($data['Site']);
+			// unset($data['Page']);
+			// unset($data['menu']);
+			// unset($data['coa_upload_hash']);
+			// unset($data['share_mail_link']);
+			// unset($data['Lab_Sample']);
+			// unset($data['Lab_Result']);
 
-			// $dbc_main = $this->_container->DBC_Main;
-			// $Lab_Result1 = new Lab_Result($dbc_main, $id);
+			$dbc_user = $this->_container->DBC_User;
 
-			// Load all the Lab Result Fully
-			// $data -=
+			$lr1_meta = [];
+			$lr1_meta['@context'] = 'http://openthc.org/lab/2021';
+			$lr1_meta['Lab_Result'] = $dbc_user->fetchRow('SELECT * FROM lab_result WHERE id = :lr0', [ ':lr0' => $LR['id'] ]);
+			$lr1_meta['Lab_Sample'] = $dbc_user->fetchRow('SELECT * FROM lab_sample WHERE id = :ls0', [ ':ls0' => $LR['lab_sample_id'] ]);
+			$lr1_meta['Lot'] = $dbc_user->fetchRow('SELECT * FROM inventory WHERE id = :i0', [ ':i0' => $lr1_meta['Lab_Sample']['lot_id'] ]);
+			$lr1_meta['Product'] = $dbc_user->fetchRow('SELECT * FROM product WHERE id = :p0', [ ':p0' => $lr1_meta['Lot']['product_id'] ]);
+			$lr1_meta['Product_Type'] = $dbc_user->fetchRow('SELECT * FROM product_type WHERE id = :pt0', [ ':pt0' => $lr1_meta['Product']['product_type_id'] ]);
+			$lr1_meta['Variety'] = $dbc_user->fetchRow('SELECT * FROM variety WHERE id = :v0', [ ':v0' => $lr1_meta['Lot']['variety_id'] ]);
+			$lr1_meta['Lab_Result_Metric_list'] = $LR->getMetrics();
+			$lr1_meta['Lab_Result_Section_Metric_list'] = $LR->getMetrics_Grouped();
 
-			// $lab = new \OpenTHC\Service\OpenTHC('lab');
-			// $arg = [ 'form_params' => [
-			// 	'id' => $LR['id'],
-			// 	'license_id' => $_SESSION['License']['id'],
-			// 	'type' => $LR['type'],
-			// 	'name' => $LR['name'],
-			// 	'meta' => $data,
-			// ]];
-			// $res = [];
-			// $chk = $lab->get('/api/v2015/result/' . $LR['id']);
-			// switch ($chk['code']) {
-			// 	case 200:
-			// 		// UPDATE
-			// 		$res = $lab->post('/api/v2015/result/' . $LR['id'], $arg);
-			// 	break;
-			// 	case 404:
-			// 		// INSERT
-			// 		$res = $lab->post('/api/v2015/result', $arg);
-			// 	break;
-			// 	default:
-			// 		_exit_text('Lab API Failure', 500);
-			// }
-			// if (200 != $res['code']) {
-			// 	_exit_text(print_r($lab, true));
-			// 	throw new \Exception('Unexpected Response from Lab Portal');
-			// }
 
 			// Build All Necessary Datas
 			// INSERT/UPDATE to openthc_main.lab_result with a HUGE meta
 
-			$data['Sample']['meta'] = json_decode($data['Sample']['meta'], true);
-			$data['Result']['meta'] = json_decode($data['Result']['meta'], true);
-			$data['Product']['meta'] = json_decode($data['Product']['meta'], true);
-			$data['Product_Type']['meta'] = json_decode($data['Product_Type']['meta'], true);
-			$data['Variety']['meta'] = json_decode($data['Variety']['meta'], true);
-			$data['License']['meta'] = json_decode($data['License']['meta'], true);
+			// $data['License']['meta'] = json_decode($data['License']['meta'], true);
 
-			unset($data['OpenTHC']);
-			unset($data['Site']);
-			unset($data['Page']);
-			unset($data['menu']);
-			unset($data['coa_upload_hash']);
-			unset($data['share_mail_link']);
-			unset($data['Lab_Sample']);
-			unset($data['Lab_Result']);
+			// Remove Incomplete Result Metrics
+			// $data['Lab_Result_Metric_list'] = array_filter($data['Lab_Result_Metric_list'], function($v, $k) {
+			// 	return !empty($v['lab_result_metric_id']);
+			// }, ARRAY_FILTER_USE_BOTH);
 
 			// Publish to Main/Global/Public
 			$dbc_main = $this->_container->DBC_Main;
@@ -374,14 +370,14 @@ SQL;
 			$Lab_Result1['flag'] = $LR['flag'];
 			$Lab_Result1['stat'] = $LR['stat'];
 			$Lab_Result1['type'] = '-system-';
-			$Lab_Result1['name'] = 'Lab Result';
-			$Lab_Result1['meta'] = json_encode($data);
+			$Lab_Result1['name'] = $LR['guid'];
+			$Lab_Result1['meta'] = json_encode($lr1_meta);
 			$Lab_Result1->save();
 
-			// return $RES->withRedirect(sprintf('/pub/%s.html', $LR['guid']));
 			return $RES->withRedirect(sprintf('/pub/%s.html', $LR['id']));
 
 			break;
+
 		case 'sync':
 
 			_exit_html_fail('<h1>Not Implemented [CRV-387]', 501);
@@ -390,6 +386,7 @@ SQL;
 			return $S->__invoke(null, $RES, array('id' => $data['Result']['id']));
 
 			break;
+
 		case 'void':
 
 			_exit_html_fail('<h1>Not Implemented [CRV-395]</h1>', 501);

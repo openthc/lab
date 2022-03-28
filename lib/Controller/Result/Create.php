@@ -131,7 +131,6 @@ class Create extends \App\Controller\Base
 		$LR['id'] = _ulid();
 		$LR['guid'] = substr($LR['id'], 0, 16);
 		$LR['license_id'] = $_SESSION['License']['id'];
-		// $LR['inventory_id_shit'] = $Sample['lot_id']; //fixed 2022-068 /mbw
 		$LR['lab_sample_id'] = $Sample['id'];
 		$LR['stat'] = 200;
 		$LR['flag'] = 0;
@@ -228,7 +227,7 @@ class Create extends \App\Controller\Base
 		// }
 
 		// Link
-		$sql = 'INSERT INTO inventory_lab_result (lot_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		$sql = 'INSERT INTO inventory_lab_result (inventory_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
 		$res = $dbc->query($sql, [
 			':i0' => $Sample['lot_id'],
 			':lr0' => $LR['id']

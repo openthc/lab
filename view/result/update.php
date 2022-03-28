@@ -191,9 +191,8 @@ $(function() {
 
 	// Attempt Magic on the THC Values?
 	var auto_sum = true;
-	$('#lab-metric-type-018NY6XC00LMT0HRHFRZGY72C7 input.lab-metric-qom').on('keyup', function() {
+	$('#lab-metric-type-018NY6XC00LMT0HRHFRZGY72C7 input.lab-metric-qom').on('blur change keyup', function() {
 
-		debugger;
 		switch (this.id) {
 			case 'lab-metric-018NY6XC00V7ACCY94MHYWNWRN':
 			case 'lab-metric-018NY6XC00PXG4PH0TXS014VVW':
