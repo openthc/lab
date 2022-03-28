@@ -32,14 +32,14 @@
 
 <div class="container mt-4">
 
-<h1>Result: <?= __h($data['Result']['id']) ?></h1>
-<h2>Sample: <?= __h($data['Sample']['id']) ?></h2>
+<h1>Result: <?= __h($data['Result']['id_nice']) ?></h1>
+<h2>Sample: <?= __h($data['Sample']['id_nice']) ?></h2>
 
 <?= $this->block('product-summary.php') ?>
 
 <div class="row">
 <div class="col-md-8">
-	<div class="form-group">
+	<div class="mb-2">
 		<label>Share Link</label>
 		<div class="input-group">
 			<input class="form-control" readonly value="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.html">
@@ -48,7 +48,7 @@
 	</div>
 </div>
 <div class="col-md-4">
-	<div class="form-group">
+	<div class="mb-2">
 		<label>Print Link
 			<span data-toggle="tooltip" data-placement="top" style="cursor:help;" title="Waiting for the Product Owner or Laboratory to upload these documents">
 				<i class="fas fa-info-circle"></i>

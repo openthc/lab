@@ -42,14 +42,39 @@ class Pub extends \App\Controller\Base
 
 		$data = array_merge($data, $meta);
 
+		// Patch Result
+		if (empty($data['Result']) && !empty($data['Lab_Result'])) {
+			$data['Result'] = $data['Lab_Result'];
+			unset($data['Lab_Result']);
+		}
+		if (is_string($data['Result']['meta'])) {
+			$data['Result']['meta'] = json_decode($data['Result']['meta'], true);
+		}
+		$data['Result']['id_nice'] = _nice_id($data['Result']['id'], $data['Result']['guid']);
+		$data['Result']['thc'] = sprintf('%0.2f', $data['Result']['thc']);
+		$data['Result']['cbd'] = sprintf('%0.2f', $data['Result']['cbd']);
+		$data['Result']['sum'] = sprintf('%0.2f', $data['Result']['sum']);
 
-		// Which Type v2022, v2021-WCIA, v2018, v2015?
+		// Patch Sample
+		if (empty($data['Sample']) && !empty($data['Lab_Sample'])) {
+			$data['Sample'] = $data['Lab_Sample'];
+			unset($data['Lab_Sample']);
+		}
+		if (is_string($data['Sample']['meta'])) {
+			$data['Sample']['meta'] = json_decode($data['Sample']['meta'], true);
+		}
+		$data['Sample']['id_nice'] = _nice_id($data['Sample']['id'], $data['Sample']['guid']);
+
+		// Which Type v2015, v2018, v2021-WCIA
+		if (empty($data['Lab_Result_Metric_list'])) {
+			$data['Lab_Result_Metric_list'] = [];
+		}
 		$key_list = array_keys($data['Lab_Result_Metric_list']);
 		$chk = $key_list[0];
-		if (preg_match('/^0[0-9A-Z]{25}$/', $chk)) { // v2016
+		if (preg_match('/^0[0-9A-Z]{25}$/', $chk)) { // v2018
 			// OK, do Nothing
 		} else {
-			// Sub-Subs (Version 0)
+			// v2022-WCIA
 			// It's a Nested List, Un Flatten, it's Grouped
 			$lab_result_metric = [];
 			foreach ($data['Lab_Result_Metric_list'] as $lab_group_name => $lab_group_data) {
@@ -65,11 +90,6 @@ class Pub extends \App\Controller\Base
 			$data['mine'] = true;
 		}
 
-		// Promoted Vars
-		$data['Result']['thc'] = sprintf('%0.2f', $data['Result']['thc']);
-		$data['Result']['cbd'] = sprintf('%0.2f', $data['Result']['cbd']);
-		$data['Result']['sum'] = sprintf('%0.2f', $data['Result']['sum']);
-
 		// $lm0 = new Lab_Metric($dbc_main);
 		// $metric_type_list = $lm0->getTypes();
 
@@ -78,18 +98,25 @@ class Pub extends \App\Controller\Base
 		// }
 
 		$coa_file = $LR->getCOAFile();
-		if (!empty($coa_file) && is_file($coa_file) && is_readable($coa_file)) {
+		if ( ! empty($coa_file) && is_file($coa_file) && is_readable($coa_file)) {
 			$data['Result']['coa_file'] = $coa_file;
+			$meta['Lab_Result']['coa_file'] = $coa_file;
 		}
 
-		$data['Sample'] = $meta['Sample'];
-		if (empty($data['Sample']['id'])) {
-			$data['Sample']['id'] = '- Not Found -';
-			$data['Sample']['id'] = $data['Result']['global_for_inventory_id']; // v0
-		}
+		// $data['Sample'] = $meta['Sample'];
+		// if (empty($data['Sample']['id'])) {
+		// 	$data['Sample']['id'] = '- Not Found -';
+		// 	$data['Sample']['id'] = $data['Result']['global_for_inventory_id']; // v0
+		// }
 
-		$chk = $dbc_main->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $data['License_Source']['id'] ]);
+		$chk = $dbc_main->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $data['License_Origin']['id'] ]);
 		$data['License_Source'] = [
+			'id' => $chk['id'],
+			'name' => $chk['name'],
+			'code' => $chk['code'],
+			'guid' => $chk['guid'],
+		];
+		$data['License_Origin'] = [
 			'id' => $chk['id'],
 			'name' => $chk['name'],
 			'code' => $chk['code'],
@@ -116,7 +143,15 @@ class Pub extends \App\Controller\Base
 			$output_data = [];
 
 			if ('wcia' == $_GET['f']) {
-				$output_data = require_once(APP_ROOT . '/view/pub/json.wcia.php');
+				switch ($data['@context']) {
+					case 'https://lab.openthc.com/v2022': // v0
+					case 'http://openthc.org/lab/2021': // v1
+						// __exit_text($meta);
+						$output_data = require_once(APP_ROOT . '/view/pub/json.wcia-2022-062.php');
+						break;
+					default:
+						$output_data = require_once(APP_ROOT . '/view/pub/json.wcia.php');
+				}
 			} else {
 				$output_data = $this->cleanData($data);
 			}
@@ -127,21 +162,49 @@ class Pub extends \App\Controller\Base
 
 		case 'application/pdf':
 
-			// If PDF is gone
-			// Redirect to the same page, HTML version
-			if ( ! empty($data['Result']['coa_file'])) {
+			switch ($data['@context']) {
+				case 'https://lab.openthc.com/v2022': // v0
+				case 'http://openthc.org/lab/2021': // v1
 
-				$coa_name = sprintf('COA-%s.pdf', $QAR['id']);
+					if ( ! empty($_GET['v']) && ('2022-065' == $_GET['v'])) {
+						// return $RES->write(
+						require_once(APP_ROOT . '/view/pub/pdf.php');
+						exit(0);
+					}
 
-				header(sprintf('content-disposition: inline; filename="%s"', $coa_name));
-				header('content-transfer-encoding: binary');
-				header('content-type: application/pdf');
+					if ( ! empty($meta['Lab_Result']['coa_file'])
+						&& is_file($meta['Lab_Result']['coa_file'])) {
 
-				readfile($data['Result']['coa_file']);
+						header(sprintf('content-disposition: inline; filename="%s-COA.pdf"', $meta['Lab_Result']['guid']));
+						header('content-transfer-encoding: binary');
+						header('content-type: application/pdf');
 
-				exit(0);
+						readfile($meta['Lab_Result']['coa_file']);
+
+						exit(0);
+
+					}
+
+					break;
+				default:
+					// $output_data = require_once(APP_ROOT . '/view/pub/json.wcia.php');
+					if ( ! empty($data['Result']['coa_file'])
+						&& is_file($data['Result']['coa_file'])) {
+
+						header(sprintf('content-disposition: inline; filename="%s-COA.pdf"', $data['Result']['guid']));
+						header('content-transfer-encoding: binary');
+						header('content-type: application/pdf');
+
+						readfile($data['Result']['coa_file']);
+
+						exit(0);
+
+					}
 
 			}
+
+			// If PDF is gone
+			// Redirect to the same page, HTML version
 
 			// If the PDF is not found we have to redirect
 			// And clear some parameters (or else it would loop)
@@ -176,7 +239,21 @@ class Pub extends \App\Controller\Base
 		$data['Page'] = array('title' => sprintf('Result :: %s', $LR['id']));
 		$data['License_Current'] = $_SESSION['License'];
 
-		return $RES->write( $this->render('pub.php', $data) );
+		if ('dump' == $_GET['_dump']) {
+			__exit_text($data);
+		}
+
+		switch ($data['@context']) {
+			case 'https://lab.openthc.com/v2022': // v0
+			case 'http://openthc.org/lab/2021': // v1
+				$meta['Site'] = $data['Site'];
+				$meta['Page'] = $data['Page'];
+				return $RES->write( $this->render('pub/html-2022-062.php', $meta) );
+				break;
+		}
+
+		// Legacy Default
+		return $RES->write( $this->render('pub/html.php', $data) );
 
 	}
 
@@ -212,6 +289,8 @@ class Pub extends \App\Controller\Base
 			'name' => $data['Variety']['name'],
 		];
 
+		$ret['Laboratory'] = [];
+
 		$ret['Sample'] = [
 			'id' => $data['Sample']['id'],
 			'guid' => $data['Sample']['guid'],
@@ -221,25 +300,41 @@ class Pub extends \App\Controller\Base
 
 		$ret['Result'] = [
 			'id' => $data['Result']['id'],
-			'metric_list' => [],
+			'metric_list' => $data['Lab_Result_Metric_list'],
 		];
 
-		if ( ! empty($data['metric_list'])) {
-			foreach ($data['metric_list'] as $m) {
+		if ( ! empty($ret['Result']['metric_list'])) {
+
+			$lrm_list = [];
+			$key_list = array_keys($ret['Result']['metric_list']);
+			foreach ($key_list as $key) {
+
+				$m = $ret['Result']['metric_list'][$key];
+
 				if (null === $m['qom']) {
 					continue;
 				}
-				$ret['Result']['metric_list'][ $m['id'] ] = [
+
+				$lrm_list[ $m['id'] ] = [
 					'id' => $m['id'],
 					'name' => $m['name'],
 					'type' => $m['type'],
+					'sort' => intval($m['sort']),
 					'qom' => $m['qom'],
 					'uom' => $m['uom'],
 				];
 			}
+
+			uasort($lrm_list, function($a, $b) {
+				return ($a['sort'] > $b['sort']);
+			});
+
+			// __exit_text($lrm_list);
+
+			$ret['Result']['metric_list'] = $lrm_list;
 		}
 
-		_ksort_r($ret);
+		// _ksort_r($ret);
 
 		return $ret;
 	}
@@ -278,6 +373,9 @@ class Pub extends \App\Controller\Base
 			case 'txt':
 				$ret = 'text/plain';
 				break;
+			case 'wcia.json':
+				$ret = 'application/json';
+				$_GET['f'] = 'wcia';
 		}
 
 		switch ($ret) {
