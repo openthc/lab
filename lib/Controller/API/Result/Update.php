@@ -1,6 +1,8 @@
 <?php
 /**
  * Update a Lab Result
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\API\Result;
@@ -72,7 +74,10 @@ class Update extends \OpenTHC\Controller\Base
 		$LR = new Lab_Result(null, [
 			'id' => $data['id'],
 		]);
-		$LR->importCOA($data['meta']['Result']['meta']['pdf_path']);
+
+		// Try LeafData way, then WCIA way
+		$coa_link = $data['meta']['Result']['meta']['pdf_path'] ?: $data['meta']['Result']['meta']['coa_link'];
+		$LR->importCOA($coa_link);
 
 		// @todo Update METRICs
 
