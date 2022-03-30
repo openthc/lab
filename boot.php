@@ -22,7 +22,7 @@
 
 define('APP_ROOT', __DIR__);
 define('APP_SALT', sha1('$PUT_YOUR_SECRET_VALUE_HERE'));
-define('APP_BUILD', '420.19.123');
+define('APP_BUILD', '420.22.088');
 
 openlog('openthc-lab', LOG_ODELAY|LOG_PID, LOG_LOCAL0);
 
@@ -94,6 +94,45 @@ function _nice_id($x0, $x1=null)
 
 	return $r;
 
+}
+
+
+/**
+ *
+ */
+function _draw_metric($lm)
+{
+	$uom = $lm['metric']['meta']['uom'] ?: $lm['metric']['uom'];
+
+?>
+	<div class="lab-metric-item">
+		<div class="input-group">
+			<div class="input-group-prepend">
+				<div class="input-group-text"><?= __h($lm['name']) ?></div>
+			</div>
+			<input
+				autocomplete="off"
+				class="form-control r lab-metric-qom"
+				data-auto-sum="1"
+				id="<?= sprintf('lab-metric-%s', $lm['id']) ?>"
+				name="<?= sprintf('lab-metric-%s', $lm['id']) ?>"
+				placeholder="<?= __h($lm['name']) ?>"
+				value="<?= $lm['metric']['qom'] ?>">
+			<select
+				class="form-control lab-metric-uom"
+				name="<?= sprintf('lab-metric-%s-uom', $lm['id']) ?>"
+				style="flex: 0 1 5em; width: 5em;"
+				tabindex="-1">
+			<?php
+			foreach (\App\UOM::$uom_list as $v => $n) {
+				$sel = ($v == $uom ? ' selected' : null);
+				printf('<option%s value="%s">%s</option>', $sel, $v, $n);
+			}
+			?>
+			</select>
+		</div>
+	</div>
+<?php
 }
 
 
