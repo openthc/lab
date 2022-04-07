@@ -65,7 +65,7 @@ SELECT lab_sample.*
 , product.name AS product_name
 , variety.name AS variety_name
 FROM lab_sample
-LEFT JOIN inventory ON lab_sample.lot_id = inventory.id::text
+LEFT JOIN inventory ON lab_sample.lot_id = inventory.id
 LEFT JOIN product ON inventory.product_id = product.id
 LEFT JOIN variety ON inventory.variety_id = variety.id
 SQL;

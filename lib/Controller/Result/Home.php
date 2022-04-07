@@ -62,13 +62,11 @@ SQL;
 		// Stuff my Company is linked to?
 		$sql = <<<SQL
 SELECT lab_result.*
-  , inventory.guid AS lab_sample_guid
---   , lab_sample.origin_lot_id
+  , lab_sample.id AS lab_sample_id
+  , lab_sample.name AS lab_sample_guid
 FROM lab_result
-JOIN inventory ON lab_result.inventory_id = inventory.id
---   LEFT JOIN lab_result_license ON lab_result.id = lab_result_license.lab_result_id
+JOIN lab_sample ON lab_result.lab_sample_id = lab_sample.id
 WHERE lab_result.license_id = :l0
---   OR lab_result_license.license_id = :l0
 ORDER BY created_at DESC, lab_result.id
 OFFSET $sql_offset
 LIMIT $sql_limit
@@ -85,6 +83,9 @@ SQL;
 		foreach ($res as $rec) {
 
 			$rec['meta'] = \json_decode($rec['meta'], true);
+			if ( empty($rec['lab_sample_guid'])) {
+				$rec['lab_sample_guid'] = sprintf('Sample: %s', $rec['lab_sample_id']);
+			}
 
 			// @todo this should be a FLAG on the Lab_Result object
 			// @todo the coa_file should be a property on the lab_result data-model
