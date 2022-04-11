@@ -24,7 +24,7 @@ class UOM
 	/**
 	 *
 	 */
-	function nice($k)
+	static function nice($k)
 	{
 		$r = self::$uom_list[$k];
 		if (empty($r)) {
