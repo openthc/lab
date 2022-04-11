@@ -139,7 +139,7 @@ SQL;
 	function getCOAFile()
 	{
 		if (empty($this->_data['id'])) {
-			throw new \Exception('Invalid Result [ALR#044]');
+			throw new \Exception('Invalid Result [ALR-044]');
 		}
 
 		$id = $this->_data['id'];
@@ -161,7 +161,7 @@ SQL;
 		$png_ouptut = preg_replace('/\.pdf$/', '.png', $pdf_output);
 
 		$dir_output = dirname($pdf_output);
-		if (!is_dir($dir_output)) {
+		if ( ! is_dir($dir_output)) {
 			mkdir($dir_output, 0755, true);
 		}
 
@@ -227,7 +227,7 @@ SQL;
 		// rename($pdf_middle, $pdf_output);
 
 		// Create PNG Preview
-		// convert WAL22.LR4VHY.pdf /opt/openthc/OUTPUT-WAL22.LR4VHY.png
+		// Capture Page 1 of DOCUMENT.pdf into DOCUMENT.png
 		$cmd = [];
 		$cmd[] = '/usr/bin/convert';
 		$cmd[] = escapeshellarg(sprintf('%s[0]', $pdf_output));

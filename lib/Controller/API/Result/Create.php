@@ -15,21 +15,21 @@ class Create extends \OpenTHC\Controller\Base
 		if (empty($data)) {
 			return $RES->withJSON([
 				'data' => null,
-				'meta' => [ 'detail' => 'Request Error [ARC#016]' ],
+				'meta' => [ 'detail' => 'Request Error [ARC-016]' ],
 			], 400);
 		}
 
 		if (empty($data['id'])) {
 			return $RES->withJSON([
 				'data' => null,
-				'meta' => [ 'detail' => 'Request Error [ARC#023]' ],
+				'meta' => [ 'detail' => 'Request Error [ARC-023]' ],
 			], 400);
 		}
 		if (empty($data['license_id'])) {
 			return $RES->withJSON([
 				'type' => '',
 				'data' => null,
-				'meta' => [ 'detail' => 'Request Error [ARC#029]' ],
+				'meta' => [ 'detail' => 'Request Error [ARC-029]' ],
 			], 400);
 		}
 
@@ -43,14 +43,14 @@ class Create extends \OpenTHC\Controller\Base
 			return $RES->withJSON([
 				'type' => 'https://api.openthc.org/e/409-duplicate-record',
 				'data' => null,
-				'meta' => [ 'detail' => 'Request Error [ARC#040]' ],
+				'meta' => [ 'detail' => 'Request Error [ARC-040]' ],
 			], 409);
 		}
 		if (!empty($chk['license_id']) && ($chk['license_id'] != $data['license_id'])) {
 			return $RES->withJSON([
 				'type' => 'https://api.openthc.org/e/409-license-not-matched',
 				'data' => null,
-				'meta' => [ 'detail' => 'Request Error [ARC#046]' ],
+				'meta' => [ 'detail' => 'Request Error [ARC-046]' ],
 			], 409);
 		}
 
