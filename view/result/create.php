@@ -17,9 +17,9 @@
 		<div class="col-md-6">
 			<div class="input-group mb-2">
 				<div class="input-group-text">
-					<a href="/sample/<?= $data['Sample']['id'] ?>">Sample:</a>
+					<a href="/sample/<?= $data['Lab_Sample']['id'] ?>">Sample:</a>
 				</div>
-				<input class="form-control" readonly value="<?= __h($data['Sample']['name']) ?>">
+				<input class="form-control" readonly value="<?= __h($data['Lab_Sample']['name']) ?>">
 			</div>
 		</div>
 		<div class="col-md-6">
@@ -119,7 +119,7 @@ foreach ($data['lab_metric_section_list'] as $lms) {
 ?>
 
 <div class="form-actions">
-	<input name="sample_id" type="hidden" value="<?= $data['Sample']['id'] ?>">
+	<input name="sample_id" type="hidden" value="<?= $data['Lab_Sample']['id'] ?>">
 	<button class="btn btn-outline-primary" name="a" value="lab-result-save"><i class="fas fa-save"></i> Save</button>
 	<button class="btn btn-outline-danger" name="a" value="lab-result-delete"><i class="fas fa-save"></i> Delete</button>
 </div>

@@ -37,7 +37,7 @@ class Create extends \App\Controller\Base
 
 		$meta = \json_decode($chk['meta'], true);
 
-		$data['Sample'] = $chk;
+		$data['Lab_Sample'] = $chk;
 		$data['License_Source'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :ls0', [ $chk['license_id_source'] ]);
 		$data['Lot'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i', [ ':i' => $chk['lot_id'] ]);
 		$data['Lot_Meta'] = json_decode($data['Lot']['meta'], true);

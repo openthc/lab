@@ -12,10 +12,10 @@ $wcia = [
 	'document_name' => 'WCIA Lab Result Schema',
 	'document_schema_version' => '1.0.0.0',
 	'sample' => [
-		'id' => $data['Sample']['id'],
+		'id' => $data['Lab_Sample']['id'],
 		'source_id' => $data['Lot']['id'],
 	],
-	'labresult_id' => $data['Result']['id'],
+	'labresult_id' => $data['Lab_Result']['id'],
 	'status' => 'pass',
 	// 'coa' => sprintf('https://%s/pub/%s/coa.pdf', $_SERVER['SERVER_NAME'], $lab_result['id']),
 	'metric_list' => [

@@ -32,8 +32,8 @@
 
 <div class="container mt-4">
 
-<h1>Result: <?= __h($data['Result']['id_nice']) ?></h1>
-<h2>Sample: <?= __h($data['Sample']['id_nice']) ?></h2>
+<h1>Result: <?= __h($data['Lab_Result']['id_nice']) ?></h1>
+<h2>Sample: <?= __h($data['Lab_Sample']['id_nice']) ?></h2>
 
 <?= $this->block('product-summary.php') ?>
 
@@ -42,8 +42,8 @@
 	<div class="mb-2">
 		<label>Share Link</label>
 		<div class="input-group">
-			<input class="form-control" readonly value="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.html">
-			<button class="btn btn-outline-secondary btn-clipcopy" data-clipboard-text="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.html" type="button"><i class="fas fa-clipboard"></i></button>
+			<input class="form-control" readonly value="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.html">
+			<button class="btn btn-outline-secondary btn-clipcopy" data-clipboard-text="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.html" type="button"><i class="fas fa-clipboard"></i></button>
 		</div>
 	</div>
 </div>
@@ -56,9 +56,9 @@
 		</label>
 		<div class="input-group">
 			<?php
-			if ($data['Result']['coa_file']) {
+			if ($data['Lab_Result']['coa_file']) {
 			?>
-				<a class="btn btn-block btn-outline-primary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.pdf" target="_blank"><i class="fas fa-print"></i> Print COA</a>
+				<a class="btn btn-block btn-outline-primary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.pdf" target="_blank"><i class="fas fa-print"></i> Print COA</a>
 			<?php
 			} else {
 				if ($data['mine']) {
@@ -66,7 +66,7 @@
 					<a
 						class="btn btn-block btn-outline-warning"
 						href="#"
-						x-href="https://<?= $data['Site']['hostname'] ?>/result/<?= $data['Result']['id'] ?>"
+						x-href="https://<?= $data['Site']['hostname'] ?>/result/<?= $data['Lab_Result']['id'] ?>"
 						data-bs-toggle="modal"
 						data-bs-target="#modal-coa-upload"
 						title="Upload the PDF COA Documents"><i class="fas fa-print"></i> Upload COA</a>
@@ -119,7 +119,7 @@
 <!-- <div class="form-actions">
 	<button class="btn btn-outline-primary" name="a" data-bs-toggle="modal" data-bs-target="#modal-result-email" type="button"><i class="far fa-envelope"></i> Email</button>
 	<button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal-scan-qr" type="button"><i class="fas fa-qrcode"></i> QR Code</button>
-	<a class="btn btn-outline-secondary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Result']['id'] ?>.json"> JSON</a>
+	<a class="btn btn-outline-secondary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.json"> JSON</a>
 </div> -->
 
 </div>
@@ -148,7 +148,7 @@ $(function() {
 			a: 'coa-upload-link',
 		};
 
-		$.post('/result/<?= $data['Result']['id'] ?>', arg)
+		$.post('/result/<?= $data['Lab_Result']['id'] ?>', arg)
 
 			.done(function(body, code) {
 
@@ -160,7 +160,7 @@ $(function() {
 				var url_mail = new URL('mailto:');
 				url_mail.search = new URLSearchParams({
 					subject: 'Upload Lab Results',
-					body: "Please upload the COA for <?= $data['Result']['id'] ?> to this page:\n\n  " + url_link.toString()
+					body: "Please upload the COA for <?= $data['Lab_Result']['id'] ?> to this page:\n\n  " + url_link.toString()
 				});
 
 				$('#coa-upload-link').val( url_link.toString() );

@@ -51,6 +51,10 @@ class View extends \App\Controller\Base
 		$ProductType = $dbc->fetchRow('SELECT * FROM product_type WHERE id = ?', [ $Product['product_type_id'] ]);
 		$Variety = $dbc->fetchRow('SELECT * FROM variety WHERE id = ?', [ $Lot['variety_id'] ]);
 
+		$Lab_Result_list = $dbc->fetchAll('SELECT * FROM lab_result WHERE lab_sample_id = :ls0', [
+			':ls0' => $Lab_Sample['id']
+		]);
+
 		$Lab_Sample_Meta = json_decode($Lab_Sample['meta'], true);
 
 		// Get Fresh Lot Data?
@@ -65,36 +69,27 @@ class View extends \App\Controller\Base
 		//$L_Lab = $res['result'];
 
 		// Find Owner License
-		$dbc_main = $this->_container->DBC_Main;
-		$L_Source = new \OpenTHC\License($dbc_main, $Lab_Sample['license_id_source']);
+		// $dbc_main = $this->_container->DBC_Main;
+		// $L_Source = new \OpenTHC\License($dbc_main, $Lab_Sample['license_id_source']);
+		$L_Source = [];
 
 		$data = $this->loadSiteData([
 			'Page' => array('title' => 'Sample :: View'),
-			// 'Lab_Sample' => $Lab_Sample->toArray(), // @deprecated
-			// 'Sample' => $Lab_Sample_Meta['Lot'], // @deprecated
-			'Sample' => $Lab_Sample->toArray(),
-			'Sample_Meta' => $Lab_Sample_Meta,
+			'Lab_Sample' => $Lab_Sample->toArray(),
+			'Lab_Sample_meta' => $Lab_Sample_Meta,
 			'Lot' => $Lot,
 			'Product' => $Product,
 			'ProductType' => $ProductType,
 			'Variety' => $Variety,
-			// 'Result' => $Lab_Sample_Meta['Result'],
-			'License_Source' => $L_Source->toArray(),
+			'Lab_Result_list' => $Lab_Result_list,
+			'License_Source' => $L_Source,
 		]);
-		$data['Sample']['id'] = $ARG['id'];
 
 		// Nicely Formatted ID
-		$data['Sample']['id_nice'] = _nice_id($data['Sample']['id'], $data['Sample']['guid']);
+		$data['Lab_Sample']['id_nice'] = _nice_id($data['Lab_Sample']['id'], $data['Lab_Sample']['guid']);
 		if (empty($data['Product']['uom'])) {
 			$data['Product']['uom'] = 'g';
 		}
-
-		// cause LeafData makes this one need MEDIACAL stuff, we fake-it in
-		if ('flower' == $data['Product']['intermediate_type']) {
-			$data['Sample']['medically_compliant'] = true;
-		}
-
-		// $data['lab_result_list'] = $dbc->fetchAll('SELECT id, name FROM lab_result WHERE lab_sample_id = :ls0', [ ':ls0' => $Lab_Sample['id'] ]);
 
 		return $RES->write( $this->render('sample/single.php', $data) );
 

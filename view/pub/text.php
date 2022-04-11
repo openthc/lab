@@ -12,8 +12,8 @@ unset($data['menu0']);
 
 ob_start();
 
-echo 'Lab Result: ' . $data['Result']['guid'] . "\n";
-echo 'Lab Sample: ' . $data['Sample']['guid'] . "\n";
+echo 'Lab Result: ' . $data['Lab_Result']['guid'] . "\n";
+echo 'Lab Sample: ' . $data['Lab_Sample']['guid'] . "\n";
 echo "\n";
 echo str_repeat('-', 72) . "\n";
 echo "Cannabinoids\n";
@@ -32,7 +32,7 @@ echo "\n";
 echo "\n";
 echo str_repeat('-', 72) . "\n";
 echo "Laboratory: {$data['Laboratory']['name']}\n";
-echo "Created: {$data['Result']['created_at']}\n";
+echo "Created: {$data['Lab_Result']['created_at']}\n";
 
 echo str_repeat('-', 72) . "\n";
 print_r($data);

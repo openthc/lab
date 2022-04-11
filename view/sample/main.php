@@ -30,6 +30,12 @@
 			<a class="btn btn-outline-secondary" href="?stat=*">All</a>
 		</div>
 	</div>
+	<div class="ms-2">
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['older']) ?>"><i class="fas fa-arrow-left"></i></a>
+			<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['newer']) ?>"><i class="fas fa-arrow-right"></i></a>
+		</div>
+	</div>
 <!--
 <div class="data-filter-info">
 	<button class="btn btn-sm btn-outline-secondary" type="button"><i class="fas fa-filter"></i></button> <em>Active</em>, <em>Untested</em>.
@@ -59,11 +65,13 @@
 <tbody>
 <?php
 foreach ($data['sample_list'] as $s) {
-	$s['id_nice'] = _nice_id($s['id'], $s['guid']);
+
+	// $s['id_nice'] = _nice_id($s['id'], $s['guid']);
+
 ?>
 	<tr>
 		<td>
-			<a href="/sample/<?= $s['id'] ?>"><?= $s['id_nice'] ?></a>
+			<a href="/sample/<?= $s['id'] ?>"><?= ($s['name'] ?: $s['id']) ?></a>
 		</td>
 		<td><?= __h($s['product_name']) ?></td>
 		<td><?= __h($s['variety_name']) ?></td>

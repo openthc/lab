@@ -87,7 +87,7 @@ class View extends \App\Controller\Base
 
 		// https://stackoverflow.com/a/8940515
 		$data['share_mail_link'] = http_build_query(array(
-			'subject' => sprintf('Lab Results %s', $data['Result']['global_id']),
+			'subject' => sprintf('Lab Result %s', $data['Lab_Result']['guid']),
 			'body' => sprintf("\n\nHere is the link: https://%s/pub/%s.html", $_SERVER['SERVER_NAME'], $data['Lab_Result']['id']),
 		), null, '&amp;', PHP_QUERY_RFC3986);
 
@@ -236,12 +236,12 @@ SQL;
 
 					var_dump($buf);
 
-					$out_file = sprintf('%s/webroot/output/COA-%s.pdf', APP_ROOT, $data['Result']['id']);
+					$out_file = sprintf('%s/webroot/output/COA-%s.pdf', APP_ROOT, $data['Lab_Result']['id']);
 					var_dump($out_file);
 
 					rename('/tmp/print.pdf', $out_file);
 
-					$ret = sprintf('/output/COA-%s.pdf', $data['Result']['id']);
+					$ret = sprintf('/output/COA-%s.pdf', $data['Lab_Result']['id']);
 					return $RES->withRedirect($ret, 303);
 
 				}
@@ -253,19 +253,19 @@ SQL;
 		case 'coa-download':
 		case 'download-coa':
 
-			if (empty($data['Result']['coa_file'])) {
+			if (empty($data['Lab_Result']['coa_file'])) {
 				_exit_html('<h1>COA File Not Found [CRV#186]</h1>', 404);
 			}
 
-			if (!is_file($data['Result']['coa_file'])) {
+			if (!is_file($data['Lab_Result']['coa_file'])) {
 				_exit_html('<h1>COA File Not Found [CRV#190]</h1>', 404);
 			}
 
-			if (filesize($data['Result']['coa_file']) < 512) {
+			if (filesize($data['Lab_Result']['coa_file']) < 512) {
 				_exit_html('<h1>COA File Not Found [CRV#194]</h1>', 404);
 			}
 
-			$data['Result']['coa_type'] = mime_content_type($data['Result']['coa_file']);
+			$data['Lab_Result']['coa_type'] = mime_content_type($data['Lab_Result']['coa_file']);
 
 			// // File Type
 			// switch ($data['Result']['coa_type']) {
@@ -279,11 +279,11 @@ SQL;
 			// 		_exit_html('<h1>COA File Type Not Supported [CRV#211]</h1>', 404);
 			// }
 
-			header(sprintf('content-disposition: inline; filename="COA-%s.pdf"', $data['Result']['id']));
+			header(sprintf('content-disposition: inline; filename="COA-%s.pdf"', $data['Lab_Result']['id']));
 			header('content-transfer-encoding: binary');
-			header(sprintf('content-type: %s', $data['Result']['coa_type']));
+			header(sprintf('content-type: %s', $data['Lab_Result']['coa_type']));
 
-			readfile($data['Result']['coa_file']);
+			readfile($data['Lab_Result']['coa_file']);
 
 			exit(0);
 
@@ -383,7 +383,7 @@ SQL;
 			_exit_html_fail('<h1>Not Implemented [CRV-387]', 501);
 
 			$S = new Sync($this->_container);
-			return $S->__invoke(null, $RES, array('id' => $data['Result']['id']));
+			return $S->__invoke(null, $RES, array('id' => $data['Lab_Result']['id']));
 
 			break;
 
@@ -392,7 +392,7 @@ SQL;
 			_exit_html_fail('<h1>Not Implemented [CRV-395]</h1>', 501);
 
 			// $cre = new \OpenTHC\CRE($_SESSION['pipe-token']);
-			// $res = $cre->qa()->delete($data['Result']['id']);
+			// $res = $cre->qa()->delete($data['Lab_Result']['id']);
 			// var_dump($res);
 			// exit;
 

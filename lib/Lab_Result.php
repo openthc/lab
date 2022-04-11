@@ -1,6 +1,8 @@
 <?php
 /**
- * QA Results
+ * Lab Result
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App;
@@ -9,44 +11,126 @@ class Lab_Result extends \OpenTHC\SQL\Record
 {
 	const FLAG_SYNC = 0x00100000;
 	const FLAG_MUTE = 0x04000000;
+	const FLAG_DEAD = 0x08000000;
 
 	protected $_table = 'lab_result';
 
-	public $_Result;
-
-	function __construct($dbc=null, $obj=null)
-	{
-		parent::__construct($dbc, $obj);
-
-		if (!empty($this->_data['meta'])) {
-			$this->_meta = json_decode($this->_data['meta'], true);
-			$this->_Result = $this->_meta['Result'];
-		}
-
-	}
-
 	/**
-	 * Get the Metrics
+	 * Get the Lab Result Metrics
 	 */
 	function getMetrics()
 	{
 		$sql = <<<SQL
 SELECT lab_result_metric.*
 , lab_metric.name AS lab_metric_name
+, lab_metric.type AS lab_metric_type
+, lab_metric.meta AS lab_metric_meta
 FROM lab_result_metric
 JOIN lab_metric ON lab_result_metric.lab_metric_id = lab_metric.id
 WHERE lab_result_metric.lab_result_id = :lr0
+ORDER BY lab_metric.type, lab_metric.sort, lab_metric.name
 SQL;
-
-		// $res = $this->_dbc->fetchAll('SELECT * FROM lab_metric');
-		// $res_
 
 		$arg = [
 			':lr0' => $this->_data['id']
 		];
 
 		$res = $this->_dbc->fetchAll($sql, $arg);
+
+		$ret = [];
+		foreach ($res as $rec) {
+			$ret[ $rec['lab_metric_id'] ] = $rec;
+		}
+
+		return $ret;
 	}
+
+	/**
+	 * Get All the Metrics in Groups
+	 */
+	function getMetrics_Grouped()
+	{
+
+		$ret_lab_metric_group = [];
+
+		// $metricTab
+		$lab_metric_section_list = $this->_dbc->fetchAll('SELECT * FROM lab_metric_type ORDER BY sort, stub');
+
+		// Spin Sections Up
+		foreach ($lab_metric_section_list as $lms) {
+
+			$lms['meta'] = json_decode($lms['meta'], true);
+			$lms['metric_list'] = [];
+
+			$ret_lab_metric_group[ $lms['id'] ] = $lms;
+		}
+
+		// Index the Lab Metric List
+		$lab_metric_list = [];
+		$res_lab_metric = $this->_dbc->fetchAll('SELECT * FROM lab_metric WHERE stat = 200 ORDER BY sort, type, name');
+		foreach ($res_lab_metric as $lm) {
+			$lm['meta'] = json_decode($lm['meta'], true);
+			$lab_metric_list[ $lm['id'] ] = $lm;
+		}
+
+		// Now Merge Results into Lab Metric List
+		$res_lab_result_metric = $this->_dbc->fetchAll('SELECT * FROM lab_result_metric WHERE lab_result_id = :lr0', [
+			':lr0' => $this->_data['id']
+		]);
+		foreach ($res_lab_result_metric as $lrm) {
+			$lab_metric_list[ $lrm['lab_metric_id'] ]['metric'] = $lrm;
+		}
+
+		// Merge Into the Groups
+		foreach ($lab_metric_list as $lm) {
+			$ret_lab_metric_group[ $lm['lab_metric_type_id'] ]['metric_list'][ $lm['id'] ] = $lm;
+		}
+
+		return $ret_lab_metric_group;
+
+	}
+
+	/**
+	 *
+	 */
+	function getMetricsOpenTHC($data)
+	{
+		$metric_field_data = file_get_contents(sprintf('%s/etc/lab-result.json', APP_ROOT));
+		$metric_field_data = json_decode($metric_field_data, true);
+
+		$data['metric_type_list'] = array_reduce($metric_field_data, function($prev, $item) {
+			$prev[ $item['type'] ] = $item['type'];
+			return $prev;
+		});
+		ksort($data['metric_type_list']);
+
+		$lrm = $data['Result']['meta'];
+
+		foreach ($metric_field_data as $i => $mf) {
+			$k = $mf['leafdata']['path'];
+			if ($lrm[$k] !== null) {
+				$mf['qom'] = $lrm[$k];
+				$data['MetricList'][ $mf['type'] ][ $mf['id'] ] = $mf;
+			}
+
+			$data['metric_list'][] = $mf;
+
+		}
+
+		// $data['MetricList']['General'][''] = [
+		// 	'name' => '',
+		// 	'qom'  => $lrm['medically_compliant_status']
+		// ];
+
+		// @todo Here we should evaluate LRM to find junk data
+		unset($data['Result']['meta']['for_inventory']);
+
+		// __exit_text($data);
+
+		return $data;
+
+	}
+
 
 	/**
 	 * Returns the COA File Path for this Lab Result
@@ -59,10 +143,6 @@ SQL;
 		}
 
 		$id = $this->_data['id'];
-
-		// if (!empty($coa_file) && is_file($coa_file) && is_readable($coa_file)) {
-		// 	return $coa_file;
-		// }
 
 		// One True Method
 		$coa_hash = implode('/', str_split(sprintf('%08x', crc32($id)), 2));
@@ -80,9 +160,9 @@ SQL;
 		$pdf_output = $this->getCOAFile();
 		$png_ouptut = preg_replace('/\.pdf$/', '.png', $pdf_output);
 
-		$coa_path = dirname($pdf_output);
-		if (!is_dir($coa_path)) {
-			mkdir($coa_path, 0755, true);
+		$dir_output = dirname($pdf_output);
+		if (!is_dir($dir_output)) {
+			mkdir($dir_output, 0755, true);
 		}
 
 		// Check Type
@@ -98,7 +178,7 @@ SQL;
 			throw new \Exception('COA File Type Not Supported [LLR-096]');
 		}
 
-		rename($coa_source, $pdf_output);
+		$x = rename($coa_source, $pdf_output);
 
 		// @todo Inspect the document
 
@@ -147,6 +227,7 @@ SQL;
 		// rename($pdf_middle, $pdf_output);
 
 		// Create PNG Preview
+		// convert WAL22.LR4VHY.pdf /opt/openthc/OUTPUT-WAL22.LR4VHY.png
 		$cmd = [];
 		$cmd[] = '/usr/bin/convert';
 		$cmd[] = escapeshellarg(sprintf('%s[0]', $pdf_output));
@@ -155,6 +236,8 @@ SQL;
 		$cmd[] = '2>&1';
 		$cmd = implode(' ', $cmd);
 		$buf = shell_exec($cmd);
+
+		// Now Thumbnail?
 
 		return true;
 
@@ -171,41 +254,66 @@ SQL;
 		}
 
 		$pdf_output = $this->getCOAFile();
-		$pdf_source = null;
+		$pdf_source = sprintf('%s/var/%s.pdf', APP_ROOT, _ulid());
 
 		if (is_string($coa_source)) {
 			$type = strtolower(substr($coa_source, 0, 4));
 			switch ($type) {
 				case '%pdf':
-					// PDF Bytes
-					$pdf_source = sprintf('%s/var/%s.pdf', APP_ROOT, _ulid());
-					file_put_contents($pdf_source, $raw);
-				break;
+					// Very likely PDF bytes
+					file_put_contents($pdf_source, $coa_source);
+					break;
 				case 'http':
 					// Fetch This
 					$req = __curl_init($coa_source);
 					$raw = curl_exec($req);
 					$inf = curl_getinfo($req);
-					if (200 == $inf['http_code']) {
-						$pdf_source = sprintf('%s/var/%s.pdf', APP_ROOT, _ulid());
-						file_put_contents($pdf_source, $raw);
+					if (200 != $inf['http_code']) {
+						return [
+							'code' => $inf['http_code'],
+							'data' => null,
+							'meta' => [ 'detail' => 'Invalid Response Code' ]
+						];
 					}
-				break;
+					if ('application/pdf' != $inf['content_type']) {
+						return [
+							'code' => 400,
+							'data' => null,
+							'meta' => [ 'detail' => sprintf('Invalid Content Type "%s"', $inf['content_type']) ]
+						];
+					}
+
+					file_put_contents($pdf_source, $raw);
+
+					break;
+
 				default:
 					// Ok, Likely a File String?
 					if (is_file($coa_source)) {
 						$pdf_source = $coa_source;
 					}
-				break;
+					break;
 			}
 		}
 
 		$dir = dirname($pdf_output);
-		if (!is_dir($dir)) {
+		if ( ! is_dir($dir)) {
 			mkdir($dir, 0755, true);
 		}
 
-		\App\PDF\Base::import($pdf_source, $pdf_output);
+		if ( ! rename($pdf_source, $pdf_output) ) {
+			return [
+				'code' => 400,
+				'data' => null,
+				'meta' => [ 'detail' => sprintf('Failed to Create "%s"', $pdf_output) ]
+			];
+		}
+
+		return [
+			'code' => 200,
+			'data' => $pdf_output,
+			'meta' => []
+		];
 
 	}
 

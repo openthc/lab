@@ -47,23 +47,23 @@ class Pub extends \App\Controller\Base
 			$data['Result'] = $data['Lab_Result'];
 			unset($data['Lab_Result']);
 		}
-		if (is_string($data['Result']['meta'])) {
-			$data['Result']['meta'] = json_decode($data['Result']['meta'], true);
+		if (is_string($data['Lab_Result']['meta'])) {
+			$data['Lab_Result']['meta'] = json_decode($data['Lab_Result']['meta'], true);
 		}
-		$data['Result']['id_nice'] = _nice_id($data['Result']['id'], $data['Result']['guid']);
-		$data['Result']['thc'] = sprintf('%0.2f', $data['Result']['thc']);
-		$data['Result']['cbd'] = sprintf('%0.2f', $data['Result']['cbd']);
-		$data['Result']['sum'] = sprintf('%0.2f', $data['Result']['sum']);
+		$data['Lab_Result']['id_nice'] = _nice_id($data['Lab_Result']['id'], $data['Lab_Result']['guid']);
+		$data['Lab_Result']['thc'] = sprintf('%0.2f', $data['Lab_Result']['thc']);
+		$data['Lab_Result']['cbd'] = sprintf('%0.2f', $data['Lab_Result']['cbd']);
+		$data['Lab_Result']['sum'] = sprintf('%0.2f', $data['Lab_Result']['sum']);
 
 		// Patch Sample
 		if (empty($data['Sample']) && !empty($data['Lab_Sample'])) {
 			$data['Sample'] = $data['Lab_Sample'];
 			unset($data['Lab_Sample']);
 		}
-		if (is_string($data['Sample']['meta'])) {
-			$data['Sample']['meta'] = json_decode($data['Sample']['meta'], true);
+		if (is_string($data['Lab_Sample']['meta'])) {
+			$data['Lab_Sample']['meta'] = json_decode($data['Lab_Sample']['meta'], true);
 		}
-		$data['Sample']['id_nice'] = _nice_id($data['Sample']['id'], $data['Sample']['guid']);
+		$data['Lab_Sample']['id_nice'] = _nice_id($data['Lab_Sample']['id'], $data['Lab_Sample']['guid']);
 
 		// Which Type v2015, v2018, v2021-WCIA
 		if (empty($data['Lab_Result_Metric_list'])) {
@@ -99,15 +99,8 @@ class Pub extends \App\Controller\Base
 
 		$coa_file = $LR->getCOAFile();
 		if ( ! empty($coa_file) && is_file($coa_file) && is_readable($coa_file)) {
-			$data['Result']['coa_file'] = $coa_file;
 			$meta['Lab_Result']['coa_file'] = $coa_file;
 		}
-
-		// $data['Sample'] = $meta['Sample'];
-		// if (empty($data['Sample']['id'])) {
-		// 	$data['Sample']['id'] = '- Not Found -';
-		// 	$data['Sample']['id'] = $data['Result']['global_for_inventory_id']; // v0
-		// }
 
 		$chk = $dbc_main->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $data['License_Origin']['id'] ]);
 		$data['License_Source'] = [
@@ -188,14 +181,14 @@ class Pub extends \App\Controller\Base
 					break;
 				default:
 					// $output_data = require_once(APP_ROOT . '/view/pub/json.wcia.php');
-					if ( ! empty($data['Result']['coa_file'])
-						&& is_file($data['Result']['coa_file'])) {
+					if ( ! empty($data['Lab_Result']['coa_file'])
+						&& is_file($data['Lab_Result']['coa_file'])) {
 
-						header(sprintf('content-disposition: inline; filename="%s-COA.pdf"', $data['Result']['guid']));
+						header(sprintf('content-disposition: inline; filename="%s-COA.pdf"', $data['Lab_Result']['guid']));
 						header('content-transfer-encoding: binary');
 						header('content-type: application/pdf');
 
-						readfile($data['Result']['coa_file']);
+						readfile($data['Lab_Result']['coa_file']);
 
 						exit(0);
 
@@ -270,8 +263,8 @@ class Pub extends \App\Controller\Base
 		$ret['License']['name'] = $data['License']['name'];
 
 		$ret['Lot'] = [
-			'id' => $data['Sample']['id'],
-			'guid' => $data['Sample']['guid'],
+			'id' => $data['Lab_Sample']['id'],
+			'guid' => $data['Lab_Sample']['guid'],
 		];
 		$ret['Product'] = [
 			'id' => $data['Product']['id'],
@@ -291,25 +284,25 @@ class Pub extends \App\Controller\Base
 
 		$ret['Laboratory'] = [];
 
-		$ret['Sample'] = [
-			'id' => $data['Sample']['id'],
-			'guid' => $data['Sample']['guid'],
-			'name' => $data['Sample']['name'],
-			'qty' => $data['Sample']['qty'],
+		$ret['Lab_Sample'] = [
+			'id' => $data['Lab_Sample']['id'],
+			'guid' => $data['Lab_Sample']['guid'],
+			'name' => $data['Lab_Sample']['name'],
+			'qty' => $data['Lab_Sample']['qty'],
 		];
 
-		$ret['Result'] = [
-			'id' => $data['Result']['id'],
+		$ret['Lab_Result'] = [
+			'id' => $data['Lab_Result']['id'],
 			'metric_list' => $data['Lab_Result_Metric_list'],
 		];
 
-		if ( ! empty($ret['Result']['metric_list'])) {
+		if ( ! empty($ret['Lab_Result']['metric_list'])) {
 
 			$lrm_list = [];
-			$key_list = array_keys($ret['Result']['metric_list']);
+			$key_list = array_keys($ret['Lab_Result']['metric_list']);
 			foreach ($key_list as $key) {
 
-				$m = $ret['Result']['metric_list'][$key];
+				$m = $ret['Lab_Result']['metric_list'][$key];
 
 				if (null === $m['qom']) {
 					continue;
@@ -329,14 +322,11 @@ class Pub extends \App\Controller\Base
 				return ($a['sort'] > $b['sort']);
 			});
 
-			// __exit_text($lrm_list);
-
-			$ret['Result']['metric_list'] = $lrm_list;
+			$ret['Lab_Result']['metric_list'] = $lrm_list;
 		}
 
-		// _ksort_r($ret);
-
 		return $ret;
+
 	}
 
 	protected function _get_type_want($ARG)
