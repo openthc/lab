@@ -52,7 +52,7 @@ pre.color-invert {
 		<div class="input-group-prepend">
 			<div class="input-group-text" style="width: 6em;">Format:</div>
 		</div>
-		<input class="form-control" id="lab-sample-seq-format" name="lab-sample-seq-format" value="{{ seq_format }}">
+		<input class="form-control" id="lab-sample-seq-format" name="lab-sample-seq-format" value="<?= __h($data['seq_format']) ?>">
 		<div class="input-group-append">
 			<button class="btn btn-outline-warning" name="a" type="submit" value="update-seq-format"><i class="fas fa-save"></i></button>
 		</div>
@@ -86,34 +86,43 @@ pre.color-invert {
 	<div class="mb-2">
 		<?= _input_group("seq-g-min"
 			, $data['seq']['g']
-			, "Global"
-			, "<button class=\"btn btn-outline-warning\" name=\"a\" type=\"submit\" value=\"reset-seq-g\"><i class=\"fas fa-sync\"></i></button>"
+			, 'Global'
+			, '<button class="btn btn-outline-warning" name="a" type="submit" value="reset-seq-g"><i class="fas fa-sync"></i></button>'
 		) ?>
 	</div>
 
 	<div class="mb-2">
 		<?= _input_group("seq-y-min"
 			, $data['seq']['y']
-			, "Yearly:"
-			, "<button class=\"btn btn-outline-warning\" name=\"a\" type=\"submit\" value=\"reset-seq-y\"><i class=\"fas fa-sync\"></i></button>"
+			, 'Yearly:'
+			, '<button class="btn btn-outline-warning" name="a" type="submit" value="reset-seq-y"><i class="fas fa-sync"></i></button>'
 		) ?>
 	</div>
 
 	<div class="mb-2">
 		<?= _input_group("seq-q-min"
 			, $data['seq']['q']
-			, "Quarterly:"
-			, "<button class=\"btn btn-outline-warning\" name=\"a\" type=\"submit\" value=\"reset-seq-q\"><i class=\"fas fa-sync\"></i></button>"
+			, 'Quarterly:'
+			, '<button class="btn btn-outline-warning" name="a" type="submit" value="reset-seq-q"><i class="fas fa-sync"></i></button>'
 		) ?>
 	</div>
 
 	<div class="mb-2">
 		<?= _input_group("seq-m-min"
 			, $data['seq']['m']
-			, "Monthly:"
-			, "<button class=\"btn btn-outline-warning\" name=\"a\" type=\"submit\" value=\"reset-seq-m\"><i class=\"fas fa-sync\"></i></button>"
+			, 'Monthly:'
+			, '<button class="btn btn-outline-warning" name="a" type="submit" value="reset-seq-m"><i class="fas fa-sync"></i></button>'
 		) ?>
 	</div>
+
+	<div class="mb-2">
+		<?= _input_group("seq-d-min"
+			, $data['seq']['d']
+			, 'Daily:'
+			, '<button class="btn btn-outline-warning" name="a" type="submit" value="reset-seq-d"><i class="fas fa-sync"></i></button>'
+		) ?>
+	</div>
+
 	</form>
 
 </div>
