@@ -43,9 +43,9 @@ class Pub extends \App\Controller\Base
 		$data = array_merge($data, $meta);
 
 		// Patch Result
-		if (empty($data['Result']) && !empty($data['Lab_Result'])) {
-			$data['Result'] = $data['Lab_Result'];
-			unset($data['Lab_Result']);
+		if (empty($data['Lab_Result']) && !empty($data['Result'])) {
+			$data['Lab_Result'] = $data['Result'];
+			unset($data['Result']);
 		}
 		if (is_string($data['Lab_Result']['meta'])) {
 			$data['Lab_Result']['meta'] = json_decode($data['Lab_Result']['meta'], true);
@@ -56,9 +56,9 @@ class Pub extends \App\Controller\Base
 		$data['Lab_Result']['sum'] = sprintf('%0.2f', $data['Lab_Result']['sum']);
 
 		// Patch Sample
-		if (empty($data['Sample']) && !empty($data['Lab_Sample'])) {
-			$data['Sample'] = $data['Lab_Sample'];
-			unset($data['Lab_Sample']);
+		if (empty($data['Lab_Sample']) && !empty($data['Sample'])) {
+			$data['Lab_Sample'] = $data['Sample'];
+			unset($data['Sample']);
 		}
 		if (is_string($data['Lab_Sample']['meta'])) {
 			$data['Lab_Sample']['meta'] = json_decode($data['Lab_Sample']['meta'], true);
