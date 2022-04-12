@@ -22,14 +22,14 @@ class View extends \App\Controller\Base
 	{
 		$id = $ARG['id'];
 		if (empty($id)) {
-			_exit_text('Invalid Request [CRV-020]', 400);
+			_exit_html_fail('<h1>Invalid Request [CRV-020]</h1>', 400);
 		}
 
 		$dbc = $this->_container->DBC_User;
 
 		$Lab_Result = new Lab_Result($dbc, $id);
 		if (empty($Lab_Result['id'])) {
-			_exit_text('WSHERE is RESULT');
+			_exit_html_fail('<h1>Lab Result Not Found [CRV-032]</h1>', 400);
 		}
 
 		$Lab_Sample = new Lab_Sample($dbc, $Lab_Result['lab_sample_id']);

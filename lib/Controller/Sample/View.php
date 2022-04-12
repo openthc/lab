@@ -18,14 +18,14 @@ class View extends \App\Controller\Base
 	function __invoke($REQ, $RES, $ARG)
 	{
 		if (empty($ARG['id'])) {
-			_exit_text('Invalid Request', 400);
+			__exit_text('Invalid Request', 400);
 		}
 
 		$dbc = $this->_container->DBC_User;
 
 		$Lab_Sample = new \App\Lab_Sample($dbc, $ARG['id']);
 		if (empty($Lab_Sample['id'])) {
-			_exit_text('Invalid Lab Sample [CSV-026]', 400);
+			__exit_text('Invalid Lab Sample [CSV-026]', 400);
 		}
 
 		switch ($_POST['a']) {
@@ -77,11 +77,11 @@ class View extends \App\Controller\Base
 			'Page' => array('title' => 'Sample :: View'),
 			'Lab_Sample' => $Lab_Sample->toArray(),
 			'Lab_Sample_meta' => $Lab_Sample_Meta,
+			'Lab_Result_list' => $Lab_Result_list,
 			'Lot' => $Lot,
 			'Product' => $Product,
 			'ProductType' => $ProductType,
 			'Variety' => $Variety,
-			'Lab_Result_list' => $Lab_Result_list,
 			'License_Source' => $L_Source,
 		]);
 
@@ -95,6 +95,9 @@ class View extends \App\Controller\Base
 
 	}
 
+	/**
+	 *
+	 */
 	function _accept($RES, $Lab_Sample)
 	{
 		$dbc = $this->_container->DBC_User;
@@ -132,7 +135,7 @@ class View extends \App\Controller\Base
 						$fmt = sprintf('%%0%dd', $len);
 					}
 
-					$seq_mode = preg_match('/_(G|Y|Q|M)/', $seq, $m) ? $m[1] : 'G';
+					$seq_mode = preg_match('/_(G|Y|Q|M|D)/', $seq, $m) ? $m[1] : 'G';
 
 					$seq_name = sprintf('seq_%s_%s', $_SESSION['Company']['id'], $seq_mode);
 					$seq_name = strtolower($seq_name);
@@ -157,6 +160,9 @@ class View extends \App\Controller\Base
 
 	}
 
+	/**
+	 *
+	 */
 	function _finishSample($RES, $ARG)
 	{
 		$dbc = $this->_container->DBC_User;
@@ -178,6 +184,9 @@ class View extends \App\Controller\Base
 		return $RES->withRedirect('/sample');
 	}
 
+	/**
+	 *
+	 */
 	function _dropSample($RES, $ARG)
 	{
 		\session_write_close();
@@ -200,9 +209,15 @@ class View extends \App\Controller\Base
 		);
 		$res = $dbc_user->query($sql, $arg);
 
+		// $sql = 'DELETE FROM lab_sample WHERE id = :pk';
+		// $res = $dbc_user->query($sql, [ ':pk' => $ARG['id'] ]);
+
 		return $RES->withRedirect('/sample');
 	}
 
+	/**
+	 *
+	 */
 	function _saveSample($RES, $Lab_Sample)
 	{
 		$dbc = $this->_container->DBC_User;
@@ -266,6 +281,9 @@ class View extends \App\Controller\Base
 		return $RES->withRedirect('/sample');
 	}
 
+	/**
+	 *
+	 */
 	function _voidSample($RES, $ARG)
 	{
 		$dbc = $this->_container->DBC_User;
