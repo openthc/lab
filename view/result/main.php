@@ -65,7 +65,7 @@ foreach ($data['result_list'] as $s) {
 ?>
 	<tr>
 		<td><a href="/result/<?= $s['id'] ?>"><?= $s['id_nice'] ?></a></td>
-		<td><a href="/sample/<?= $s['lab_sample_guid'] ?>"><?= $s['lab_sample_guid'] ?></a></td>
+		<td><a href="/sample/<?= $s['lab_sample_id'] ?>"><?= $s['lab_sample_guid'] ?></a></td>
 		<td><?= $s['created_at'] ?></td>
 		<td><?= $s['type_nice'] ?></td>
 		<td><?= $s['medically_compliant'] ? "Medical" : '' ?></td>

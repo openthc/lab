@@ -1,6 +1,8 @@
 <?php
 /**
- * Lab Sample Inventory Item
+ * Lab Sample
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App;

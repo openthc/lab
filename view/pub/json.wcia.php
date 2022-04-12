@@ -17,7 +17,7 @@ $wcia = [
 	],
 	'labresult_id' => $data['Lab_Result']['id'],
 	'status' => 'pass',
-	// 'coa' => sprintf('https://%s/pub/%s/coa.pdf', $_SERVER['SERVER_NAME'], $lab_result['id']),
+	'coa' => sprintf('https://%s/pub/%s/coa.pdf', $_SERVER['SERVER_NAME'], $data['Lab_Result']['id']),
 	'metric_list' => [
 		'Cannabinoids' => [
 			'test_id' => 'Cannabinoids',
