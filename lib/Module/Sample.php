@@ -9,7 +9,7 @@ class Sample extends \OpenTHC\Module\Base
 {
 	function __invoke($a)
 	{
-		$a->get('', 'App\Controller\Sample\Home');
+		$a->get('', 'App\Controller\Sample\Main');
 
 		$a->map(['GET','POST'], '/create', 'App\Controller\Sample\Create');
 

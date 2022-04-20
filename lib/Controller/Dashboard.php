@@ -1,6 +1,6 @@
 <?php
 /**
- * Home Controller
+ * Dashboard Controller
  *
  * This file is part of OpenTHC Laboratory Portal
  *

@@ -7,7 +7,7 @@
 
 namespace App\Controller\Result;
 
-class Home extends \App\Controller\Base
+class Main extends \App\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{

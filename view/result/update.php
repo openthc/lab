@@ -123,6 +123,17 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) {
 }
 ?>
 
+
+<div class="mb-2">
+	<div class="input-group">
+		<div class="input-group-prepend">
+			<div class="input-group-text">COA File:</div>
+		</div>
+		<input class="form-control" name="file" type="file">
+	</div>
+</div>
+
+
 <div class="form-actions">
 	<input name="sample_id" type="hidden" value="<?= $data['Lab_Sample']['id'] ?>">
 	<button class="btn btn-outline-primary" name="a" value="lab-result-save"><i class="fas fa-save"></i> Save</button>

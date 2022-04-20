@@ -11,7 +11,7 @@ use Edoceo\Radix\DB\SQL;
 
 use App\Lab_Sample;
 
-class Home extends \App\Controller\Base
+class Main extends \App\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{
@@ -62,8 +62,8 @@ SQL;
 
 		$sql_select = <<<SQL
 SELECT lab_sample.*
-, product.name AS product_name
-, variety.name AS variety_name
+  , product.name AS product_name
+  , variety.name AS variety_name
 FROM lab_sample
 LEFT JOIN inventory ON lab_sample.lot_id = inventory.id
 LEFT JOIN product ON inventory.product_id = product.id
@@ -104,6 +104,8 @@ SQL;
 		$Pager = new \App\UI\Pager($c, 100, $_GET['p']);
 
 		$data['page_list_html'] = $Pager->getHTML();
+		$data['page_older'] = max(1, intval($_GET['p']) - 1);
+		$data['page_newer'] = intval($_GET['p']) + 1;
 
 		return $RES->write( $this->render('sample/main.php', $data) );
 	}
