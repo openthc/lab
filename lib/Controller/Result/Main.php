@@ -95,8 +95,6 @@ SQL;
 			// Try to Read first from META -- our preferred data
 			$rec['created_at'] = _date('m/d/y', $rec['created_at']);
 			$rec['sum'] = $rec['meta']['sum'] ?: '-';
-			$rec['testing_status'] = $rec['meta']['testing_status'];
-			$rec['status'] = $rec['meta']['status'];
 
 			$t = array();
 			$x = $rec['meta']['batch_type'];
@@ -119,32 +117,37 @@ SQL;
 			$stat = array();
 			if (!empty($rec['coa_file'])) {
 				if (is_file($rec['coa_file'])) {
-					$stat[] = ' <i class="far fa-file-pdf"></i>';
+					$stat[] = ' <i class="far fa-file-pdf text-success"></i>';
 				} else {
-					$stat[] = ' <i class="far fa-file-pdf text-danger"></i>';
+					$stat[] = ' <i class="fas fa-file-pdf text-danger"></i>';
 				}
 			}
 
-			$x = sprintf('%s/%s', $rec['testing_status'], $rec['status']);
+			$x = $rec['stat'];
 			switch ($x) {
+			case -1:
+			case 400:
 			case '/failed':
 			case 'completed/failed':
-				$stat[] = '<i class="fas fa-check-square" style="color: var(--red);"></i>';
+				$stat[] = '<i class="fas fa-check-square" style="color: var(--bs-red);"></i>';
 				break;
+			case 1:
+			case 200:
 			case 'completed/passed':
-				$stat[] = '<i class="fas fa-check-square" style="color: var(--green);"></i>';
+				$stat[] = '<i class="far fa-check-square" style="color: var(--bs-green);"></i>';
 				break;
+			case 0:
 			case 'in_progress/failed':
-				$stat[] = '<i class="fas fa-clock" style="color: var(--gray);"></i>';
-				$stat[] = '<i class="fas fa-check-square" style="color: var(--red);"></i>';
+				$stat[] = '<i class="fas fa-clock" style="color: var(--bs-gray);"></i>';
+				$stat[] = '<i class="fas fa-check-square" style="color: var(--bs-red);"></i>';
 				break;
-			case 'in_progress/passed':
-				$stat[] = '<i class="fas fa-clock"></i> <i class="fas fa-check-square" style="color: var(--green);"></i>';
-				break;
-			case 'not_started/failed':
-				$stat[] = '<i class="fas fa-clock"></i>';
-				$stat[] = '<i class="fas fa-check-square" style="color: var(--red);"></i>';
-				break;
+			// case 'in_progress/passed':
+			// 	$stat[] = '<i class="fas fa-clock"></i> <i class="fas fa-check-square" style="color: var(--bs-green);"></i>';
+			// 	break;
+			// case 'not_started/failed':
+			// 	$stat[] = '<i class="fas fa-clock"></i>';
+			// 	$stat[] = '<i class="fas fa-check-square" style="color: var(--bs-red);"></i>';
+			// 	break;
 			default:
 				$stat[] = h($x);
 			}
