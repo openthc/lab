@@ -9,7 +9,7 @@
 
 <h1><a href="/result">Result</a> :: Update</h1>
 
-<form action="" autocomplete="off" method="post">
+<form action="" autocomplete="off" enctype="multipart/form-data" method="post">
 <div class="container">
 <section style="margin-bottom:1rem;">
 
@@ -56,9 +56,9 @@
 
 	<div class="row">
 
-		<h3><i class="far fa-comments"></i> Terp Notes:</h3>
+		<h3><i class="far fa-comments"></i> Note:</h3>
 		<div class="input-group">
-			<textarea class="form-control" id="lab-result-terp-note" name="terp-note"><?= __h($Lab_Result['note']) ?></textarea>
+			<textarea class="form-control" id="lab-result-terp-note" name="terp-note"><?= __h($data['Lab_Result']['note']) ?></textarea>
 			<button class="btn btn-outline-secondary btn-terp-note-auto" type="button"><i class="fas fa-magic"></i> Auto</button>
 		</div>
 
