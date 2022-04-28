@@ -43,10 +43,6 @@ class Pub extends \App\Controller\Base
 		$data = array_merge($data, $meta);
 
 		// Patch Result
-		if (empty($data['Lab_Result']) && !empty($data['Result'])) {
-			$data['Lab_Result'] = $data['Result'];
-			unset($data['Result']);
-		}
 		if (is_string($data['Lab_Result']['meta'])) {
 			$data['Lab_Result']['meta'] = json_decode($data['Lab_Result']['meta'], true);
 		}
@@ -56,10 +52,6 @@ class Pub extends \App\Controller\Base
 		$data['Lab_Result']['sum'] = sprintf('%0.2f', $data['Lab_Result']['sum']);
 
 		// Patch Sample
-		if (empty($data['Lab_Sample']) && !empty($data['Sample'])) {
-			$data['Lab_Sample'] = $data['Sample'];
-			unset($data['Sample']);
-		}
 		if (is_string($data['Lab_Sample']['meta'])) {
 			$data['Lab_Sample']['meta'] = json_decode($data['Lab_Sample']['meta'], true);
 		}
@@ -90,13 +82,7 @@ class Pub extends \App\Controller\Base
 			$data['mine'] = true;
 		}
 
-		// $lm0 = new Lab_Metric($dbc_main);
-		// $metric_type_list = $lm0->getTypes();
-
-		// if (empty($data['Lab_Result_Metric_list'])) {
-			// $data = $LR->getMetricsOpenTHC($data);
-		// }
-
+		// Load COA File
 		$coa_file = $LR->getCOAFile();
 		if ( ! empty($coa_file) && is_file($coa_file) && is_readable($coa_file)) {
 			$meta['Lab_Result']['coa_file'] = $coa_file;
@@ -137,9 +123,7 @@ class Pub extends \App\Controller\Base
 
 			if ('wcia' == $_GET['f']) {
 				switch ($data['@context']) {
-					case 'https://lab.openthc.com/v2022': // v0
-					case 'http://openthc.org/lab/2021': // v1
-						// __exit_text($meta);
+					case 'http://openthc.org/lab/2021':
 						$output_data = require_once(APP_ROOT . '/view/pub/json.wcia-2022-062.php');
 						break;
 					default:
@@ -156,8 +140,7 @@ class Pub extends \App\Controller\Base
 		case 'application/pdf':
 
 			switch ($data['@context']) {
-				case 'https://lab.openthc.com/v2022': // v0
-				case 'http://openthc.org/lab/2021': // v1
+				case 'http://openthc.org/lab/2021':
 
 					if ( ! empty($_GET['v']) && ('2022-065' == $_GET['v'])) {
 						// return $RES->write(
@@ -237,8 +220,7 @@ class Pub extends \App\Controller\Base
 		}
 
 		switch ($data['@context']) {
-			case 'https://lab.openthc.com/v2022': // v0
-			case 'http://openthc.org/lab/2021': // v1
+			case 'http://openthc.org/lab/2021':
 				$meta['Site'] = $data['Site'];
 				$meta['Page'] = $data['Page'];
 				return $RES->write( $this->render('pub/html-2022-062.php', $meta) );
