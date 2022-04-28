@@ -22,7 +22,9 @@ $opt = getopt('', [
 	'sample:',
 ]);
 if (empty($opt['object'])) {
-	$opt['object'] = 'license,contact,b2b,sample,result';
+	$opt['object'] = explode(',', 'license,contact,b2b,sample,result');
+} else {
+	$opt['object'] = explode(',', $opt['object']);
 }
 
 $_SESSION['Company'] = [
@@ -71,11 +73,21 @@ if (!empty($opt['sample'])) {
 }
 
 _qbench_pull_report($dbc, $qbc);
-_qbench_pull_license($dbc, $qbc);
-_qbench_pull_license_contact($dbc, $qbc);
-_qbench_pull_b2b($dbc, $qbc);
-_qbench_pull_sample($dbc, $qbc);
-_qbench_pull_result_data($dbc, $qbc); // Pull and put into files to iterate faster
+if (in_array('license', $opt['object'])) {
+	_qbench_pull_license($dbc, $qbc);
+}
+if (in_array('contact', $opt['object'])) {
+	_qbench_pull_contact($dbc, $qbc);
+}
+if (in_array('b2b', $opt['object'])) {
+	_qbench_pull_b2b($dbc, $qbc);
+}
+if (in_array('sample', $opt['object'])) {
+	_qbench_pull_sample($dbc, $qbc);
+}
+if (in_array('result', $opt['object'])) {
+	_qbench_pull_result($dbc, $qbc);
+}
 
 
 // Get the Tests (an actual Test)
@@ -155,9 +167,9 @@ function _qbench_pull_license($dbc, $qbc)
 }
 
 // Get Contact/License Data from QBench
-function _qbench_pull_license_contact($dbc, $qbc)
+function _qbench_pull_contact($dbc, $qbc)
 {
-	echo "_qbench_pull_license_contact()\n";
+	echo "_qbench_pull_contact()\n";
 
 	$idx = 1;
 	$max = $idx;
@@ -218,9 +230,9 @@ function _qbench_pull_license_contact($dbc, $qbc)
 /**
  *
  */
-function _qbench_pull_result_data($dbc, $qbc)
+function _qbench_pull_result($dbc, $qbc)
 {
-	echo "_qbench_pull_lab_result_data()\n";
+	echo "_qbench_pull_lab_result()\n";
 
 	$hit = 0;
 	$idx = 1;
