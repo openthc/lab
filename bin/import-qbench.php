@@ -21,6 +21,12 @@ $opt = getopt('', [
 	'object:',
 	'sample:',
 ]);
+if (empty($opt['company'])) {
+	echo "Say --company=COMPANY_D\n";
+}
+if (empty($opt['license'])) {
+	echo "Say --license=LICENSE_ID\n";
+}
 if (empty($opt['object'])) {
 	$opt['object'] = explode(',', 'license,contact,b2b,sample,result');
 } else {
@@ -125,9 +131,10 @@ function _qbench_pull_license($dbc, $qbc)
 		foreach ($res['data'] as $rec) {
 
 			$rec['_id'] = sprintf('qbench:%s', $rec['id']);
+			$rec['customer_name'] = trim($rec['customer_name']);
 
 			// guid1 and guid0 may be needed here
-			$lic0 = $dbc->fetchRow('SELECT id FROM license WHERE guid = :g0', [
+			$lic0 = $dbc->fetchRow('SELECT id, name FROM license WHERE guid = :g0', [
 				':g0' => $rec['_id']
 			]);
 
@@ -139,7 +146,7 @@ function _qbench_pull_license($dbc, $qbc)
 					'id' => _ulid()
 					, 'guid' => $rec['_id']
 					, 'code' => $rec['_id']
-					, 'name' => trim($rec['customer_name'])
+					, 'name' => $rec['customer_name']
 					// , 'address_full' => trim($rec['address'])
 					// , 'email' => trim($rec['email_address'])
 					// , 'phone' => trim($rec['phone'])
@@ -162,7 +169,7 @@ function _qbench_pull_license($dbc, $qbc)
 		// echo "\nwhile ($idx < $max); // {$res['total_count']} objects";
 		echo "\n";
 
-	} while ($idx < $max);
+	} while ($idx <= $max);
 
 }
 
@@ -222,7 +229,7 @@ function _qbench_pull_contact($dbc, $qbc)
 		// echo "\nwhile ($idx < $max); // {$res['total_count']} objects";
 		echo "\n";
 
-	} while ($idx < $max);
+	} while ($idx <= $max);
 
 }
 
@@ -259,7 +266,7 @@ function _qbench_pull_result($dbc, $qbc)
 
 		// echo "\rwhile ($idx < $max); // {$res['total_count']} objects";
 
-	} while ($idx < $max);
+	} while ($idx <= $max);
 
 }
 
@@ -268,15 +275,14 @@ function _qbench_pull_result($dbc, $qbc)
  */
 function _qbench_pull_result_import($dbc, $rec)
 {
-	if (empty($rec['worksheet_data'])) {
-		return(0);
-	}
-
 	$rec['_id'] = sprintf('qbench:%s', $rec['id']);
 	$rec['_lab_result_id'] = sprintf('qbench:%s', $rec['id']);
 	$rec['_lab_sample_id'] = sprintf('qbench:%s', $rec['sample_id']);
-	// __ksort_r($rec);
-	// print_r($rec);
+
+	if (empty($rec['worksheet_data'])) {
+		echo '-';
+		return(0);
+	}
 
 	// Lab Sample?
 	$ls0 = $dbc->fetchRow('SELECT id FROM lab_sample WHERE id = :g1', [
@@ -641,7 +647,7 @@ function _qbench_pull_sample($dbc, $qbc)
 
 		echo "\n";
 
-	} while (($idx < $max) && ($hit < 1000));
+	} while (($idx <= $max) && ($hit < 1000));
 
 }
 
@@ -723,7 +729,7 @@ function _qbench_pull_b2b($dbc, $qbc)
 
 		echo "\nwhile (($idx < $max) && ($hit < 100));";
 
-	} while (($idx < $max) && ($hit < 100));
+	} while (($idx <= $max) && ($hit < 100));
 
 }
 
