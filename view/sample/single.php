@@ -7,7 +7,7 @@
 
 ?>
 
-<form method="post">
+<form autocomplete="off" method="post">
 <div class="container">
 
 <h1>
@@ -71,7 +71,7 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 	</div>
 	<div class="col-md-6">
 		<div class="mb-2">
-			<label>Variety / Strain:</label>
+			<label>Variety:</label>
 			<div class="input-group">
 				<input class="form-control variety-autocomplete" name="variety-name" value="<?= __h($data['Variety']['name']) ?>">
 				<input class="" name="variety-id" type="hidden" value="<?= $data['Variety']['id'] ?>">

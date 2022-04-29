@@ -18,14 +18,14 @@ class View extends \App\Controller\Base
 	function __invoke($REQ, $RES, $ARG)
 	{
 		if (empty($ARG['id'])) {
-			__exit_text('Invalid Request', 400);
+			_exit_html_fail('Invalid Request', 400);
 		}
 
 		$dbc = $this->_container->DBC_User;
 
 		$Lab_Sample = new \App\Lab_Sample($dbc, $ARG['id']);
 		if (empty($Lab_Sample['id'])) {
-			__exit_text('Invalid Lab Sample [CSV-026]', 400);
+			_exit_html_fail('Invalid Lab Sample [CSV-026]', 400);
 		}
 
 		switch ($_POST['a']) {
