@@ -7,6 +7,7 @@
 
 ?>
 
+<div class="container">
 <div class="d-flex flex-row flex-wrap justify-content-between mt-2">
 
 	<div>
@@ -181,6 +182,8 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 </div>
 </form>
 -->
+
+</div>
 
 <?= $this->block('modal-coa-upload.php') ?>
 <?= $this->block('modal-send-email.php') ?>
