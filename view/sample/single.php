@@ -42,7 +42,7 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 	<div class="col-md-6">
 		<div class="mb-2">
 			<label>Source Lot Identifier:</label>
-			<input class="form-control" name="lot-id-source" value="<?= $data['Lot']['guid'] ?>">
+			<input class="form-control" name="source-lot-guid" value="<?= $data['Lot']['guid'] ?>">
 		</div>
 	</div>
 	<div class="col-md-6">

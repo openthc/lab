@@ -29,15 +29,6 @@ if (empty($data['Lab_Sample']['name'])) {
 
 	<div class="mb-2">
 		<div class="input-group">
-			<div class="input-group-text">Origin Lot:</div>
-			<input autofocus name="inventory_guid" class="form-control license-autocomplete" value="<?= __h($data['Source_Lot']['guid']) ?>">
-			<input id="inventory-id" name="inventory-id" type="hidden" value="<?= __h($data['Source_Lot']['id']) ?>">
-			<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
-		</div>
-	</div>
-
-	<div class="mb-2">
-		<div class="input-group">
 			<div class="input-group-text">Origin License:</div>
 			<input autofocus name="license_origin" class="form-control license-autocomplete" value="<?= __h($data['Source_License']['name']) ?>">
 			<input class="autocomplete-data-id" id="license-id" name="license-id" type="hidden" value="<?= __h($data['Source_License']['id']) ?>">
@@ -48,7 +39,8 @@ if (empty($data['Lab_Sample']['name'])) {
 	<div class="mb-2">
 		<div class="input-group">
 			<div class="input-group-text">Origin Identifier:</div>
-			<input name="lot-id-source" class="form-control" value="<?= __h($data['Source_Lot']['guid']) ?>">
+			<input name="source-lot-guid" class="form-control" value="<?= __h($data['Source_Lot']['guid']) ?>">
+			<input name="source-lot-id" type="hidden" value="<?= __h($data['Source_Lot']['id']) ?>">
 		</div>
 	</div>
 

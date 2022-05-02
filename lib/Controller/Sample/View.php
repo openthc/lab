@@ -31,19 +31,20 @@ class View extends \App\Controller\Base
 		switch ($_POST['a']) {
 			case 'done':
 				return $this->_finishSample($RES, $ARG, $Lab_Sample);
-			break;
+				break;
 			case 'drop':
 				// need to return the $RES object from these methods to do anything
 				return $this->_dropSample($RES, $ARG, $Lab_Sample);
-			break;
+				break;
 			case 'accept-sample':
 				return $this->_accept($RES, $Lab_Sample);
+				break;
 			case 'save':
 				return $this->_saveSample($RES, $Lab_Sample);
-			break;
+				break;
 			case 'void':
 				return $this->_voidSample($RES, $ARG, $Lab_Sample);
-			break;
+				break;
 		}
 
 		$Lot = $dbc->fetchRow('SELECT * FROM inventory WHERE id = ?', [ $Lab_Sample['lot_id'] ]);
@@ -266,13 +267,13 @@ class View extends \App\Controller\Base
 			}
 		}
 
-		if (!empty($_POST['sample-qty'])) {
+		if ( ! empty($_POST['sample-qty'])) {
 			$Lab_Sample['qty'] = floatval($_POST['sample-qty']);
 		}
 
-		if (!empty($_POST['lot-id-source'])) {
+		if ( ! empty($_POST['source-lot-id'])) {
 			$m = json_decode($Lab_Sample['meta'], true);
-			$m['Lot_Source']['id'] = $_POST['lot-id-source'];
+			$m['Lot_Source']['id'] = $_POST['source-lot-id'];
 			$Lab_Sample['meta'] = json_encode($m);
 		}
 

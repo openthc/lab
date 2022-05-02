@@ -52,7 +52,7 @@ class Create extends \App\Controller\Base
 				$ls = new \App\Lab_Sample($dbc);
 				$ls['id'] = _ulid();
 				$ls['name'] = $_POST['sample-name'];
-				$ls['lot_id'] = $_POST['inventory-id'];
+				$ls['lot_id'] = $_POST['source-lot-id'];
 				$ls['license_id'] = $_SESSION['License']['id'];
 				$ls['license_id_source'] = $_POST['license-id'];
 				$ls['qty'] = floatval($_POST['qty']);
