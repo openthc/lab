@@ -67,11 +67,6 @@ class Create extends \OpenTHC\Controller\Base
 			'meta' => json_encode($data['meta'])
 		]);
 
-		$LR = new Lab_Result(null, [
-			'id' => $data['id'],
-		]);
-		$LR->importCOA($data['meta']['Result']['meta']['pdf_path']);
-
 		return $RES->withJSON([
 			'data' => $rec,
 			'meta' => [ 'detail' => 'Success' ]
