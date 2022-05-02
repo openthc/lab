@@ -59,15 +59,15 @@ foreach ($this->data['metric_list'] as $m) {
 	if ($m['type'] != $type_x) {
 	?>
 		<tr class="thead-dark">
-			<th colspan="9"><h3><?= h($m['type']) ?></h3></th>
+			<th colspan="6"><h3><?= h($m['type']) ?></h3></th>
 		</tr>
 		<tr class="thead-dark">
 			<th>Name</th>
 			<th>UOM</th>
 			<th>LOD</th>
-			<th>LOQ</th>
-			<th>Max</th>
-			<th colspan="3">Products</th>
+			<th>LOQ-LB</th>
+			<th>LOQ-UB</th>
+			<!-- <th colspan="3">Products</th> -->
 			<th></th>
 		</tr>
 	<?php
@@ -77,8 +77,8 @@ foreach ($this->data['metric_list'] as $m) {
 	<tr>
 		<td><?= h($m['name']) ?></td>
 		<?php
-		if ( ! empty($m['goto'])) {
-			printf('<td colspan="6">goto: %s</td>', $m['goto']);
+		if (308 == $m['stat']) {
+			printf('<td colspan="4">%s</td>', $m['meta']['goto']);
 		} else {
 		?>
 		<td>
@@ -96,24 +96,24 @@ foreach ($this->data['metric_list'] as $m) {
 		<td class="r">
 			<input class="form-control form-control-sm r" name="<?= sprintf('max-%s', $m['id']) ?>" value="<?= h($m['meta']['max']) ?>">
 		</td>
-		<td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_FLOWER) ? 'checked' : null ?> checked disabled name="<?= sprintf('bud-%s', $m['id']) ?>" type="checkbox"> Flower</label></td>
-		<td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_EDIBLE) ? 'checked' : null ?> checked disabled name="<?= sprintf('edi-%s', $m['id']) ?>" type="checkbox"> Edible</label></td>
-		<td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_EXTRACT) ? 'checked' : null ?> checked disabled name="<?= sprintf('ext-%s', $m['id']) ?>"  type="checkbox"> Extract</label></td>
+		<!-- <td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_FLOWER) ? 'checked' : null ?> checked disabled name="<?= sprintf('bud-%s', $m['id']) ?>" type="checkbox"> Flower</label></td> -->
+		<!-- <td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_EDIBLE) ? 'checked' : null ?> checked disabled name="<?= sprintf('edi-%s', $m['id']) ?>" type="checkbox"> Edible</label></td> -->
+		<!-- <td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_EXTRACT) ? 'checked' : null ?> checked disabled name="<?= sprintf('ext-%s', $m['id']) ?>"  type="checkbox"> Extract</label></td> -->
 		<?php
 		}
 		?>
-		<td>
+		<td class="r">
 			<div class="btn-group btn-group-sm">
 			<?php
 			switch ($m['stat']) {
 				case 200:
-					printf('<button class="btn btn-outline-success btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="hide"><i class="far fa-circle"></i></button>', $m['id']);
+					printf('<button class="btn btn-success btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="hide"><i class="far fa-circle"></i></button>', $m['id']);
 					break;
 				case 308:
-					echo '<button class="btn btn-outline-info disabled" disabled type="button"><i class="fas fa-link"></i></button>';
+					echo '<button class="btn btn-outline-secondary disabled" disabled type="button"><i class="fas fa-link"></i></button>';
 					break;
 				case 410:
-					printf('<button class="btn btn-outline-secondary btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="show"><i class="fas fa-ban"></i></button>', $m['id']);
+					printf('<button class="btn btn-secondary btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="show"><i class="fas fa-ban"></i></button>', $m['id']);
 					break;
 				default:
 					echo $m['stat'];

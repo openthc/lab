@@ -35,14 +35,14 @@ class Metric extends \App\Controller\Base
 						$dbc->query('UPDATE lab_metric SET stat = 410 WHERE id = :lm0', [
 							':lm0' => $_POST['lab_metric_id']
 						]);
-						$html = sprintf('<button class="btn btn-outline-secondary btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="show"><i class="fas fa-ban"></i></button>', $_POST['lab_metric_id']);
+						$html = sprintf('<button class="btn btn-secondary btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="show"><i class="fas fa-ban"></i></button>', $_POST['lab_metric_id']);
 						__exit_html($html);
 						break;
 					case 'show':
 						$dbc->query('UPDATE lab_metric SET stat = 200 WHERE id = :lm0', [
 							':lm0' => $_POST['lab_metric_id']
 						]);
-						$html = sprintf('<button class="btn btn-outline-success btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="hide"><i class="far fa-circle"></i></button>', $_POST['lab_metric_id']);
+						$html = sprintf('<button class="btn btn-success btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="hide"><i class="far fa-circle"></i></button>', $_POST['lab_metric_id']);
 						__exit_html($html);
 						break;
 				}
