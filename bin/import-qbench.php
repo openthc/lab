@@ -20,6 +20,7 @@ $opt = getopt('', [
 	'license:',
 	'object:',
 	'sample:',
+	'page:',
 ]);
 if (empty($opt['company'])) {
 	echo "Say --company=COMPANY_D\n";
@@ -31,6 +32,9 @@ if (empty($opt['object'])) {
 	$opt['object'] = explode(',', 'license,contact,b2b,sample,result');
 } else {
 	$opt['object'] = explode(',', $opt['object']);
+}
+if (empty($opt['page'])) {
+	$opt['page'] = 1;
 }
 
 $_SESSION['Company'] = [
@@ -385,8 +389,8 @@ function _qbench_pull_result_import($dbc, $rec)
 					// Sadly, these can be basically anything
 					// And are defined by each user of QBench
 					switch ($val) {
-						case 'DET': // @todo what is this?
-						case 'Det': // @todo what is this?
+						case 'DET': // Detected
+						case 'Det': // GT-LOD < LOQ-LB
 							$val = -130;
 							break;
 						case 'ND':
@@ -412,7 +416,9 @@ function _qbench_pull_result_import($dbc, $rec)
 							$val = 0;
 							break;
 						case '>20,000': // GT-LOQ
-							$val = 20000;
+						case '>20': // GT-LOQ
+						case '>1%':
+							$val = -416;
 							break;
 						default:
 							var_dump($metric_val);
