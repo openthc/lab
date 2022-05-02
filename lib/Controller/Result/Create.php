@@ -180,11 +180,13 @@ class Create extends \App\Controller\Base
 				case '018NY6XC00LM877GAKMFPK7BMC': // d8-thc
 				case '018NY6XC00LMB0JPRM2SF8F9F2': // thca
 					$thc_list[] = $lrm1['qom'];
+					$thc_uom = $m['uom'];
 					break;
 				case '018NY6XC00DEEZ41QBXR2E3T97': // total-cbd
 				case '018NY6XC00LMK7KHD3HPW0Y90N': // cbd
 				case '018NY6XC00LMENDHEH2Y32X903': // cbda
 					$cbd_list[] = $lrm1['qom'];
+					$cbd_uom = $m['uom'];
 					break;
 			}
 
@@ -199,6 +201,7 @@ class Create extends \App\Controller\Base
 		// $LS->delFlag();
 		// $LS->setFlag();
 		$LS['stat'] = Lab_Sample::STAT_DONE;
+		// $LS['qty'] = 0; // Configure to Zero-Out on Complete?
 		$LS->save('Lab_Sample/Update');
 		// $dbc->query('UPDATE lab_sample SET flag = flag & :f1, stat = :s1 WHERE id = :ls0', [
 		// 	':ls0' => $LS['id'],
@@ -216,17 +219,19 @@ class Create extends \App\Controller\Base
 		// $IL->setFlag();
 		// $IL->save();
 
-		// switch ($this->_data['uom']) {
-		// case 'pct':
-		// 	$I['qa_cbd'] = sprintf('%0.2F%%', $this->_data['cbd']);
-		// 	$I['qa_thc'] = sprintf('%0.2F%%', $this->_data['thc']);
-		// 	break;
-		// default:
-		// 	$I['qa_cbd'] = sprintf('%0.2F %s', $this->_data['cbd'], $this->_data['uom']);
-		// 	$I['qa_thc'] = sprintf('%0.2F %s', $this->_data['thc'], $this->_data['uom']);
-		// }
+		// $cbd_uom?
+		switch ($thc_uom) {
+		case 'pct':
+			$cbd = sprintf('%0.2F%%', $LR['cbd']);
+			$thc = sprintf('%0.2F%%', $LR['thc']);
+			break;
+		default:
+			$cbd = sprintf('%0.2F %s', $LR['cbd'], $cbd_uom);
+			$thc = sprintf('%0.2F %s', $LR['thc'], $thc_uom);
+		}
 
 		// Link
+		// @todo Column Rename from lot_id => inventory_id
 		$sql = 'INSERT INTO inventory_lab_result (inventory_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
 		$res = $dbc->query($sql, [
 			':i0' => $Sample['lot_id'],
