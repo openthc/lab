@@ -1,6 +1,8 @@
 <?php
 /**
  * Configure Sample Stuff
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace App\Controller\Config;
@@ -57,7 +59,7 @@ class Sample extends \App\Controller\Base
 		}
 
 
-		foreach ([ 'G','Y','Q','M'] as $c) { // $idx=0; $idx<4; $idx++) {
+		foreach ([ 'G','Y','Q','M','D'] as $c) { // $idx=0; $idx<4; $idx++) {
 			try {
 
 				$s = sprintf('seq_%s_%s', $_SESSION['Company']['id'], $c );
@@ -68,6 +70,7 @@ class Sample extends \App\Controller\Base
 				// $seq_data[$idx] = $dbc->fetchOne('SELECT currval(:s)', $arg);
 				// $seq_data[$idx] = $dbc->fetchOne('SELECT nextval(:s)', $arg);
 				$seq_data[$c] = $dbc->fetchOne(sprintf('SELECT last_value FROM "%s"', $s));
+
 			} catch (\Exception $e) {
 				// Ignore
 				// _exit_html($e->getMessage());
@@ -100,6 +103,7 @@ class Sample extends \App\Controller\Base
 			'q' => $seq_data['Q'],
 			'q9' => sprintf('%09d', $seq_data['Q']),
 			'm' => $seq_data['M'],
+			'd' => $seq_data['D'],
 		];
 
 		return $RES->write( $this->render('config/sample.php', $data) );

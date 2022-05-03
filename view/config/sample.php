@@ -1,6 +1,8 @@
 <?php
 /**
+ * View Sample Sequence Settings
  *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 use \Edoceo\Radix\Session;
@@ -54,31 +56,32 @@ pre.color-invert {
 		</div>
 		<input class="form-control" id="lab-sample-seq-format" name="lab-sample-seq-format" value="<?= __h($data['seq_format']) ?>">
 		<div class="input-group-append">
-			<button class="btn btn-outline-warning" name="a" type="submit" value="update-seq-format"><i class="fas fa-save"></i></button>
+			<button class="btn btn-warning" name="a" type="submit" value="update-seq-format"><i class="fas fa-save"></i></button>
 		</div>
 	</div>
 	</form>
 
 
 	<pre class="color-invert">
-		{TYPE}  two character type:          "<em>LS|LR</em>"
-		{YYYY}  four digit year:             "<em>{{ seq.YYYY }}</em>"
-		{YY}    two digit year:              "<em>{{ seq.YY }}</em>"
-		{MM}    two digit month:             "<em>{{ seq.MM }}</em>"
-		{MA}    single character month:      "<em>{{ seq.MA }}</em>"
-		{DD}    two digit day of month:      "<em>{{ seq.DD }}</em>"
-		{DDD}   three digit day of year:     "<em>{{ seq.DDD }}</em>"
-		{HH}    two digit hour:              "<em>{{ seq.HH }}</em>"
-		{II}    two digit minute:            "<em>{{ seq.II }}</em>"
-		{SS}    two digit seconds:           "<em>{{ seq.SS }}</em>"
-		{SEQ}   sequence, global:            "<em>{{ seq.g }}</em>"
-		{SEQ_Y} sequence, resets yearly      "<em>{{ seq.y }}</em>"
-		{SEQ_Q} sequence, resets quarterly:  "<em>{{ seq.q }}</em>"
-		{SEQ_M} sequence, resets monthly:    "<em>{{ seq.m }}</em>"</pre>
+		{TYPE}  two character type:          &quot;<em>LS|LR</em>&quot;
+		{YYYY}  four digit year:             &quot;<em><?= $data['seq']['YYYY'] ?></em>&quot; [2000-9999]
+		{YY}    two digit year:              &quot;<em><?= $data['seq']['YY'] ?></em>&quot;   [20-99]
+		{MM}    two digit month:             &quot;<em><?= $data['seq']['MM'] ?></em>&quot;   [01-12]
+		{MA}    single character month:      &quot;<em><?= $data['seq']['MA'] ?></em>&quot;    [A-L]
+		{DD}    two digit day of month:      &quot;<em><?= $data['seq']['DD'] ?></em>&quot;   [00-31]
+		{DDD}   three digit day of year:     &quot;<em><?= $data['seq']['DDD'] ?></em>&quot;  [000-366]
+		{HH}    two digit hour:              &quot;<em><?= $data['seq']['HH'] ?></em>&quot;   [00-23]
+		{II}    two digit minute:            &quot;<em><?= $data['seq']['II'] ?></em>&quot;   [00-59]
+		{SS}    two digit seconds:           &quot;<em><?= $data['seq']['SS'] ?></em>&quot;   [00-59]
+		{SEQ}   sequence, global:            &quot;<em><?= $data['seq']['g'] ?></em>&quot;
+		{SEQ_Y} sequence, resets yearly      &quot;<em><?= $data['seq']['y'] ?></em>&quot;
+		{SEQ_Q} sequence, resets quarterly:  &quot;<em><?= $data['seq']['q'] ?></em>&quot;
+		{SEQ_M} sequence, resets monthly:    &quot;<em><?= $data['seq']['m'] ?></em>&quot;
+		{SEQ_D} sequence, resets daily:      &quot;<em><?= $data['seq']['d'] ?></em>&quot;</pre>
 	<p>Each of the items named <code>SEQ</code> may have a numeric suffix added to indicate how many zeros to pad with</p>
 	<pre class="color-invert">
-		{SEQ_Y6} six digit, yearly:     "<em>{{ seq.y6 }}</em>"
-		{SEQ_Q9} nine digit, quarterly:  "<em>{{ seq.q9 }}</em>"</pre>
+		{SEQ_Y6} six digit, yearly:      &quot;<em><?= $data['seq']['y6'] ?></em>&quot;
+		{SEQ_Q9} nine digit, quarterly:  &quot;<em><?= $data['seq']['q9'] ?></em>&quot;</pre>
 
 
 	<h2>Current Sequence Information</h2>
@@ -87,7 +90,7 @@ pre.color-invert {
 		<?= _input_group("seq-g-min"
 			, $data['seq']['g']
 			, 'Global'
-			, '<button class="btn btn-outline-warning" name="a" type="submit" value="reset-seq-g"><i class="fas fa-sync"></i></button>'
+			, '<button class="btn btn-warning" name="a" type="submit" value="reset-seq-g"><i class="fas fa-sync"></i></button>'
 		) ?>
 	</div>
 
@@ -95,7 +98,7 @@ pre.color-invert {
 		<?= _input_group("seq-y-min"
 			, $data['seq']['y']
 			, 'Yearly:'
-			, '<button class="btn btn-outline-warning" name="a" type="submit" value="reset-seq-y"><i class="fas fa-sync"></i></button>'
+			, '<button class="btn btn-warning" name="a" type="submit" value="reset-seq-y"><i class="fas fa-sync"></i></button>'
 		) ?>
 	</div>
 
@@ -103,7 +106,7 @@ pre.color-invert {
 		<?= _input_group("seq-q-min"
 			, $data['seq']['q']
 			, 'Quarterly:'
-			, '<button class="btn btn-outline-warning" name="a" type="submit" value="reset-seq-q"><i class="fas fa-sync"></i></button>'
+			, '<button class="btn btn-warning" name="a" type="submit" value="reset-seq-q"><i class="fas fa-sync"></i></button>'
 		) ?>
 	</div>
 
@@ -111,7 +114,7 @@ pre.color-invert {
 		<?= _input_group("seq-m-min"
 			, $data['seq']['m']
 			, 'Monthly:'
-			, '<button class="btn btn-outline-warning" name="a" type="submit" value="reset-seq-m"><i class="fas fa-sync"></i></button>'
+			, '<button class="btn btn-warning" name="a" type="submit" value="reset-seq-m"><i class="fas fa-sync"></i></button>'
 		) ?>
 	</div>
 
@@ -119,7 +122,7 @@ pre.color-invert {
 		<?= _input_group("seq-d-min"
 			, $data['seq']['d']
 			, 'Daily:'
-			, '<button class="btn btn-outline-warning" name="a" type="submit" value="reset-seq-d"><i class="fas fa-sync"></i></button>'
+			, '<button class="btn btn-warning" name="a" type="submit" value="reset-seq-d"><i class="fas fa-sync"></i></button>'
 		) ?>
 	</div>
 
