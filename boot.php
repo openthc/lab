@@ -159,3 +159,41 @@ function _draw_metric_select_pass_fail($lm)
 	</div>
 <?php
 }
+
+
+/**
+ * Draw Status Picker
+ */
+function _draw_stat_pick()
+{
+	$html = <<<HTML
+	<select class="form-control form-control-sm lab-metric-qom-bulk">
+	<option value="OK">OK</option>
+	<option value="N/A">N/A</option>
+	<option value="N/D">N/D</option>
+	<option value="N/T">N/T</option>
+	</select>
+	HTML;
+	return $html;
+}
+
+
+/**
+ * Draw UOM Picker
+ */
+function _draw_unit_pick()
+{
+	$html = [];
+	$html[] = '<select class="form-control form-control-sm lab-metric-uom-bulk">';
+	foreach (\App\UOM::$uom_list as $k => $v) {
+		$html[] = sprintf('<option data-uom="%s" value="%s">%s</option>'
+			, $k
+			, $k
+			, $v
+		);
+	}
+	$html[] = '</select>';
+
+	return implode('', $html);
+
+}
