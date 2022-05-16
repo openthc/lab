@@ -28,6 +28,7 @@ $out_metric_list['018NY6XC00DEEZ41QBXR2E3T97'] = 'Potency - Total CBD (%)'; // (
 $out_metric_list['018NY6XC00LMK15566W1G0ZH5X'] = 'Mycotoxin - Ochratoxin A (ug/kg)';
 $out_metric_list['018NY6XC00LMR9PB7SNBP97DAS'] = 'Mycotoxin - Total Aflatoxins (ug/kg)';
 
+// Review WAC and CCRS Data 314-55-101
 $out_metric_list['018NY6XC00LMHF4266DN94JPPX'] = 'Moisture Analysis - Water Activity (aw)';
 $out_metric_list['018NY6XC00LM0PXPG4592M8J14'] = 'Moisture Analysis - Moisture Content (%)';
 
@@ -100,7 +101,7 @@ $out_metric_list['018NY6XC00LMEN8F7VNXYV7HCS'] = 'Pesticide - Malathion (ug/g) P
 $out_metric_list['018NY6XC00LMMFPYJ25XC5QTTQ'] = 'Pesticide - Metalaxyl (ug/g) Pesticide - Metalaxyl (ppm)';
 $out_metric_list['018NY6XC00LMC4048KGG4SR6WF'] = 'Pesticide - Methiocarb (ug/g) Pesticide - Methiocarb (ppm)';
 $out_metric_list['018NY6XC00LM7WBZ76X1E3T868'] = 'Pesticide - Methomyl (ug/g) Pesticide - Methomyl (ppm)';
-$out_metric_list[''] = 'Pesticide - Methyl parathion (ug/g) Pesticide - Methyl parathion (ppm)';
+$out_metric_list['018NY6XC00LM4N6RPDAC97NM9V'] = 'Pesticide - Methyl parathion (ug/g) Pesticide - Methyl parathion (ppm)';
 $out_metric_list['018NY6XC00LMCQ7DX02S94RMM7'] = 'Pesticide - MGK-264 (ug/g) Pesticide - MGK-264 (ppm)';
 $out_metric_list['018NY6XC00LMN56HSR1X5ACEJB'] = 'Pesticide - Myclobutanil (ug/g) Pesticide - Myclobutanil (ppm)';
 $out_metric_list['018NY6XC00LMSCF0SS8VVJ9DE5'] = 'Pesticide - Naled (ug/g) Pesticide - Naled (ppm)';
@@ -136,24 +137,54 @@ foreach ($out_metric_list as $mk0 => $mn0) {
 		'PASS',
 		$mn0, // trim(sprintf('%s %s', $lrm['name'], $lrm['uom'])),
 		$dt0->format('Y-m-d'), // Test Date
-		$lrm['qom'],
+		_ccrs_uom_fix($lrm['qom']),
 		$lrm['id'],
-		$dt0->format('Y-m-d'),
 		'-system-',
+		$dt0->format('Y-m-d'),
 		'',
 		'',
 		'INSERT',
 	];
 }
 
+$csv_header = [
+	'LicenseNumber',
+	'InventoryExternalIdentifier',
+	'LabLicenseNumber',
+	'LabTestStatus',
+	'TestName',
+	'TestDate',
+	'TestValue',
+	'ExternalIdentifier',
+	'CreatedBy',
+	'CreatedDate',
+	'UpdatedBy',
+	'UpdatedDate',
+	'Operation'
+];
+
 $out_handle = fopen('php://output', 'a');
 CCRS::fputcsv_stupidly($out_handle, explode(',', 'SubmittedBy,OpenTHC,,,,,,,,,,,'));
 CCRS::fputcsv_stupidly($out_handle, explode(',', sprintf('SubmittedDate,%s,,,,,,,,,,,', date('m/d/Y'))));
 CCRS::fputcsv_stupidly($out_handle, explode(',', sprintf('NumberRecords,%d,,,,,,,,,,,', count($csv_output))));
-CCRS::fputcsv_stupidly($out_handle, explode(',', 'LicenseNumber,InventoryExternalIdentifier,LabLicenseNumber,LabTestStatus,TestName,TestDate,TestValue,ExternalIdentifier,CreatedBy,CreatedDate,UpdatedBy,UpdatedDate,Operation'));
+CCRS::fputcsv_stupidly($out_handle, $csv_header);
 
 foreach ($csv_output as $row) {
 	CCRS::fputcsv_stupidly($out_handle, $row);
 }
 
 exit(0);
+
+/**
+ * UOM Helper
+ * Since CCRS can't handle things like N/A, N/D or N/T
+ */
+function _ccrs_uom_fix($q)
+{
+	if ($q <= 0) {
+		$q = 0;
+	}
+
+	return $q;
+
+}
