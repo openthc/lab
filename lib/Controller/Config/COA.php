@@ -17,29 +17,46 @@ class COA extends \App\Controller\Base
 	function __invoke($REQ, $RES, $ARG)
 	{
 
-		// getPath?
+		// Options
+		$opt_list = [];
+		$opt_list[] = 'coa/address/line/1';
+		$opt_list[] = 'coa/address/line/2';
+		$opt_list[] = 'coa/email';
+		$opt_list[] = 'coa/phone';
+		$opt_list[] = 'coa/website';
+		$opt_list[] = 'coa/footer';
 
-		// Examine COA File
+		$dbc = $this->_container->DBC_User;
+
+		// Save It
 		switch ($_POST['a']) {
+
 			case 'config-coa-save':
 
-				var_dump($_POST);
+				foreach ($opt_list as $k) {
 
-				exit;
+					$dbc->query('INSERT INTO base_option (key, val) VALUES (:k0, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
+						':k0' => $k,
+						':v1' => json_encode($_POST[$k])
+					]);
 
+				}
 
-				// Company Option?
+				break;
 
-			case 'save':
-				var_dump($_POST);
-				var_dump($_FILES);
-				exit(0);
 		}
 
 		$data = $this->loadSiteData();
 
-		$data['coa_list'] = [];
-		$data['coa_list'] = $this->_container->DBC_User->fetchAll('SELECT * FROM lab_layout');
+		// $data['coa_list'] = [];
+		// $data['coa_list'] = $this->_container->DBC_User->fetchAll('SELECT * FROM lab_layout');
+
+		$sql = 'SELECT val FROM base_option WHERE key = :k0';
+
+		foreach ($opt_list as $k) {
+			$arg = [ ':k0' => $k ];
+			$data[$k] = json_decode($dbc->fetchOne($sql, $arg), true);
+		}
 
 		return $RES->write( $this->render('config/coa.php', $data) );
 

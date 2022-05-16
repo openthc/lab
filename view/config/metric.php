@@ -48,7 +48,7 @@ function _draw_select_uom($id, $uom_want)
 
 <div class="container mt-2">
 
-<h1>Config :: Metrics</h1>
+<h1><a href="/config">Config</a> :: Metrics</h1>
 <p>Configure which metrics are used with which product classes.</p>
 
 <form method="post">
@@ -107,6 +107,7 @@ foreach ($this->data['metric_list'] as $m) {
 			<?php
 			switch ($m['stat']) {
 				case 200:
+					echo '<button class="btn btn-primary" title="Edit Product Classes" type="button"><i class="far fa-edit"></i></button>';
 					printf('<button class="btn btn-success btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="hide"><i class="far fa-circle"></i></button>', $m['id']);
 					break;
 				case 308:
@@ -133,7 +134,7 @@ foreach ($this->data['metric_list'] as $m) {
 </table>
 
 <div class="form-actions">
-	<button class="btn btn-outline-primary" name="a" value="save"><i class="fas fa-save"></i> Save</button>
+	<button class="btn btn-primary" name="a" value="save"><i class="fas fa-save"></i> Save</button>
 </div>
 </form>
 

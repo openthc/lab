@@ -7,49 +7,65 @@
 
 ?>
 
-<div class="input-group">
+<form enctype="multipart/form-data" method="post">
+<div class="input-group mt-2">
 	<div class="input-group-prepend">
-		<div class="input-group-text" style="width: 6em;">Display Name:</div>
+		<div class="input-group-text">Display Name:</div>
 	</div>
 	<input class="form-control" name="config-coa-company-name" value="<?= __h($data['config-coa-company-name']) ?>">
 </div>
 
-<div class="input-group">
+<div class="input-group mt-2">
 	<div class="input-group-prepend">
-		<div class="input-group-text" style="width: 6em;">Address Line 1:</div>
+		<div class="input-group-text">Address Line 1:</div>
 	</div>
-	<input class="form-control" name="config-coa-address-1" value="<?= __h($data['config-coa-address-1']) ?>">
+	<input class="form-control" name="coa/address/line/1" value="<?= __h($data['coa/address/line/1']) ?>">
 </div>
 
-<div class="input-group">
+<div class="input-group mt-2">
 	<div class="input-group-prepend">
-		<div class="input-group-text" style="width: 6em;">Address Line 2:</div>
+		<div class="input-group-text">Address Line 2:</div>
 	</div>
-	<input class="form-control" name="config-coa-address-2" value="<?= __h($data['config-coa-address-2']) ?>">
+	<input class="form-control" name="coa/address/line/2" value="<?= __h($data['coa/address/line/2']) ?>">
 </div>
 
-<div class="input-group">
+<div class="input-group mt-2">
 	<div class="input-group-prepend">
-		<div class="input-group-text" style="width: 6em;">Phone:</div>
+		<div class="input-group-text">Phone:</div>
 	</div>
-	<input class="form-control" name="config-coa-phone" value="<?= __h($data['config-coa-phone']) ?>">
+	<input class="form-control" name="coa/phone" value="<?= __h($data['coa/phone']) ?>">
 </div>
 
-<div class="input-group">
+<div class="input-group mt-2">
 	<div class="input-group-prepend">
-		<div class="input-group-text" style="width: 6em;">Email:</div>
+		<div class="input-group-text">Email:</div>
 	</div>
-	<input class="form-control" name="config-coa-email" value="<?= __h($data['config-coa-email']) ?>">
+	<input class="form-control" name="coa/email" value="<?= __h($data['coa/email']) ?>">
 </div>
 
-<div class="input-group">
+<div class="input-group mt-2">
 	<div class="input-group-prepend">
-		<div class="input-group-text" style="width: 6em;">Website:</div>
+		<div class="input-group-text">Website:</div>
 	</div>
-	<input class="form-control" name="config-coa-website" value="<?= __h($data['config-coa-website']) ?>">
+	<input class="form-control" name="coa/website" value="<?= __h($data['coa/website']) ?>">
+</div>
+
+<div class="input-group mt-2">
+	<div class="input-group-prepend">
+		<div class="input-group-text">Footer Text:</div>
+	</div>
+	<textarea class="form-control" name="coa/footer"><?= __h($data['coa/footer']) ?></textarea>
+</div>
+
+<div class="input-group mt-2">
+	<div class="input-group-prepend">
+		<div class="input-group-text">Logo/Icon:</div>
+	</div>
+	<input class="form-control" name="coa/icon" type="file">
 </div>
 
 
-<div class="form-actions">
+<div class="form-actions mt-4">
 	<button class="btn btn-primary" name="a" type="submit" value="config-coa-save"><i class="fas fa-save"></i></button>
 </div>
+</form>

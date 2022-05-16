@@ -51,7 +51,6 @@ class Metric extends \App\Controller\Base
 
 				foreach ($data['metric_list'] as $idx => $m) {
 
-					$m['meta'] = json_decode($m['meta'], true);
 					$m['meta']['uom'] = $_POST[sprintf('uom-%s', $m['id'])];
 					$m['meta']['lod'] = $_POST[sprintf('lod-%s', $m['id'])];
 					$m['meta']['loq'] = $_POST[sprintf('loq-%s', $m['id'])];
