@@ -7,7 +7,12 @@
 
 ?>
 
-<form enctype="multipart/form-data" method="post">
+<div class="container mt-2">
+
+<h1><a href="/config">Config</a> :: COA</h1>
+<p>Configure values for the COA Outputs.</p>
+
+<form autocomplete="off" enctype="multipart/form-data" method="post">
 <div class="input-group mt-2">
 	<div class="input-group-prepend">
 		<div class="input-group-text">Display Name:</div>
@@ -69,3 +74,5 @@
 	<button class="btn btn-primary" name="a" type="submit" value="config-coa-save"><i class="fas fa-save"></i></button>
 </div>
 </form>
+
+</div>

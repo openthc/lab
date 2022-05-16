@@ -51,7 +51,7 @@ function _draw_select_uom($id, $uom_want)
 <h1><a href="/config">Config</a> :: Metrics</h1>
 <p>Configure which metrics are used with which product classes.</p>
 
-<form method="post">
+<form autocomplete="off" method="post">
 <table class="table table-sm table-bordered table-metric">
 <?php
 foreach ($this->data['metric_list'] as $m) {
