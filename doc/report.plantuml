@@ -1,0 +1,33 @@
+@startuml
+
+frame lab {
+
+	object Sample
+	object Metric
+	object Matrix
+	object Result
+	object Result_Metric
+	object Report
+
+	Sample --> Matrix
+	Matrix --> Result
+	Matrix <-- Metric
+	Result_Metric <-- Metric
+	Result_Metric <-- Result
+	Report <-- Sample
+	Report <-* Result
+	Report <-* Result_Metric
+
+}
+
+
+frame tnt {
+
+	object Lot
+	object License
+
+	Lot <-- License
+	Lot --> Sample
+}
+
+@enduml
