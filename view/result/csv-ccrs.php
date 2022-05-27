@@ -11,6 +11,11 @@ use OpenTHC\CRE\CCRS;
 
 use App\Lab_Result;
 
+// Get Some Configuration Options
+$csv_config = [];
+$csv_config['lab_name'] = $_SESSION['Company']['name'];
+// $data['License_Laboratory']['code']
+
 header('content-type: text/plain');
 
 $dt0 = new DateTime($data['Lab_Result']['created_at']);
@@ -142,7 +147,7 @@ foreach ($out_metric_list as $mk0 => $mn0) {
 		$dt0->format('Y-m-d'), // Test Date
 		_ccrs_uom_fix($lrm['qom']),
 		$lrm['id'],
-		'-system-',
+		$csv_config['lab_name'],
 		$dt0->format('Y-m-d'),
 		'',
 		'',
@@ -167,7 +172,7 @@ $csv_header = [
 ];
 
 $out_handle = fopen('php://output', 'a');
-CCRS::fputcsv_stupidly($out_handle, explode(',', 'SubmittedBy,OpenTHC,,,,,,,,,,,'));
+CCRS::fputcsv_stupidly($out_handle, explode(',', sprintf('SubmittedBy,%s,,,,,,,,,,,', $csv_config['lab_name'])));
 CCRS::fputcsv_stupidly($out_handle, explode(',', sprintf('SubmittedDate,%s,,,,,,,,,,,', date('m/d/Y'))));
 CCRS::fputcsv_stupidly($out_handle, explode(',', sprintf('NumberRecords,%d,,,,,,,,,,,', count($csv_output))));
 CCRS::fputcsv_stupidly($out_handle, $csv_header);
