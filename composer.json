@@ -14,15 +14,14 @@
 		"chrome-php/chrome": "1.6.1",
 		"edoceo/lowline_php": "dev-master",
 		"edoceo/radix": "dev-master",
-		"endroid/qr-code": "4.4.8",
-		"google/protobuf": "3.20.1",
+		"endroid/qr-code": "4.4.9",
+		"google/protobuf": "3.21.1",
 		"grpc/grpc": "1.42.0",
 		"league/oauth2-client": "2.6.1",
 		"openthc/api": "dev-master",
 		"openthc/common": "dev-master",
 		"openthc/cre-adapter": "dev-master",
 		"pear/net_smtp": "1.10.0",
-		"phing/phing": "2.16.0",
 		"tecnickcom/tcpdf": "6.4.4"
 	},
 	"require-dev": {
