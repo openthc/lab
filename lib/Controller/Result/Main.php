@@ -27,6 +27,7 @@ class Main extends \App\Controller\Base
 			],
 			'result_stat' => [
 				'100' => 0,
+				'102' => 0,
 				'200' => 0,
 				'400' => 0,
 			]
@@ -131,15 +132,19 @@ SQL;
 			case 'completed/failed':
 				$stat[] = '<i class="fas fa-check-square" style="color: var(--bs-red);"></i>';
 				break;
+			case 0:
+			case 'in_progress/failed':
+				$stat[] = '<i class="fas fa-clock" style="color: var(--bs-gray);"></i>';
+				$stat[] = '<i class="fas fa-check-square" style="color: var(--bs-red);"></i>';
+				break;
 			case 1:
 			case 200:
 			case 'completed/passed':
 				$stat[] = '<i class="far fa-check-square" style="color: var(--bs-green);"></i>';
 				break;
-			case 0:
-			case 'in_progress/failed':
-				$stat[] = '<i class="fas fa-clock" style="color: var(--bs-gray);"></i>';
-				$stat[] = '<i class="fas fa-check-square" style="color: var(--bs-red);"></i>';
+			case 102:
+			case 'in_progress/':
+				$stat[] = '<i class="fa-regular fa-hourglass" title="Processing"></i>';
 				break;
 			// case 'in_progress/passed':
 			// 	$stat[] = '<i class="fas fa-clock"></i> <i class="fas fa-check-square" style="color: var(--bs-green);"></i>';
