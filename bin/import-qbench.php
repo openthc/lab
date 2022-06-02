@@ -76,13 +76,29 @@ $res = $qbc->auth();
 if (!empty($opt['sample'])) {
 	// Get Just One
 	echo "Dump One Sample\n";
-
-
 	exit(0);
-
 }
 
-_qbench_pull_report($dbc, $qbc);
+$lab_panel_list = [];
+$res = $qbc->get('/api/v1/panel');
+foreach ($res['data'] as $x) {
+	$x['_id'] = sprintf('qbench:%d', $x['id']);
+	$lab_panel_list[$x['_id']] = $x;
+	// printf("Panel: %s / '%s'\n", $x['_id'], $x['title']);
+}
+
+$lab_assay_list = [];
+$res = $qbc->get('/api/v1/assay');
+foreach ($res['data'] as $x) {
+	$x['_id'] = sprintf('qbench:%d', $x['id']);
+	$lab_assay_list[$x['_id']] = $x;
+	// printf("Assay: %s / '%s'\n", $x['_id'], $x['title']);
+}
+
+// printf("Loaded %d Panel and %d Assay\n", count($lab_panel_list), count($lab_assay_list));
+// exit;
+
+// _qbench_pull_report($dbc, $qbc);
 if (in_array('license', $opt['object'])) {
 	_qbench_pull_license($dbc, $qbc);
 }
@@ -99,10 +115,14 @@ if (in_array('result', $opt['object'])) {
 	_qbench_pull_result($dbc, $qbc);
 }
 
+// A Sample Report Contains a Data-Set of Which Test Result objects are included in the REPORT
+// A REPORT is a collection of 1=Sample & 1+Result Object each with 1+Metric Objects
+// $res = $qbc->get('/api/v1/report/sample/33535/info');
+// var_dump($res);
+
+//  exit;
 
 // Get the Tests (an actual Test)
-// $res = $qbc->get('/api/v1/assay');
-// print_r($res);
 
 // foreach ($res['data'] as $rec) {
 
@@ -136,9 +156,16 @@ function _qbench_pull_license($dbc, $qbc)
 
 			$rec['_id'] = sprintf('qbench:%s', $rec['id']);
 			$rec['customer_name'] = trim($rec['customer_name']);
+			$rec['license_number'] = trim($rec['license_number']);
+			if (preg_match('/^\d{6}$/', $rec['license_number'])) {
+				$rec['_code'] = $rec['license_number'];
+			}
+
+
+			echo "License: {$rec['id']} ";
 
 			// guid1 and guid0 may be needed here
-			$lic0 = $dbc->fetchRow('SELECT id, name FROM license WHERE guid = :g0', [
+			$lic0 = $dbc->fetchRow('SELECT id, code, name FROM license WHERE guid = :g0', [
 				':g0' => $rec['_id']
 			]);
 
@@ -158,14 +185,44 @@ function _qbench_pull_license($dbc, $qbc)
 					, 'meta' => json_encode($rec)
 					, 'type' => 'Grower'
 				];
+				if ( ! empty($rec['_code'])) {
+					$lic0['code'] = $rec['_code'];
+				}
 				$lic0['hash'] = sha1($lic0['meta']);
 				$dbc->insert('license', $lic0);
 
 				echo '+';
 
 			} else {
-				echo '.';
+
+				if ( ! empty($rec['_code'])) {
+					if ($rec['_code'] != $lic0['code']) {
+						echo '^';
+						$update = [];
+						$update['code'] = $rec['_code'];
+						$filter = [];
+						$filter['id'] = $lic0['id'];
+						$dbc->update('license', $update, $filter);
+					}
+				}
+
+				// $lic0['hash'] = sha1($lic0['meta']);
+				if ($rec['customer_name'] != $lic0['name']) {
+					echo '^';
+					$update = [];
+					$update['name'] = $rec['customer_name'];
+					$update['meta'] = json_encode($rec);
+					$filter = [];
+					$filter['id'] = $lic0['id'];
+					$dbc->update('license', $update, $filter);
+				} else {
+					echo '.';
+				}
+
 			}
+
+			echo "\n";
+
 		}
 
 		$idx++;
@@ -200,8 +257,25 @@ function _qbench_pull_contact($dbc, $qbc)
 		foreach ($res['data'] as $rec) {
 
 			$rec['_id'] = sprintf('qbench:%s', $rec['id']);
-			$rec['email'] = trim(strtolower($rec['email']));
-			ksort($rec);
+
+			if ( ! empty($rec['email'])) {
+				var_dump($rec);
+			}
+
+			// Pending Record?
+			$ct0 = [
+				'id' => _ulid()
+				, 'guid' => $rec['_id']
+				, 'meta' => json_encode($rec)
+				, 'type' => 'X'
+				, 'email' => trim(strtolower($rec['email'] ?: $rec['email_address']))
+				, 'phone' => ($rec['mobile'] ?: $rec['phone'])
+				, 'fullname' => trim(sprintf('%s %s', $rec['first_name'], $rec['last_name']))
+			];
+			$ct0 = array_filter($ct0);
+			$ct0['hash'] = sha1($ct0['meta']);
+
+			echo "Contact: {$ct0['guid']} {$ct0['email']} ";
 
 			$chk = $dbc->fetchRow('SELECT id FROM contact WHERE guid = :g0', [
 				':g0' => $rec['_id']
@@ -209,28 +283,25 @@ function _qbench_pull_contact($dbc, $qbc)
 
 			if (empty($chk['id'])) {
 
-				$ct0 = [
-					'id' => _ulid()
-					, 'guid' => $rec['_id']
-					, 'meta' => json_encode($rec)
-					, 'type' => 'X'
-					, 'email' => trim(strtolower($rec['email'] ?: $rec['email_address']))
-					, 'phone' => ($rec['mobile'] ?: $rec['phone'])
-					, 'fullname' => trim(sprintf('%s %s', $rec['first_name'], $rec['last_name']))
-				];
-				$ct0['hash'] = sha1($ct0['meta']);
-				$dbc->insert('contact', $ct0);
-
 				echo '+';
 
+				try {
+					$dbc->insert('contact', $ct0);
+				} catch (\Exception $e) {
+					echo $e->getMessage();
+					var_dump($rec);
+					exit;
+				}
+
 			} else {
-				echo '.';
+				echo '=';
 			}
+
+			echo "\n";
 		}
 
 		$idx++;
 
-		// echo "\nwhile ($idx < $max); // {$res['total_count']} objects";
 		echo "\n";
 
 	} while ($idx <= $max);
@@ -253,10 +324,11 @@ function _qbench_pull_result($dbc, $qbc)
 
 		$res = $qbc->get('/api/v1/test?' . http_build_query([
 			'page_num' => $idx,
-			'page_size' => 50,
 			'sort_by' => 'id',
 			'sort_order' => 'desc'
 		]));
+
+		echo "Count: " . count($res['data']) . "\n";
 
 		$max = intval($res['total_pages']);
 
@@ -279,14 +351,57 @@ function _qbench_pull_result($dbc, $qbc)
  */
 function _qbench_pull_result_import($dbc, $rec)
 {
+	global $lab_assay_list, $lab_panel_list;
+
 	$rec['_id'] = sprintf('qbench:%s', $rec['id']);
+	$rec['_assay_id'] = sprintf('qbench:%s', $rec['assay_id']);
+	if ( ! empty($rec['panel_id'])) {
+		$rec['_panel_id'] = sprintf('qbench:%s', $rec['panel_id']);
+	}
 	$rec['_lab_result_id'] = sprintf('qbench:%s', $rec['id']);
 	$rec['_lab_sample_id'] = sprintf('qbench:%s', $rec['sample_id']);
 
+	echo "lab_result: {$rec['_id']} ";
+
 	if (empty($rec['worksheet_data'])) {
-		echo '-';
+		echo "\n";
 		return(0);
 	}
+
+	switch (strtoupper($rec['state'])) {
+		case 'NOT STARTED':
+			$rec['_stat'] = 100;
+			break;
+		case 'BEING TESTED':
+		case 'NEEDS GC DATA':
+			$rec['_stat'] = 102;
+			break;
+		case 'IN DATA REVIEW':
+		case 'WAITING ON MORE SAMPLE':
+			$rec['_stat'] = 102;
+			break;
+		case 'RETEST - CONFIRMATION':
+		case 'RETEST - DILUTION REQUIRED':
+		case 'RETEST - REPREP REQUIRED':
+			$rec['_stat'] = 307;
+			break;
+		case 'CANCELLED':
+			$rec['_stat'] = 410;
+			break;
+		case 'SUBCONTRACTING':
+			$rec['_stat'] = 307;
+			break;
+		case 'COMPLETED':
+			$rec['_stat'] = 200;
+			break;
+		default:
+			var_dump($rec);
+			throw new \Exception('Invalid Status [IQB-313]');
+	}
+
+	// __ksort_r($rec);
+	// print_r($rec);
+	// exit;
 
 	// Lab Sample?
 	$ls0 = $dbc->fetchRow('SELECT id FROM lab_sample WHERE id = :g1', [
@@ -305,7 +420,7 @@ function _qbench_pull_result_import($dbc, $rec)
 		return(0);
 	}
 
-	$lr0 = $dbc->fetchRow('SELECT id FROM lab_result WHERE (id = :g1 OR guid = :g1)', [
+	$lr0 = $dbc->fetchRow('SELECT id, name, stat FROM lab_result WHERE (id = :g1 OR guid = :g1)', [
 		':g1' => $rec['_lab_result_id']
 	]);
 	if (empty($lr0['id'])) {
@@ -317,46 +432,25 @@ function _qbench_pull_result_import($dbc, $rec)
 			, 'lab_sample_id' => $rec['_lab_sample_id']
 			// , 'inventory_id' => '018NY6XC00L0T0000000000000'
 			, 'hash' => md5(json_encode($rec))
-			, 'name' => sprintf('QBench Result %s', $rec['id'])
-			, 'stat' => 200
+			, 'name' => ( $lab_assay_list[ $rec['_assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) )
+			, 'stat' => $rec['_stat']
 			, 'uom' => 'g'
 		];
-		switch (strtoupper($rec['state'])) {
-			case 'NOT STARTED':
-				$lr1['stat'] = 100;
-				break;
-			case 'BEING TESTED':
-			case 'NEEDS GC DATA':
-				$lr1['stat'] = 102;
-				break;
-			case 'IN DATA REVIEW':
-			case 'WAITING ON MORE SAMPLE':
-				$lr1['stat'] = 102;
-				break;
-			case 'RETEST - CONFIRMATION':
-			case 'RETEST - DILUTION REQUIRED':
-			case 'RETEST - REPREP REQUIRED':
-				$lr1['stat'] = 307;
-				break;
-			case 'CANCELLED':
-				$lr1['stat'] = 410;
-				break;
-			case 'SUBCONTRACTING':
-				$lr1['stat'] = 307;
-				break;
-			case 'COMPLETED':
-				$lr1['stat'] = 200;
-				break;
-			default:
-				var_dump($rec);
-				throw new \Exception('Invalid Status [IQB-313]');
-		}
 
 		$dbc->insert('lab_result', $lr1);
 		$lr0 = $lr1;
 
+		echo '+ ';
+
 	} else {
-		echo '^';
+
+		echo '^ ';
+
+		$lr2 = new \App\Lab_Result($dbc, $lr0);
+		$lr2['name'] = ( $lab_assay_list[ $rec['_assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) );
+		$lr2['stat'] = $rec['_stat'];
+		$lr2->save('Lab/Result Updated via Import');
+
 	}
 
 
@@ -368,6 +462,9 @@ function _qbench_pull_result_import($dbc, $rec)
 			$metric_val['_key'] = $metric_key;
 
 			// Map Key to ULID
+			// However, the QBench Data has a Preference for Authortative Data in mg/L field.
+			// And then stuff in mg/g and then mg/mL then % then mg/unit
+			// So, if there is an ND in the ${NAME}_mg_l field then use that, not the ZERO value in %
 			$metric_key_ulid = _qbench_map_metric($metric_key);
 			if ('018NY6XC00LM00000000000000' == $metric_key_ulid) {
 				continue;
@@ -394,11 +491,11 @@ function _qbench_pull_result_import($dbc, $rec)
 							$val = -130;
 							break;
 						case 'ND':
-							$val = -3;
+							$val = -2;
 							break;
 						case 'NT':
 							$val = -134; // v0
-							$val = -2; // v1
+							$val = -3; // v1
 							break;
 						case 'TNTC': // @todo what is this?
 							$val = -138;
@@ -454,6 +551,8 @@ function _qbench_pull_result_import($dbc, $rec)
 
 	}
 
+	echo "\n";
+
 }
 
 
@@ -487,7 +586,7 @@ function _qbench_pull_sample($dbc, $qbc)
 
 		$res = $qbc->get('/api/v1/sample?' . http_build_query([
 			'page_num' => $idx
-			, 'sort_by' => 'id'
+			, 'sort_by' => 'id' // last_updated
 			, 'sort_order' => 'desc'
 		]));
 
@@ -512,11 +611,13 @@ function _qbench_pull_sample($dbc, $qbc)
 			}
 			ksort($rec);
 
+			// echo "Sample: {$rec['_id']}\n";
+
 			$b2b = $dbc->fetchRow('SELECT id, license_id_source FROM b2b_incoming WHERE guid = :g0', [
 				':g0' => $rec['_order_id']
 			]);
 			if (empty($b2b)) {
-				echo "Missing Order {$rec['_order_id']} on Sample {$rec['_id']}\n";
+				echo "Missing Order '{$rec['_order_id']}' on Sample {$rec['_id']}\n";
 				continue;
 			}
 
@@ -538,7 +639,13 @@ function _qbench_pull_sample($dbc, $qbc)
 					'qty_initial' => $rec['_qty'],
 					'stat' => 200
 				];
-				$dbc->insert('inventory', $lot);
+				try {
+					$dbc->insert('inventory', $lot);
+				} catch (\Exception $e) {
+					echo $e->getMessage();
+					echo "\n";
+					continue;
+				}
 
 			} else {
 
@@ -581,7 +688,7 @@ function _qbench_pull_sample($dbc, $qbc)
 				$lab_sample['meta'] = json_encode($rec);
 
 				$dbc->insert('lab_sample', $lab_sample);
-
+				echo '+';
 			} else {
 				// $lab_sample['stat'] = // res['status'] == "IN PROGRESS", "IN REVIEW", NULL
 				$update = [];
@@ -607,6 +714,7 @@ function _qbench_pull_sample($dbc, $qbc)
 
 				try {
 					$dbc->update('lab_sample', $update, $filter);
+					echo '^';
 				} catch (Exception $e) {
 					// Sometimes this fails because of duplicated GUID values which we don't allow.
 					// Would need to move one to a -0 and then update the new one to be -1
@@ -653,7 +761,8 @@ function _qbench_pull_sample($dbc, $qbc)
 
 		echo "\n";
 
-	} while (($idx <= $max) && ($hit < 1000));
+	} while ($idx <= $max);
+	// } while (($idx < $max) && ($hit < 1000));
 
 }
 
@@ -671,6 +780,7 @@ function _qbench_pull_b2b($dbc, $qbc)
 		$res = $qbc->get('/api/v1/order?' . http_build_query([
 			'page_num' => $idx
 			, 'sort_by' => 'id'
+			// , 'sort_by' => 'last_updated'
 			, 'sort_order' => 'desc'
 		]));
 
@@ -680,62 +790,103 @@ function _qbench_pull_b2b($dbc, $qbc)
 		foreach ($res['data'] as $rec) {
 
 			$rec['_id'] = sprintf('qbench:%s', $rec['id']);
-			ksort($rec);
 
-			// echo "Order: {$rec['_id']} ";
+			echo "B2B_Incoming: {$rec['_id']} ";
 
-			$b2b = $dbc->fetchRow('SELECT id FROM b2b_incoming WHERE guid = :x1', [
+			$b2b0 = [
+				// 'id' => _ulid()
+				// , 'license_id_source' => $l1['id']
+				'license_id_target' => $_SESSION['License']['id']
+				, 'created_at' => $rec['date_created']
+				, 'updated_at' => date(\DateTime::RFC3339, $rec['last_updated'])
+				, 'guid' => $rec['_id']
+				, 'name' => sprintf('QBench Order %d', $rec['id'])
+				, 'hash' => md5(json_encode($rec))
+				, 'meta' => json_encode($rec)
+				, 'stat' => 200
+			];
+
+			// Order Status
+			switch (strtoupper($rec['state'])) {
+				case 'CANCELLED':
+					$b2b0['stat'] = 410;
+					break;
+				case 'COMPLETED':
+					$b2b0['stat'] = 307;
+					break;
+				case 'CREATED':
+				case 'IN PROGRESS': // sub category of CREATED
+				case 'ON HOLD':     // sub category of CREATED
+					$b2b0['stat'] = 200;
+					break;
+			}
+
+			$b2b_chk = $dbc->fetchRow('SELECT id, stat FROM b2b_incoming WHERE guid = :x1', [
 				':x1' => sprintf('qbench:%s', $rec['id'])
 			]);
 
-			if (empty($b2b)) {
+			if (empty($b2b_chk['id'])) {
 
 				echo '+';
+
+				$b2b0['id'] = _ulid();
 
 				// License = customer_account_id?
 				// License = explode(',', strtolower($rec['email_to']));
 
-				$l1 = $dbc->fetchRow('SELECT id FROM license WHERE code = :l1', [
+				$l1 = $dbc->fetchRow('SELECT id FROM license WHERE (code = :l1 OR guid = :l1)', [
 					':l1' => sprintf('qbench:%s', $rec['customer_account_id'])
 				]);
 				if (empty($l1['id'])) {
-					echo sprintf('Cannot Find License: qbench:%s in %s', $rec['customer_account_id'], $rec['_id']);
-					echo "\n";
-					continue;
+
+					printf("Cannot Find License: qbench:%s in %s\n", $rec['customer_account_id'], $rec['_id']);
+
+					$l1 = [
+						'id' => _ulid(),
+						'code' => sprintf('qbench:%s', $rec['customer_account_id']),
+						'guid' => sprintf('qbench:%s', $rec['customer_account_id']),
+						'name' => sprintf('qbench:%s', $rec['customer_account_id']),
+						'type' => 'X',
+						'hash' => '-'
+					];
+					$dbc->insert('license', $l1);
 				// } else {
 					// $l1 = [
 					// 	'id' => '018NY6XC00L1CENSE000000000',
 					// ];
 				}
 
-				$dbc->insert('b2b_incoming', [
-					'id' => _ulid()
-					, 'license_id_source' => $l1['id']
-					, 'license_id_target' => $_SESSION['License']['id']
-					, 'created_at' => $rec['date_created']
-					, 'updated_at' => date(\DateTime::RFC3339, $rec['last_updated'])
-					, 'guid' => $rec['_id']
-					, 'name' => sprintf('QBench Order %d', $rec['id'])
-					, 'hash' => md5(json_encode($rec))
-					, 'meta' => json_encode($rec)
-					, 'stat' => 307, // STAT_DONE
-				]);
+				$b2b0['license_id_source'] = $l1['id'];
+
+				$dbc->insert('b2b_incoming', $b2b0);
 
 			} else {
+
 				$hit++;
-			// 	$dbc->query('UPDATE b2b_incoming SET license_id_source = :l1 WHERE id = :b0', [
-			// 		':b0' => $b2b['id'],
-			// 		':l1' => $l1['id'],
-			// 	]);
-				echo '=';
+
+				if ($b2b_chk['stat'] != $b2b0['stat']) {
+					echo '^';
+					$update = [];
+					$update['stat'] = $b2b0['stat'];
+					$filter = [];
+					$filter['id'] = $b2b_chk['id'];
+					$dbc->update('b2b_incoming', $update, $filter);
+				} else {
+					echo '=';
+				}
+
 			}
+
+			echo "\n";
+
 		}
 
 		$idx++;
 
-		echo "\nwhile (($idx < $max) && ($hit < 100));";
+		// echo "\nwhile (($idx < $max) && ($hit < 100));";
 
-	} while (($idx <= $max) && ($hit < 100));
+	} while ($idx <= $max);
+	// } while (($idx < $max) && ($hit < 100));
 
 }
 
@@ -747,6 +898,7 @@ function _qbench_pull_report($dbc, $qbc)
 	//
 	// Reports
 	$res = $qbc->get('/api/v1/report');
+	var_dump($res);
 	foreach ($res['data'] as $rec) {
 		echo "Report: {$rec['id']} {$rec['title']}\n";
 		// exit;
@@ -874,7 +1026,7 @@ function _qbench_map_metric($k)
 		, 'cbdva_mg_g' => '018NY6XC00LM00000000000000'
 		, 'cbdva_mg_ml' => '018NY6XC00LM00000000000000'
 		, 'cbdva_mg_serving' => '018NY6XC00LM00000000000000'
-		, 'cbdva_percent' => '018NY6XC00BEXDNJ6STPMQ7B96'
+		, 'cbdva_percent' => '018NY6XC00M27M46SED0ZZCSQZ'
 		, 'cbg_l' => '018NY6XC00LM00000000000000'
 		, 'cbg_mg_g' => '018NY6XC00LM00000000000000'
 		, 'cbg_mg_ml' => '018NY6XC00LM00000000000000'
@@ -969,7 +1121,7 @@ function _qbench_map_metric($k)
 		, 'flufenacet' => '018NY6XC00VZX735DKKRTMBW6R'
 		, 'fluometuron' => '018NY6XC0083YEGTKJYVJJ38V7'
 		, 'flutolanil' => '018NY6XC00KZX7A23W14MT2074'
-		, 'flutriafol' => '01G0HSCNTKPR488GZN569M9SDB'
+		, 'flutriafol' => '018NY6XC00LMCQGJHSAQRVR05X'
 		, 'foreign_materials_pf' => '018NY6XC00LM00000000000000'
 		, 'fuberidazole' => '018NY6XC00BXDN38RRQFM83K2C'
 		, 'furalaxyl' => '018NY6XC0015HX2C5EYMXAJ9SN'
@@ -1042,7 +1194,8 @@ function _qbench_map_metric($k)
 		, 'myclobutanil' => '018NY6XC00LMN56HSR1X5ACEJB'
 		, 'naled' => '018NY6XC00LMSCF0SS8VVJ9DE5'
 		, 'nitenpyram' => '018NY6XC00H4N32NPA0CS61N92'
-		, 'ochratoxin_a' => '01EDPTGHG0NDY33JDVXVPEWYXN' // Our is A +H
+		// , 'ochratoxin_a' => '01EDPTGHG0NDY33JDVXVPEWYXN' // Our is A +H
+		, 'ochratoxin_a' => '018NY6XC00LMK15566W1G0ZH5X'
 		, 'ocimene_1' => '018NY6XC00LM00000000000000'
 		, 'ocimene_1_percent' => '018NY6XC00LMPS11DW5VC5ZDF6'
 		, 'ocimene_1_ug_g' => '018NY6XC00LMPS11DW5VC5ZDF6'
@@ -1055,7 +1208,7 @@ function _qbench_map_metric($k)
 		, 'p_cymene_percent' => '018NY6XC00LMQW6Q8FE142912R'
 		, 'p_cymene_ug_g' => '018NY6XC00LMQW6Q8FE142912R'
 		, 'paclobutrazol' => '018NY6XC00LMV3YF9F83621G84'
-		, 'parathion_methyl' => '01G0HSPKX1C4MX26E0RJGECRQB' // Evaluate?
+		, 'parathion_methyl' => '018NY6XC00LM4N6RPDAC97NM9V' // '01G0HSPKX1C4MX26E0RJGECRQB' // Evaluate?
 		, 'pentane' => '018NY6XC00LM68678PK1SAVVR5'
 		, 'permethrin_nh4' => '018NY6XC00LMXSM3QAXV8HQD5F'
 		, 'phosmet' => '018NY6XC00LMZ95MW0N3JPZ056'
@@ -1132,25 +1285,16 @@ function _qbench_map_metric($k)
 		, 'thiobencarb' => '018NY6XC00XFJV2A15SWXR8AS0'
 		, 'thiophanate_methyl' => '018NY6XC008N5MR09YY8T1HRMR'
 		, 'toluene' => '018NY6XC00LMGG9JR3SM0MEDGQ'
-		, 'total_aflatoxins' => '' // Calculated?
-		, 'total_aflatoxins' => ''
-		, 'total_cbd_mg_g' => ''
+		, 'total_aflatoxins' => '018NY6XC00LMR9PB7SNBP97DAS' // Calculated?
 		, 'total_cbd_mg_g' => ''
 		, 'total_cbd_mg_ml' => ''
-		, 'total_cbd_mg_ml' => ''
 		, 'total_cbd_mg_serving' => ''
-		, 'total_cbd_mg_serving' => ''
-		, 'total_cbd_percent' => ''
 		, 'total_cbd_percent' => ''
 		, 'total_terpenes_percent' => ''
 		, 'total_terpenes' => ''
 		, 'total_thc_mg_g' => ''
-		, 'total_thc_mg_g' => ''
-		, 'total_thc_mg_ml' => ''
 		, 'total_thc_mg_ml' => ''
 		, 'total_thc_mg_serving' => ''
-		, 'total_thc_mg_serving' => ''
-		, 'total_thc_percent' => ''
 		, 'total_thc_percent' => ''
 		, 'total_unit_serving' => ''
 		, 'trans_nerolidol' => '018NY6XC00LM00000000000000'
