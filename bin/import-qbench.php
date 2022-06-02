@@ -609,7 +609,12 @@ function _qbench_pull_sample($dbc, $qbc)
 				$rec['_qty'] = $m[1];
 				$rec['_uom'] = $m[2];
 			}
-			ksort($rec);
+			$key_list = array_keys($rec);
+			foreach ($key_list as $k) {
+				if (is_string($rec[$k])) {
+					$rec[$k] = trim($rec[$k]);
+				}
+			}
 
 			// echo "Sample: {$rec['_id']}\n";
 
