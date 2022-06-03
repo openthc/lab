@@ -7,6 +7,9 @@
 
 namespace App\Controller\Result;
 
+use App\Lab_Result;
+use App\Lab_Sample;
+
 class Download extends \App\Controller\Result\View
 {
 	private $_fh;
@@ -60,17 +63,16 @@ class Download extends \App\Controller\Result\View
 				return $this->csv_ccrs($RES, $ARG);
 			case 'json':
 				return $this->json($RES, $ARG);
-			case 'json+wica':
-			case 'json wica':
+			case 'json+wcia':
+			case 'json wcia':
 				return $this->json_wcia($RES, $ARG);
 			case 'pdf':
 				return $this->pdf($RES, $ARG);
 			case 'png':
-				if ($_GET['d'] == 'coa') {
-					return $this->png_coa($RES, $ARG);
-				}
 				return $this->png($RES, $ARG);
-
+			case 'png+coa':
+			case 'png coa':
+				return $this->png_coa($RES, $ARG);
 		}
 
 		var_dump($_GET);
@@ -128,11 +130,22 @@ class Download extends \App\Controller\Result\View
 		}
 
 		$data = $this->load_lab_result_full($Lab_Result['id']);
+		$data['Lot'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i0', [
+			':i0' => $Lab_Sample['lot_id']
+		]);
+		$data['License_Laboratory'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
+			':l0' => $data['Lab_Sample']['license_id']
+		]);
+		$data['License_Source'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
+			':l0' => $data['Lab_Sample']['license_id_source']
+		]);
 
-		require_once(APP_ROOT . '/view/pub/ccrs.php');
+		// __exit_text($data);
 
-		// __exit_text('Dump as CSV/CCRS', 501);
+		require_once(APP_ROOT . '/view/result/csv-ccrs.php');
+
 		exit(0);
+
 	}
 
 	function json($RES, $ARG)
@@ -141,11 +154,55 @@ class Download extends \App\Controller\Result\View
 	}
 
 	/**
+	 *
+	 */
+	function json_wcia($RES, $ARG)
+	{
+		$data = $this->_load_data($ARG);
+
+		require_once(APP_ROOT . '/view/pub/json.wcia-2022-062.php');
+		// require_once(APP_ROOT . '/view/result/json-wcia.php');
+	}
+
+	/**
 	 * Generate a PDF Linking to this Page
 	 */
 	function pdf($RES, $ARG)
 	{
-		__exit_text('Generate COA?, Download Existing?', 501);
+		$data = $this->_load_data($ARG);
+
+		$sample_file = sprintf('%s/var/%s/sample/%s.*', APP_ROOT, $_SESSION['Company']['id'], $data['Lab_Sample']['id']);
+		$sample_file = glob($sample_file);
+		if ( ! empty($sample_file)) {
+			$data['Lab_Sample']['img_file'] = $sample_file[0];
+		}
+
+		$dbc = $this->_container->DBC_User;
+		$C0 = new \OpenTHC\Company($dbc, $_SESSON['Company']['id']);
+		$data['License_Laboratory']['address_line_1'] = $C0->getOption('coa/address/line/1');
+		$data['License_Laboratory']['address_line_2'] = $C0->getOption('coa/address/line/2');
+		$data['License_Laboratory']['email'] =   $C0->getOption('coa/email');
+		$data['License_Laboratory']['phone'] =   $C0->getOption('coa/phone');
+		$data['License_Laboratory']['website'] = $C0->getOption('coa/website');
+		$data['License_Laboratory']['icon'] =    $C0->getOption('coa/icon');
+
+		//
+		// $data['Client'] = [];
+		// $data['Client']['icon'] =
+
+		$data['footer_text'] = $C0->getOption('coa/footer');
+
+		if ('dump' == $_GET['_']) {
+			__exit_text($data);
+		}
+
+		// Filter out Lab Metrics w/o Metrics
+		// ['metric']
+
+		require_once(APP_ROOT . '/view/result/coa-pdf.php');
+
+		exit(0);
+
 	}
 
 	/**
@@ -153,27 +210,43 @@ class Download extends \App\Controller\Result\View
 	 */
 	function png($RES, $ARG)
 	{
-		$qrCode = new \Endroid\QrCode\QrCode(sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $ARG['id']));
+		// $qrCode = new \Endroid\QrCode\QrCode(sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $ARG['id']));
+		$res = \Endroid\QrCode\Builder\Builder::create()
+			->writer(new \Endroid\QrCode\Writer\PngWriter())
+			->writerOptions([])
+			->data('Custom QR code contents')
+			->encoding(new \Endroid\QrCode\Encoding\Encoding('UTF-8'))
+			->errorCorrectionLevel(new \Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh())
+			// ->size(300)
+			// ->margin(10)
+			// ->roundBlockSizeMode(new \Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin())
+			// ->logoPath(__DIR__.'/assets/symfony.png')
+			// ->labelText('This is the label')
+			// ->labelFont(new \Endroid\QrCode\Label\Font\NotoSans(20))
+			// ->labelAlignment(new LabelAlignmentCenter())
+			->build();
+
+		// var_dump($res); exit;
 
 		$img_name = sprintf('%s.png', $ARG['id']);
 
 		// Generate a QR Code pointing to this page
 		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="%s"', $img_name));
 		$RES = $RES->withHeader('content-transfer-encoding', 'binary');
-		$RES = $RES->withHeader('content-type: image/png');
+		$RES = $RES->withHeader('content-type', 'image/png');
 
-		$RES = $RES->write( $qrCode->writeString() );
+		$RES = $RES->write( $res->getString() );
 
 		return $RES;
 
 	}
 
-		/**
+	/**
 	 * Generate a PDF Linking to this Page
 	 */
 	function png_coa($RES, $ARG)
 	{
-		$qrCode = new \Endroid\QrCode\QrCode(sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $ARG['id']));
+		// $qrCode = new \Endroid\QrCode\QrCode(sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $ARG['id']));
 
 		$img_name = sprintf('%s.png', $ARG['id']);
 
@@ -182,40 +255,58 @@ class Download extends \App\Controller\Result\View
 		header('content-transfer-encoding: binary');
 		header('content-type: image/png');
 
-		echo $qrCode->writeString();
+		// echo $qrCode->writeString();
 
 	}
 
+	/**
+	 * Load the Full Lab Data
+	 */
+	function _load_data($ARG)
+	{
+		$dbc = $this->_container->DBC_User;
 
-//	function _ouptut_tofile()
-//	{
-//		$fh = tmpfile();
-//
-//	// Header
-//	fputcsv($fh, array_values($col_spec));
-//	fseek($fh, -1, SEEK_CUR);
-//	fwrite($fh, "\r\n");
-//
-//	foreach ($res as $rec) {
-//
-//		$out = array();
-//
-//		foreach ($col_spec as $k => $x) {
-//			$out[] = $rec[$k];
-//		}
-//
-//		fputcsv($fh, array_values($out));
-//
-//		// Replace \n with \r\n
-//		fseek($fh, -1, SEEK_CUR);
-//		fwrite($fh, "\r\n");
-//	}
-//
-//		fseek($fh, 0, SEEK_SET);
-//
-//		fpassthru($fh);
-//	}
+		$data = $this->load_lab_result_full($ARG['id']);
+		// if (empty($Lab_Result['id'])) {
+		// 	_exit_html_fail('<h1>Lab Result Not Found [CRD-123]</h1>', 400);
+		// }
+		// $Lab_Sample = new Lab_Sample($dbc, $Lab_Result['lab_sample_id']);
+		// if (empty($Lab_Sample['id'])) {
+		// }
 
+		$Lab_Result = new Lab_Result($dbc, $data['Lab_Result']);
+
+		$data['Lab_Result_Section_Metric_list'] = $Lab_Result->getMetrics_Grouped();
+
+		$data['Lab_Result_Metric_Type_list'] = $Lab_Result->getMetricListGrouped();
+
+		// $data['Lot'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i0', [
+		// 	':i0' => $data['Lab_Sample']['lot_id']
+		// ]);
+
+		// $data['Product'] = $dbc->fetchRow('SELECT * FROM product WHERE id = :i0', [
+		// 	':i0' => $data['Lot']['product_id']
+		// ]);
+
+		// $data['Product_Type'] = $dbc->fetchRow('SELECT * FROM product_type WHERE id = :i0', [
+		// 	':i0' => $data['Product']['product_type_id']
+		// ]);
+
+		$data['License_Laboratory'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
+			':l0' => $data['Lab_Result']['license_id']
+		]);
+
+		$data['License_Source'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
+			':l0' => $data['Lab_Sample']['license_id_source']
+		]);
+
+		return $data;
+
+	}
+
+	/**
+	 *
+	 */
 	function _output($row)
 	{
 		fputcsv($this->_fh, array_values($row), $this->_sep);
