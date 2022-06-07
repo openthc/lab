@@ -281,24 +281,37 @@ class COA extends \App\PDF\Base
 				break;
 		}
 
+		switch ($qom) {
+			case -1:
+				$qom = 'N/A';
+				$uom = '-';
+				break;
+			case -2:
+				$qom = 'N/D';
+				$uom = '-';
+				break;
+			case -3:
+				$qom = 'N/T';
+				$uom = '-';
+				break;
+			default:
+				switch ($uom) {
+					case 'pct':
+						$qom = intval($qom);
+						break;
+					// case 'ppm':
+					// case 'ppb':
+					// 	$qom = $qom;
+					// 	break;
+				}
+
+		}
+
 		$this->setXY($x + 2.5, $y);
-		$this->cell(0.5, self::FS_10, _qom_nice($lrm['qom']), 0, 0, 'R');
+		$this->cell(0.5, self::FS_10, $qom, 0, 0, 'R');
 
 		$this->setXY($x + 3, $y);
-		$this->cell(0.5, self::FS_10, \App\UOM::nice($lrm['uom']), 0, 0, 'L');
-
-		// switch ($lrm['id']) {
-		// 	case '':
-
-		// }
-
-		// switch ($lrm['qom']) {
-		// 	case -1:
-		// 	case -2:
-		// 	case -3:
-		// }
-
-		// $this->cell(0.5, self::FS_10, $txt, 0, 0, 'R');
+		$this->cell(0.5, self::FS_10, \App\UOM::nice($uom), 0, 0, 'L');
 
 	}
 
@@ -313,8 +326,8 @@ class COA extends \App\PDF\Base
 		// Section Header
 		$this->setXY($x, $y);
 		$this->setFont('', 'B', 14);
-		$this->cell(7.5, App_PDF_COA::FS_14, $metric_name);
-		$this->setXY($x, $y + App_PDF_COA::FS_14);
+		$this->cell(7.5, self::FS_14, $metric_name);
+		$this->setXY($x, $y + self::FS_14);
 		$this->setFont('', '', 10);
 
 
@@ -379,8 +392,8 @@ class COA extends \App\PDF\Base
 
 				// Table Header
 				$this->setFont('', 'B', 14);
-				$this->cell(7.5, App_PDF_COA::FS_14, sprintf('%s (continued)', $metric_name));
-				$this->setXY($x, $y + App_PDF_COA::FS_14);
+				$this->cell(7.5, self::FS_14, sprintf('%s (continued)', $metric_name));
+				$this->setXY($x, $y + self::FS_14);
 				$this->setFont('', '', 10);
 
 			}

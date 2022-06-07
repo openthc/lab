@@ -31,11 +31,11 @@ $pdf->draw_metric_table_2_col_a_then_d('General', $data['Lab_Result_Section_Metr
 
 // Cannabinoids
 $x = 0.5;
-$y = $pdf->getY() + App_PDF_COA::FS_14;
+$y = $pdf->getY() + COA::FS_14;
 $pdf->setXY($x, $y);
 // $pdf->setFont('', 'B', 14);
-// $pdf->cell(7.5, App_PDF_COA::FS_14, );
-// $pdf->setXY(0.5, $y + App_PDF_COA::FS_14);
+// $pdf->cell(7.5, COA::FS_14, );
+// $pdf->setXY(0.5, $y + COA::FS_14);
 // $pdf->setFont('', '', 10);
 // $pdf->draw_metric_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0HRHFRZGY72C7']['metric_list']);
 $metric_list = $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0HRHFRZGY72C7']['metric_list'];
@@ -65,21 +65,21 @@ if ($metric_list_count > 0) {
 
 // Metals
 $x = 0.5;
-$y = $pdf->getY() + App_PDF_COA::FS_14;
+$y = $pdf->getY() + COA::FS_14;
 $pdf->setXY($x, $y);
 $pdf->draw_metric_table_2_col_a_then_d('Metals', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR']['metric_list']);
 
 
 // Microbes
 $x = 0.5;
-$y = $pdf->getY() + App_PDF_COA::FS_14;
+$y = $pdf->getY() + COA::FS_14;
 $pdf->setXY($x, $y);
 $pdf->draw_metric_table_2_col_a_then_d('Microbes', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0B7NMK7RGYAMN']['metric_list']);
 
 
 // Mycotoxins
 $x = 0.50;
-$y = $pdf->getY() + App_PDF_COA::FS_14;
+$y = $pdf->getY() + COA::FS_14;
 $pdf->setXY($x, $y);
 $pdf->draw_metric_table_2_col_a_then_d('Mycotoxins', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0GDBPF0V9B71Z']['metric_list']);
 
@@ -87,7 +87,7 @@ $pdf->draw_metric_table_2_col_a_then_d('Mycotoxins', $data['Lab_Result_Section_M
 // Solvents
 $x = 0.50;
 $y = $pdf->getY();
-$y = $y + App_PDF_COA::FS_14;
+$y = $y + COA::FS_14;
 $pdf->setXY($x, $y);
 $pdf->draw_metric_table_2_col_a_then_d('Solvents', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW']['metric_list']);
 
@@ -97,7 +97,7 @@ $pdf->draw_metric_table_2_col_a_then_d('Solvents', $data['Lab_Result_Section_Met
 
 $x = 0.50;
 $y = $pdf->getY();
-$y += App_PDF_COA::FS_14;
+$y += COA::FS_14;
 $pdf->setXY($x, $y);
 $metric_list = $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT09ZG05C2NE7KX']['metric_list'];
 // $metric_list_count = count($metric_list);
