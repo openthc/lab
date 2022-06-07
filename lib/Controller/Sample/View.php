@@ -59,6 +59,10 @@ class View extends \App\Controller\Base
 			':ls0' => $Lab_Sample['id']
 		]);
 
+		$Lab_Report_list = $dbc->fetchAll('SELECT * FROM lab_report WHERE lab_sample_id = :ls0', [
+			':ls0' => $Lab_Sample['id']
+		]);
+
 		$Lab_Sample_Meta = json_decode($Lab_Sample['meta'], true);
 
 		// Get Fresh Lot Data?
@@ -82,6 +86,7 @@ class View extends \App\Controller\Base
 			'Lab_Sample' => $Lab_Sample->toArray(),
 			'Lab_Sample_meta' => $Lab_Sample_Meta,
 			'Lab_Result_list' => $Lab_Result_list,
+			'Lab_Report_list' => $Lab_Report_list,
 			'Lot' => $Lot,
 			'Product' => $Product,
 			'ProductType' => $ProductType,

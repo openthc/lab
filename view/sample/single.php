@@ -7,7 +7,7 @@
 
 ?>
 
-<form autocomplete="off" method="post">
+<form autocomplete="off" enctype="multipart/form-data" method="post">
 <div class="container">
 
 <h1>
@@ -28,10 +28,10 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 		<div class="mb-2">
 			<label>Source License:</label>
 			<div class="input-group">
-				<input name="license-name-source" class="form-control license-autocomplete" value="<?= __h($data['License_Source']['name']) ?>">
-				<input class="autocomplete-data-id" id="license-id-source" name="license-id-source" type="hidden" value="<?= $data['License_Source']['id'] ?>">
-				<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
-				<a class="btn btn-outline-secondary" href="/reports/b2b/license-detail??id=<?= $data['License_Source']['id'] ?>"><i class="fas fa-link"></i></a>
+				<input name="source-license-name" class="form-control license-autocomplete" value="<?= __h($data['License_Source']['name']) ?>">
+				<input class="autocomplete-data-id" id="source-license-id" name="source-license-id" type="hidden" value="<?= $data['License_Source']['id'] ?>">
+				<button class="btn btn-outline-secondary btn-autocomplete-hint disabled" type="button"><i class="fas fa-sync"></i></button>
+				<!-- <a class="btn btn-outline-secondary" href="/reports/b2b/license-detail??id=<?= $data['License_Source']['id'] ?>"><i class="fas fa-link"></i></a> -->
 			</div>
 		</div>
 	</div>
@@ -47,7 +47,7 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 	</div>
 	<div class="col-md-6">
 		<div class="mb-2">
-			<label>Product Type</label>
+			<label>Product Type:</label>
 			<div class="input-group">
 				<input class="form-control" readonly value="<?= __h($data['ProductType']['name']) ?>">
 				<!-- <div class="input-group-append">
@@ -60,7 +60,7 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 <div class="row">
 	<div class="col-md-6">
 		<div class="mb-2">
-			<label>Product</label>
+			<label>Product:</label>
 			<div class="input-group">
 				<input class="form-control product-autocomplete" name="product-name" value="<?= __h($data['Product']['name']) ?>">
 				<input id="product-id" name="product-id" type="hidden" value="<?= $data['Product']['id'] ?>">
@@ -81,7 +81,6 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 	</div>
 </div>
 
-
 <!-- <p>Source ID: <code>{{ Lab_Sample.global_original_id }}</code>
 	if Lab_Sample.meta.external_id or Lab_Sample.meta.legacy_id {
 		{{ Lab_Sample.meta.external_id ? ("External ID: <code>" ~ Lab_Sample.meta.external_id ~ "</code>")|raw }}
@@ -93,11 +92,28 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 <div class="row">
 	<div class="col-md-6">
 		<div class="mb-2">
-			<label>Quantity</label>
+			<label>Quantity:</label>
 			<div class="input-group">
 				<input class="form-control r" name="sample-qty" min="1" step="0.01" type="number" value="<?= __h($data['Lab_Sample']['qty']) ?>">
 				<div class="input-group-text"><?= __h($data['Product']['uom']) ?></div>
 			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="mb-2">
+			<label>Image:</label>
+			<div class="input-group">
+				<input accept=".png,.jpeg,.jpg,image/png,image/jpeg" capture="environment" class="form-control" name="sample-file" type="file">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col">
+		<div class="mb-2">
+			<label>Notes:</label>
+			<textarea class="form-control" name="lab-sample-note"><?= __h($data['Sample']['note']) ?></textarea>
 		</div>
 	</div>
 </div>
@@ -108,12 +124,37 @@ if ( ! empty($data['Lab_Result_list'])) {
 ?>
 
 	<hr>
-	<h2>Lab Results</h2>
+	<h2 style="margin-bottom:0;">Lab Results</h2>
+	<table class="table table-sm">
 	<?php
 	foreach ($data['Lab_Result_list'] as $lr) {
-		printf('<p>Lab Result: <a href="/result/%s">%s</a></p>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
+		echo '<tr>';
+		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['guid']) );
+		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
+		printf('<td class="r"><input name="lab-result[]" type="checkbox" value="%s"></td>', $lr['id']);
+		echo '</tr>';
 	}
+	echo '</table>';
+}
+?>
 
+<?php
+if ( ! empty($data['Lab_Report_list'])) {
+?>
+
+	<hr>
+	<h2 style="margin-bottom:0;">Lab Reports</h2>
+	<table class="table table-sm">
+	<?php
+	foreach ($data['Lab_Report_list'] as $lr) {
+		echo '<tr>';
+		printf('<td><a href="/report/%s"><code>%s</code></a></td>', $lr['id'], substr($lr['id'], -6) );
+		printf('<td><a href="/report/%s">%s</a></td>', $lr['id'], __h($lr['name']) );
+		// printf('<td><a href="/report/%s">%s</a></td>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
+		// printf('<td class="r"><input name="lab-report[]" type="checkbox" value="%s"></td>', $lr['id']);
+		echo '</tr>';
+	}
+	echo '</table>';
 }
 ?>
 
@@ -121,16 +162,17 @@ if ( ! empty($data['Lab_Result_list'])) {
 	<?php
 	switch ($data['Lab_Sample']['stat']) {
 		case 100:
-			echo '<button class="btn btn-outline-primary" name="a" type="submit" value="accept-sample"><i class="fas fa-sync"></i> Accept</button>';
+			echo '<button class="btn btn-primary" name="a" type="submit" value="accept-sample"><i class="fas fa-sync"></i> Accept</button>';
 			break;
 		case 200:
-			printf('<a class="btn btn-outline-primary" href="/result/create?sample_id=%s"><i class="fas fa-plus"></i> Add Results</a>', $data['Lab_Sample']['id']);
+			printf('<a class="btn btn-primary" href="/result/create?sample_id=%s"><i class="fas fa-plus"></i> Add Results</a>', $data['Lab_Sample']['id']);
 			break;
 	}
 	?>
-	<button class="btn btn-outline-secondary" name="a" type="submit" value="save"><i class="fas fa-save"></i> Save</button>
-	<!-- <a class="btn btn-outline-secondary" href="/sample/<?= $data['Lab_Sample']['id'] ?>/edit"><i class="fas fa-edit"></i> Edit</a> -->
-	<!-- <button class="btn btn-outline-secondary" name="a" type="submit" value="done"><i class="fas fa-check-square"></i> Finish</button> -->
+	<button class="btn btn-primary" name="a" type="submit" value="save"><i class="fas fa-save"></i> Save</button>
+	<button class="btn btn-outline-secondary" name="a" type="submit" value="lab-report-create"><i class="fa-solid fa-file-signature"></i> Report</button>
+	<!-- <a class="btn btn-secondary" href="/sample/<?= $data['Lab_Sample']['id'] ?>/edit"><i class="fas fa-edit"></i> Edit</a> -->
+	<!-- <button class="btn btn-secondary" name="a" type="submit" value="done"><i class="fas fa-check-square"></i> Finish</button> -->
 	<button class="btn btn-outline-danger" name="a" type="submit" value="void"><i class="fas fa-ban"></i> Void</button>
 	<button class="btn btn-outline-danger" name="a" type="submit" value="drop"><i class="fas fa-trash"></i> Delete</button>
 </div>
