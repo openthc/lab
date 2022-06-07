@@ -9,7 +9,7 @@ namespace OpenTHC\Lab\Module;
 
 use Edoceo\Radix\DB\SQL;
 
-class Result extends \OpenTHC\Module\Base
+class Report extends \OpenTHC\Module\Base
 {
 	function __invoke($a)
 	{
