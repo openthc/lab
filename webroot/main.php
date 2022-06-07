@@ -73,9 +73,49 @@ $app->get('/share/{id}', function($REQ, $RES, $ARG) {
 
 // Public
 $app->get('/pub/{id}.{type:html|json|pdf|png|txt}', 'App\Controller\Pub');
+$app->get('/pub/{id}/{type:ccrs.txt}', 'App\Controller\Pub');
 $app->get('/pub/{id}/{type:wcia.json}', 'App\Controller\Pub');
 $app->get('/pub/{id}', 'App\Controller\Pub');
 
+$app->get('/inventory/{id}', function($REQ, $RES, $ARG) {
+
+	// Some Secret is Needed
+	$cfg = \OpenTHC\Config::get('openthc/lab');
+
+	$jwt = [];
+	$jwt['head'] = [
+		'alg' => 'HS256',
+		'typ' => 'JWT'
+	];
+	$jwt['body'] = [
+		'iss' => $_SERVER['SERVER_NAME'],
+		'exp' => time() + 300,
+		'sub' => $_SESSION['Contact']['id'],
+		'company' => $_SESSION['Company']['id'],
+		'license' => $_SESSION['License']['id'],
+		'intent' => 'inventory/view',
+		'inventory' => $ARG['id'],
+	];
+	$jwt['sign'] = [];
+
+	$jwt['head_b64'] = __base64_encode_url(json_encode($jwt['head']));
+	$jwt['body_b64'] = __base64_encode_url(json_encode($jwt['body']));
+	$jwt['sign'] = hash_hmac('sha256', sprintf('%s.%s', $jwt['head_b64'], $jwt['body_b64']), $cfg['secret'], true);
+	$jwt['sign_b64'] = __base64_encode_url($jwt['sign']);
+
+	$url = sprintf('%s/auth/open?jwt=%s'
+		, $_SESSION['OpenTHC']['app']['base']
+		, sprintf('%s.%s.%s', $jwt['head_b64'], $jwt['body_b64'], $jwt['sign_b64'])
+	);
+
+	// __exit_text($url);
+	return $RES->withRedirect($url);
+
+	// __exit_text($_SESSION);
+	// exit(0);
+})
+	->add('App\Middleware\Auth')
+	->add('App\Middleware\Session');
 
 // Sample Group
 $app->group('/sample', 'App\Module\Sample')
@@ -83,6 +123,12 @@ $app->group('/sample', 'App\Module\Sample')
 	->add('App\Middleware\Auth')
 	->add('App\Middleware\Session');
 
+
+// Report Group
+$app->group('/report', 'OpenTHC\Lab\Module\Report')
+	->add('App\Middleware\Menu')
+	->add('App\Middleware\Auth')
+	->add('App\Middleware\Session');
 
 // Result Group
 $app->group('/result', 'App\Module\Result')
@@ -124,6 +170,11 @@ $app->group('/config', 'App\Module\Config')
 $app->get('/dashboard', 'App\Controller\Dashboard')
 	->add('App\Middleware\Menu')
 	->add('App\Middleware\Auth')
+	->add('App\Middleware\Session');
+
+
+// Intake
+$app->map(['GET','POST'], '/intake', 'App\Controller\Intake')
 	->add('App\Middleware\Session');
 
 

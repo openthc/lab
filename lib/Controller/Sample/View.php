@@ -39,6 +39,9 @@ class View extends \App\Controller\Base
 			case 'accept-sample':
 				return $this->_accept($RES, $Lab_Sample);
 				break;
+			case 'lab-report-create':
+				return $this->_createReport($RES, $Lab_Sample);
+				break;
 			case 'save':
 				return $this->_saveSample($RES, $Lab_Sample);
 				break;
@@ -70,9 +73,9 @@ class View extends \App\Controller\Base
 		//$L_Lab = $res['result'];
 
 		// Find Owner License
-		// $dbc_main = $this->_container->DBC_Main;
-		// $L_Source = new \OpenTHC\License($dbc_main, $Lab_Sample['license_id_source']);
-		$L_Source = [];
+		$L_Source = $dbc->fetchRow('SELECT id, name, code, guid, email, phone FROM license WHERE id = :l0', [
+			':l0' => $Lab_Sample['license_id_source']
+		]);
 
 		$data = $this->loadSiteData([
 			'Page' => array('title' => 'Sample :: View'),
@@ -83,11 +86,12 @@ class View extends \App\Controller\Base
 			'Product' => $Product,
 			'ProductType' => $ProductType,
 			'Variety' => $Variety,
+			'Source_License' => $L_Source,
 			'License_Source' => $L_Source,
 		]);
 
 		// Nicely Formatted ID
-		$data['Lab_Sample']['id_nice'] = _nice_id($data['Lab_Sample']['id'], $data['Lab_Sample']['guid']);
+		$data['Lab_Sample']['id_nice'] = $data['Lab_Sample']['name'] ?: $data['Lab_Sample']['id'];
 		if (empty($data['Product']['uom'])) {
 			$data['Product']['uom'] = 'g';
 		}
@@ -108,10 +112,11 @@ class View extends \App\Controller\Base
 
 		if (!empty($cfg)) {
 
+			$dt0 = new \DateTime();
+
 			$dtz = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'timezone'");
 			if ($dtz) {
 				// Assign Sequence
-				$dt0 = new \DateTime();
 				$dt0->setTimeZone(new \DateTimeZone($dtz));
 			}
 
@@ -162,6 +167,65 @@ class View extends \App\Controller\Base
 	}
 
 	/**
+	 * Create a Report from 1+ Result
+	 */
+	function _createReport($RES, $Lab_Sample)
+	{
+		$dbc = $this->_container->DBC_User;
+
+		// Collect All the Metrics
+		$lab_metric_list = [];
+		$lab_metric_type_list = [];
+		foreach ($_POST['lab-result'] as $x) {
+
+			$LR0 = new \App\Lab_Result($dbc, $x);
+			$lrm_list = $LR0->getMetrics();
+
+			$sql = <<<SQL
+			SELECT lab_result_metric.*
+			  , lab_metric.lab_metric_type_id
+			  , lab_metric.sort
+			FROM lab_result_metric
+			JOIN lab_metric ON lab_result_metric.lab_metric_id = lab_metric.id
+			WHERE lab_result_metric.lab_result_id = :lr0
+			SQL;
+			$res = $dbc->fetchAll($sql, [
+				':lr0' => $x
+			]);
+			foreach ($res as $lrm) {
+				$lab_metric_list[ $lrm['lab_metric_id'] ] = $lrm;
+				// $lab_metric_type_list[ $lrm['lab_metric_type_id'] ][]
+			}
+		}
+
+		// Create a Lab Report
+		$lr1 = [];
+		$lr1['id'] = _ulid();
+		$lr1['lab_sample_id'] = $Lab_Sample['id'];
+		// $lr1['contact_id'] = $_SESSION['Contact']['id'];
+		$lr1['license_id'] = $_SESSION['License']['id'];
+		$lr1['license_id_source'] = $_SESSION['License']['id'];
+		$lr1['license_id_client'] = $_POST['source-license-id'];
+		$lr1['name'] = sprintf('Lab Report for Sample %s', $Lab_Sample['name']);
+		$lr1['meta'] = json_encode([
+			'lab_report_list' => $_POST['lab-result'],
+			'lab_metric_list' => $lab_metric_list,
+		]);
+
+		// __exit_text([
+		// 	'_POST' => $_POST,
+		// 	// 'Lab_Sample' => $Lab_Sample,
+		// 	'Lab_Report' => $lr1,
+		// 	// 'lab_result_metric' => $lab_metric_list
+		// ]);
+
+		$dbc->insert('lab_report', $lr1);
+
+		return $RES->withRedirect(sprintf('/report/%s', $lr1['id']));
+
+	}
+
+	/**
 	 *
 	 */
 	function _finishSample($RES, $ARG)
@@ -196,19 +260,24 @@ class View extends \App\Controller\Base
 		// $res = $this->cre->delete('/lot/' . $ARG['id']);
 		$dbc_user = $this->_container->DBC_User;
 
-		$sql = 'SELECT * from lab_sample where id = :pk';
-		$res = $dbc_user->fetchAll($sql, [
+		// $sql = 'SELECT * from lab_sample where id = :pk';
+		// $res = $dbc_user->fetchAll($sql, [
+		// 	':pk' => $ARG['id'],
+		// ]);
+
+		$sql = 'DELETE FROM lab_sample WHERE id = :pk';
+		$res = $dbc_user->query($sql, [
 			':pk' => $ARG['id'],
 		]);
 
-		$sql = 'UPDATE lab_sample SET stat = :s1, flag = flag | :f1 WHERE license_id = :l0 AND id = :pk';
-		$arg = array(
-			':pk' => $ARG['id'],
-			':l0' => $_SESSION['License']['id'],
-			':s1' => \App\Lab_Sample::STAT_VOID,
-			':f1' => \App\Lab_Sample::FLAG_DEAD,
-		);
-		$res = $dbc_user->query($sql, $arg);
+		// $sql = 'UPDATE lab_sample SET stat = :s1, flag = flag | :f1 WHERE license_id = :l0 AND id = :pk';
+		// $arg = array(
+		// 	':pk' => $ARG['id'],
+		// 	':l0' => $_SESSION['License']['id'],
+		// 	':s1' => \App\Lab_Sample::STAT_VOID,
+		// 	':f1' => \App\Lab_Sample::FLAG_DEAD,
+		// );
+		// $res = $dbc_user->query($sql, $arg);
 
 		// $sql = 'DELETE FROM lab_sample WHERE id = :pk';
 		// $res = $dbc_user->query($sql, [ ':pk' => $ARG['id'] ]);
@@ -227,45 +296,45 @@ class View extends \App\Controller\Base
 		$_POST['variety-name'] = trim($_POST['variety-name']);
 
 		// Product Change?
-		if ($_POST['product-id'] != $Lab_Sample['product_id']) {
-			if (!empty($_POST['product-name'])) {
-				$arg = [];
-				$arg[':p0'] = $_POST['product-name'];
-				$PR = $dbc->fetchRow('SELECT id FROM product WHERE name = :p0', $arg);
-				if (!empty($PR['id'])) {
-					$Lab_Sample['product_id'] = $PR['id'];
-				} else {
-					$PR = [];
-					$PR['id'] = _ulid();
-					$PR['guid'] = $PR['id'];
-					$PR['license_id'] = $Lab_Sample['license_id'];
-					$PR['product_type_id'] = 117; // Flower
-					$PR['name'] = $_POST['product-name'];
-					$PR['stub'] = _text_stub($PR['name']);
-					$dbc->insert('product', $PR);
-					$Lab_Sample['product_id'] = $PR['id'];
-				}
-			}
-		}
+		// if ($_POST['product-id'] != $Lab_Sample['product_id']) {
+		// 	if (!empty($_POST['product-name'])) {
+		// 		$arg = [];
+		// 		$arg[':p0'] = $_POST['product-name'];
+		// 		$PR = $dbc->fetchRow('SELECT id FROM product WHERE name = :p0', $arg);
+		// 		if (!empty($PR['id'])) {
+		// 			$Lab_Sample['product_id'] = $PR['id'];
+		// 		} else {
+		// 			$PR = [];
+		// 			$PR['id'] = _ulid();
+		// 			$PR['guid'] = $PR['id'];
+		// 			$PR['license_id'] = $Lab_Sample['license_id'];
+		// 			$PR['product_type_id'] = 117; // Flower
+		// 			$PR['name'] = $_POST['product-name'];
+		// 			$PR['stub'] = _text_stub($PR['name']);
+		// 			$dbc->insert('product', $PR);
+		// 			$Lab_Sample['product_id'] = $PR['id'];
+		// 		}
+		// 	}
+		// }
 
 		// Variety Change?
-		if (!empty($_POST['variety-id'])) {
-			$arg = [];
-			$arg[':v0'] = $_POST['variety-id'];
-			$VT = $dbc->fetchRow('SELECT id FROM variety WHERE id = :v0', $arg);
-			if (empty($VT['id'])) {
-				$VT = [
-					'id' => $_POST['variety-id'],
-					'license_id' => $_SESSION['License']['id'],
-					'guid' => $_POST['variety-id'],
-					'name' => $_POST['variety-name'],
-				];
-				$dbc->insert('variety', $VT);
-			}
-			if (!empty($VT['id'])) {
-				$Lab_Sample['variety_id'] = $VT['id'];
-			}
-		}
+		// if (!empty($_POST['variety-id'])) {
+		// 	$arg = [];
+		// 	$arg[':v0'] = $_POST['variety-id'];
+		// 	$VT = $dbc->fetchRow('SELECT id FROM variety WHERE id = :v0', $arg);
+		// 	if (empty($VT['id'])) {
+		// 		$VT = [
+		// 			'id' => $_POST['variety-id'],
+		// 			'license_id' => $_SESSION['License']['id'],
+		// 			'guid' => $_POST['variety-id'],
+		// 			'name' => $_POST['variety-name'],
+		// 		];
+		// 		$dbc->insert('variety', $VT);
+		// 	}
+		// 	if (!empty($VT['id'])) {
+		// 		$Lab_Sample['variety_id'] = $VT['id'];
+		// 	}
+		// }
 
 		if ( ! empty($_POST['sample-qty'])) {
 			$Lab_Sample['qty'] = floatval($_POST['sample-qty']);
@@ -277,9 +346,58 @@ class View extends \App\Controller\Base
 			$Lab_Sample['meta'] = json_encode($m);
 		}
 
-		$Lab_Sample['license_id_source'] = $_POST['license-id-source'];
+		if ( ! empty($_POST['source-license-id'])) {
+			$Lab_Sample['license_id_source'] = $_POST['source-license-id'];
+		}
+
+		// Check for copy of this license record
+		$L0 = $dbc->fetchRow('SELECT id, name FROM license WHERE id = :l0', [
+			':l0' => $Lab_Sample['license_id_source']
+		]);
+		// If not found, get from Directory and add
+		if (empty($L0['id'])) {
+			$dir = new \OpenTHC\Service\OpenTHC('dir');
+			$res = $dir->get(sprintf('/api/license/%s', $Lab_Sample['license_id_source']));
+
+			$dbc->insert('license', [
+				'id' => $res['data']['id'],
+				'name' => $res['data']['name'],
+				'code' => $res['data']['code'],
+				'guid' => $res['data']['guid'],
+				'type' => $res['data']['type'],
+				'hash' => '-',
+			]);
+		}
+
+		$Lab_Sample['name'] = trim($_POST['lab-sample-name']);
 		$Lab_Sample->save();
-		return $RES->withRedirect('/sample');
+
+		if ( ! empty($_FILES['sample-file'])) {
+			$f0 = $_FILES['sample-file'];
+			if (0 == $f0['error']) {
+				switch ($f0['type']) {
+					case 'image/jpeg':
+					case 'image/png':
+						$output_type = basename($f0['type']);
+						$output_file = sprintf('%s/var/%s/sample/%s.%s', APP_ROOT, $_SESSION['Company']['id'], $Lab_Sample['id'], $output_type);
+						$output_path = dirname($output_file);
+						if ( ! is_dir($output_path)) {
+							mkdir($output_path, 0755, true);
+						}
+						move_uploaded_file($f0['tmp_name'], $output_file);
+						break;
+					default:
+						// Error
+				}
+			} else {
+				// Error
+			}
+
+		}
+
+
+		return $RES->withRedirect(sprintf('/sample/%s', $Lab_Sample['id']));
+
 	}
 
 	/**
