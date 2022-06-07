@@ -34,7 +34,14 @@ class View extends \App\Controller\Base
 
 		$Lab_Sample = new Lab_Sample($dbc, $Lab_Result['lab_sample_id']);
 		if (empty($Lab_Sample['id'])) {
-			// _exit_text('WSHERE is SAMPLE');
+
+		}
+
+		$lr_meta = $Lab_Result->getMeta();
+		if ( ! empty($lr_meta['global_id'])) {
+			if (preg_match('/^WA.+\.LR.+$/', $lr_meta['global_id'])) {
+				// Fucking Leaf Data
+			}
 		}
 
 		$data = $this->load_lab_result_full($id);
@@ -47,10 +54,32 @@ class View extends \App\Controller\Base
 		$data['Lab_Result']['id_nice'] = _nice_id($data['Lab_Result']['id'], $data['Lab_Result']['guid']);
 		$data['Lab_Sample']['id_nice'] = _nice_id($data['Lab_Sample']['id'], $data['Lab_Sample']['guid']);
 
-		$data['Lab_Result']['coa_file'] = $data['Lab_Result']->getCOAFile();
-		if ( ! is_file($data['Lab_Result']['coa_file'])) {
-			$data['Lab_Result']['coa_file'] = null;
+		// @note this is not resolving the file correctly
+		if (empty($data['Lab_Result']['coa_file'])) {
+			$data['Lab_Result']['coa_file'] = $data['Lab_Result']->getCOAFile();
 		}
+		if ( ! empty($data['Lab_Result']['coa_file'])) {
+			if ( ! is_file($data['Lab_Result']['coa_file'])) {
+				$data['Lab_Result']['coa_file'] = null;
+			}
+		}
+		// if (empty($data['Lab_Result']['coa_file'])) {
+		// 	$coa_hash1 = implode('/', str_split(sprintf('%08x', crc32($data['Lab_Result']['guid'])), 2));
+		// 	$coa_file1 = sprintf('%s/coa/%s/%s.pdf', APP_ROOT, $coa_hash1, $data['Lab_Result']['guid']);
+		// 	$data['Lab_Result']['coa_file'] = $coa_file1;
+		// 	$data['Lab_Result']['coa_file1'] = $coa_file1;
+		// }
+
+
+		// Load Inventory Items
+		$sql = <<<SQL
+		SELECT inventory.id
+		  , inventory.guid
+		FROM inventory
+		JOIN inventory_lab_result ON inventory_lab_result.lot_id = inventory.id
+		WHERE inventory_lab_result.lab_result_id = :lr0
+		SQL;
+		$data['Inventory_list'] = $dbc->fetchAll($sql, [ ':lr0' => $data['Lab_Result']['id'] ]);
 
 		$data['Result_Metric_Group_list'] = $Lab_Result->getMetrics_Grouped();
 
@@ -95,6 +124,10 @@ class View extends \App\Controller\Base
 			return $this->_postHandler($REQ, $RES, $Lab_Result, $data);
 		}
 
+		if ('dump' == $_GET['_dump']) {
+			__exit_text($data);
+		}
+
 		return $RES->write( $this->render('result/single.php', $data) );
 
 	}
@@ -128,7 +161,7 @@ class View extends \App\Controller\Base
 		// 	$Lab_Sample = new Lab_Sample(null, $chk);
 		}
 
-		$Lot = $dbc_user->fetchRow('SELECT id, product_id, variety_id FROM inventory WHERE id = :i0', [ ':i0' => $Lab_Sample['inventory_id'] ]);
+		$Lot = $dbc_user->fetchRow('SELECT id, product_id, variety_id FROM inventory WHERE id = :i0', [ ':i0' => $Lab_Sample['inventory_id'] ?: $Lab_Sample['lot_id'] ]);
 		$Product = $dbc_user->fetchRow('SELECT * FROM product WHERE id = ?', [ $Lot['product_id'] ]);
 		$ProductType = $dbc_user->fetchRow('SELECT * FROM product_type WHERE id = ?', [ $Product['product_type_id'] ]);
 		$Variety = $dbc_user->fetchRow('SELECT * FROM variety WHERE id = ?', [ $Lot['variety_id'] ]);
@@ -138,7 +171,13 @@ class View extends \App\Controller\Base
 
 		// Get authoriative lab metrics
 		$lab_result_metric_list = [];
-		$res = $dbc_user->fetchAll('SELECT id AS lab_metric_id, type, sort, name, meta FROM lab_metric WHERE stat = 200 ORDER BY sort, name');
+		$sql = <<<SQL
+		SELECT id AS lab_metric_id, type, sort, name, meta, meta->>'uom' AS uom
+		FROM lab_metric
+		WHERE stat = 200
+		ORDER BY sort, name
+		SQL;
+		$res = $dbc_user->fetchAll($sql);
 		foreach ($res as $rec) {
 			$rec['meta'] = json_decode($rec['meta'], true);
 			$lab_result_metric_list[ $rec['lab_metric_id'] ] = $rec;
@@ -217,7 +256,6 @@ SQL;
 
 				// var_dump($html);
 
-				// exit;
 				if ('coa-create-pdf' == $_POST['a']) {
 
 					// _exit_text($html);
@@ -253,22 +291,26 @@ SQL;
 		case 'coa-download':
 		case 'download-coa':
 
+			$coa_file = $data['Lab_Result']['coa_file'];
+
+
 			if (empty($data['Lab_Result']['coa_file'])) {
-				_exit_html('<h1>COA File Not Found [CRV#186]</h1>', 404);
+				_exit_html('<h1>COA File Not Found [CRV-186]</h1>', 404);
 			}
 
-			if (!is_file($data['Lab_Result']['coa_file'])) {
-				_exit_html('<h1>COA File Not Found [CRV#190]</h1>', 404);
+			if ( ! is_file($data['Lab_Result']['coa_file'])) {
+				__exit_text($data);
+				_exit_html('<h1>COA File Not Found [CRV-190]</h1>', 404);
 			}
 
 			if (filesize($data['Lab_Result']['coa_file']) < 512) {
-				_exit_html('<h1>COA File Not Found [CRV#194]</h1>', 404);
+				_exit_html('<h1>COA File Not Found [CRV-194]</h1>', 404);
 			}
 
 			$data['Lab_Result']['coa_type'] = mime_content_type($data['Lab_Result']['coa_file']);
 
 			// // File Type
-			// switch ($data['Result']['coa_type']) {
+			// switch ($coa_type) {
 			// 	case 'application/pdf':
 			// 		// Proper
 			// 	break;
@@ -291,21 +333,30 @@ SQL;
 
 		case 'coa-upload':
 
-			$src_name = strtolower($_FILES['file']['name']);
-			$pat_want = strtolower(preg_match('/\.(\w+)/', $LR['id'], $m) ? $m[1] : $LR['id']);
-
-			$chk_name = strpos($src_name, $pat_want);
-
-			if (false === $chk_name) {
-				Session::flash('warn', 'Naming the file the same as the Lab Result is a good idea');
-			}
-
-			// @todo NO, Fix this, write to well-known location
 			try {
 				$LR->setCOAFile($_FILES['file']['tmp_name']);
 			} catch (\Exception $e) {
 				Session::flash('fail', $e->getMessage());
 			}
+
+			// publish / re-publish
+			$lab_self = new \OpenTHC\Service\OpenTHC('lab');
+			$arg = [ 'json' => [
+				'company' => $_SESSION['Company']['id']
+				, 'lab_result' => $LR['id']
+			]];
+			$res = $lab_self->post('/api/v2018/pub', $arg);
+
+			switch ($res['code']) {
+				case 200:
+				case 201:
+					// Success
+					break;
+				default:
+					throw new \Exception('Unable to (re)-publish to Lab Portal');
+			}
+
+			Session::flash('info', 'COA Uploaded and Lab Result Published');
 
 			return $RES->withRedirect(sprintf('/result/%s', $LR['id']));
 
@@ -326,7 +377,28 @@ SQL;
 			$LR->save();
 			break;
 		case 'lab-result-share':
-		case 'share':
+		case 'share': // v0
+
+			$lab_self = new \OpenTHC\Service\OpenTHC('lab');
+
+			$arg = [ 'json' => [
+				'company' => $_SESSION['Company']['id']
+				, 'lab_result' => $LR['id']
+			]];
+			$res = $lab_self->post('/api/v2018/pub', $arg);
+
+			switch ($res['code']) {
+				case 200:
+				case 201:
+
+					// Success
+					$LR->setFlag(\App\Lab_Result::FLAG_PUBLIC);
+					$LR->save();
+
+					return $RES->withRedirect($res['data']['pub']);
+				default:
+					throw new \Exception('Unable to Publish to Lab Portal');
+			}
 
 			// @todo Make Sure it's Published in MAIN
 			// unset($data['OpenTHC']);
@@ -338,20 +410,6 @@ SQL;
 			// unset($data['Lab_Sample']);
 			// unset($data['Lab_Result']);
 
-			$dbc_user = $this->_container->DBC_User;
-
-			$lr1_meta = [];
-			$lr1_meta['@context'] = 'http://openthc.org/lab/2021';
-			$lr1_meta['Lab_Result'] = $dbc_user->fetchRow('SELECT * FROM lab_result WHERE id = :lr0', [ ':lr0' => $LR['id'] ]);
-			$lr1_meta['Lab_Sample'] = $dbc_user->fetchRow('SELECT * FROM lab_sample WHERE id = :ls0', [ ':ls0' => $LR['lab_sample_id'] ]);
-			$lr1_meta['Lot'] = $dbc_user->fetchRow('SELECT * FROM inventory WHERE id = :i0', [ ':i0' => $lr1_meta['Lab_Sample']['lot_id'] ]);
-			$lr1_meta['Product'] = $dbc_user->fetchRow('SELECT * FROM product WHERE id = :p0', [ ':p0' => $lr1_meta['Lot']['product_id'] ]);
-			$lr1_meta['Product_Type'] = $dbc_user->fetchRow('SELECT * FROM product_type WHERE id = :pt0', [ ':pt0' => $lr1_meta['Product']['product_type_id'] ]);
-			$lr1_meta['Variety'] = $dbc_user->fetchRow('SELECT * FROM variety WHERE id = :v0', [ ':v0' => $lr1_meta['Lot']['variety_id'] ]);
-			$lr1_meta['Lab_Result_Metric_list'] = $LR->getMetrics();
-			$lr1_meta['Lab_Result_Section_Metric_list'] = $LR->getMetrics_Grouped();
-
-
 			// Build All Necessary Datas
 			// INSERT/UPDATE to openthc_main.lab_result with a HUGE meta
 
@@ -362,19 +420,7 @@ SQL;
 			// 	return !empty($v['lab_result_metric_id']);
 			// }, ARRAY_FILTER_USE_BOTH);
 
-			// Publish to Main/Global/Public
-			$dbc_main = $this->_container->DBC_Main;
-			$Lab_Result1 = new Lab_Result($dbc_main, $LR['id']);
-			$Lab_Result1['id'] = $LR['id'];
-			$Lab_Result1['license_id'] = $LR['license_id'];
-			$Lab_Result1['flag'] = $LR['flag'];
-			$Lab_Result1['stat'] = $LR['stat'];
-			$Lab_Result1['type'] = '-system-';
-			$Lab_Result1['name'] = $LR['guid'];
-			$Lab_Result1['meta'] = json_encode($lr1_meta);
-			$Lab_Result1->save();
-
-			return $RES->withRedirect(sprintf('/pub/%s.html', $LR['id']));
+			// return $RES->withRedirect(sprintf('/pub/%s.html', $LR['id']));
 
 			break;
 
@@ -390,11 +436,6 @@ SQL;
 		case 'void':
 
 			_exit_html_fail('<h1>Not Implemented [CRV-395]</h1>', 501);
-
-			// $cre = new \OpenTHC\CRE($_SESSION['pipe-token']);
-			// $res = $cre->qa()->delete($data['Lab_Result']['id']);
-			// var_dump($res);
-			// exit;
 
 			break;
 		default:
