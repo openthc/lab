@@ -135,6 +135,43 @@
 	}
 }
 
+/**
+ * Result Shit
+ */
+.lab-metric-grid {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	/* justify-content: space-between; */
+	margin: 0 -0.25rem;
+}
+.lab-metric-item {
+	flex: 1 0 33.3333%;
+	/* max-width: 30rem; */
+	min-width: 15rem;
+	padding: 0.25rem;
+}
+.lab-metric-item .input-group-prepend .input-group-text {
+	display: block;
+	overflow: hidden;
+	text-align: left;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: 10em;
+}
+.lab-metric-item .input-group-prepend .input-group-text:hover {
+	min-width: 10em;
+	width: auto;
+}
+.lab-metric-item::after {
+	content: '';
+	flex: auto;
+}
+
+
+/**
+ * Config Shit
+ */
 .config-wrap {
 	align-items: center;
 	display: flex;
@@ -155,8 +192,27 @@
 <body>
 
 <?= $this->block('menu-zero.php') ?>
-<?= $this->block('flash-messages.php') ?>
+<!-- <?= $this->block('flash-messages.php') ?> -->
+<?php
+$x = \Edoceo\Radix\Session::flash();
+if ( ! empty($x)) {
 
+	// Upscale Radix Style to Bootstrap
+	$x = str_replace('<div class="good">', '<div class="alert alert-success alert-dismissible" role="alert">', $x);
+	$x = str_replace('<div class="info">', '<div class="alert alert-info alert-dismissible" role="alert">', $x);
+	$x = str_replace('<div class="warn">', '<div class="alert alert-warning alert-dismissible" role="alert">', $x);
+	$x = str_replace('<div class="fail">', '<div class="alert alert-danger alert-dismissible" role="alert">', $x);
+	$x = str_replace('</div>', '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>', $x);
+
+	if ( ! empty($x)) {
+		// var_dump($x);
+		echo $x;
+	}
+
+}
+?>
+
+<!-- @todo Remove container-fluid -->
 <main class="container-fluid" style="min-height:80vh;">
 <?= $this->body ?>
 </main>
@@ -238,7 +294,6 @@ $(function() {
 	});
 
 	// Product
-	// @todo should this be local first?
 	$('.product-autocomplete').autocomplete({
 		source: 'https://pdb.openthc.org/api/autocomplete',
 		search: function(e, ui) {
@@ -298,8 +353,6 @@ $(function() {
 			}
 		}
 	});
-
-
 
 });
 </script>
