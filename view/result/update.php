@@ -5,9 +5,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+$stat_pick_html = _draw_stat_pick();
+$unit_pick_html = _draw_unit_pick();
+
 ?>
 
-<h1><a href="/result">Result</a> :: Update</h1>
+<h1><a href="/result">Result</a> :: <?= $data['Lab_Result']['guid'] ?> :: Update</h1>
 
 <form action="" autocomplete="off" enctype="multipart/form-data" method="post">
 <div class="container">
@@ -20,14 +23,24 @@
 					<a href="/sample/<?= $data['Lab_Sample']['id'] ?>">Sample:</a>
 				</div>
 				<input class="form-control" readonly value="<?= __h($data['Lab_Sample']['name']) ?>">
+				<button class="btn btn-outline-secondary" type="button"><i class="far fa-edit"></i></button>
 			</div>
 		</div>
 		<div class="col-md-6">
 			<div class="input-group mb-2">
-				<div class="input-group-text">
-					<a href="/report/license?id=<?= $data['License_Source']['id'] ?>">License:</a>
-				</div>
-				<input class="form-control" readonly value="<?= __h($data['License_Source']['name']) ?>">
+				<?php
+				if (empty($data['License_Source']['id'])) {
+					echo '<div class="input-group-text">';
+					echo '<span class="text-warning">License:</span>';
+					echo '</div>';
+					echo '<input class="form-control" readonly value="-orphan-">';
+				} else {
+					echo '<div class="input-group-text">';
+					printf('<a href="/report/license?id=%s">License:</a>', $data['License_Source']['id']);
+					echo '</div>';
+					printf('<input class="form-control" readonly value="%s">', __h($data['License_Source']['name']));
+				}
+				?>
 			</div>
 		</div>
 	</div>
@@ -87,16 +100,7 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) {
 					</div>
 				</div>
 				<div>
-					<div class="btn-group btn-group-sm">
-						<?php
-						foreach (\App\UOM::$uom_list as $k => $v) {
-							printf('<button class="btn btn-outline-secondary lab-metric-uom-bulk" data-uom="%s" type="button">%s</button>'
-								, $k
-								, $v
-							);
-						}
-						?>
-					</div>
+					<?= $unit_pick_html ?>
 				</div>
 			<?php
 			}
@@ -133,10 +137,23 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) {
 	</div>
 </div>
 
+<div class="mb-2">
+	<div class="input-group">
+		<div class="input-group-prepend">
+			<div class="input-group-text">Status:</div>
+		</div>
+		<select class="form-control" name="lab-result-stat">
+			<option value="100">In Progress</option>
+			<option value="200">Passed</option>
+			<option value="400">Failed</option>
+		</select>
+	</div>
+</div>
 
 <div class="form-actions">
 	<input name="sample_id" type="hidden" value="<?= $data['Lab_Sample']['id'] ?>">
-	<button class="btn btn-outline-primary" name="a" value="lab-result-save"><i class="fas fa-save"></i> Save</button>
+	<button class="btn btn-primary" name="a" value="lab-result-save"><i class="fas fa-save"></i> Save</button>
+	<button class="btn btn-secondary" name="a" value="lab-result-commit"><i class="fa-solid fa-flag-checkered"></i> Commit</button>
 	<button class="btn btn-outline-danger" name="a" value="lab-result-delete"><i class="fas fa-save"></i> Delete</button>
 </div>
 

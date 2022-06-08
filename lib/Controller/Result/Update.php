@@ -39,10 +39,10 @@ class Update extends \App\Controller\Result\View
 			// _exit_text('WSHERE is SAMPLE');
 		}
 
-		$data = $this->loadSiteData($data);
 		$data['Page'] = [
 			'title' => 'Result :: Update'
 		];
+		$data = $this->loadSiteData($data);
 
 		$data['Lab_Sample'] = $Lab_Sample->toArray();
 		$data['Lab_Result'] = $Lab_Result->toArray();
@@ -68,9 +68,9 @@ class Update extends \App\Controller\Result\View
 	 */
 	function post($REQ, $RES, $ARG)
 	{
-		$dbc = $this->_container->DBC_User;
+		$dbc_user = $this->_container->DBC_User;
 
-		$LR = new Lab_Result($dbc, $ARG['id']);
+		$LR = new Lab_Result($dbc_user, $ARG['id']);
 		if (empty($LR['id'])) {
 			_exit_text('Invalid Lab Result [CRU-075]', 400);
 		}
@@ -82,39 +82,40 @@ class Update extends \App\Controller\Result\View
 					':lr0' => $LR['id']
 				];
 
-				$dbc->query('BEGIN');
+				$dbc_user->query('BEGIN');
 
-				$dbc->query('DELETE FROM inventory_lab_result WHERE lab_result_id = :lr0', $arg);
-				$dbc->query('DELETE FROM lab_result_metric WHERE lab_result_id = :lr0', $arg);
-				$dbc->query('DELETE FROM lab_result WHERE id = :lr0', $arg);
+				$dbc_user->query('DELETE FROM inventory_lab_result WHERE lab_result_id = :lr0', $arg);
+				$dbc_user->query('DELETE FROM lab_result_metric WHERE lab_result_id = :lr0', $arg);
+				$dbc_user->query('DELETE FROM lab_result WHERE id = :lr0', $arg);
 
 				// Reset Flags on Sample
-				$LS = new Lab_Sample($dbc, $LR['lab_sample_id']);
+				$LS = new Lab_Sample($dbc_user, $LR['lab_sample_id']);
 
 				// Reset Flags on Inventory?
-				// $IY = new Inventory($dbc, $LS['inventory_id']);
+				// $IY = new Inventory($dbc_user, $LS['inventory_id']);
 
 				// Alert
 
-				$dbc->query('COMMIT');
+				$dbc_user->query('COMMIT');
 
 				return $RES->withRedirect('/result');
 
 				break;
 
+			case 'lab-result-commit':
 			case 'lab-result-save':
 
 				$sql = "SELECT *, meta->>'uom' AS uom FROM lab_metric";
-				$res_lab_metric = $dbc->fetchAll($sql);
+				$res_lab_metric = $dbc_user->fetchAll($sql);
 
 				$cbd_list = [];
 				$thc_list = [];
 
-				$dbc->query('BEGIN');
+				$dbc_user->query('BEGIN');
 
 				foreach ($res_lab_metric as $m) {
 
-					// $lrm = new Lab_Result_Metric($dbc, [
+					// $lrm = new Lab_Result_Metric($dbc_user, [
 					// 	'lab_result_id' => $LR['id'],
 					// 	'lab_metric_id' => $m['id']
 					// ]);
@@ -125,6 +126,8 @@ class Update extends \App\Controller\Result\View
 					if (strlen($qom) == 0) {
 						continue;
 					}
+
+					$uom = $_POST[sprintf('lab-metric-%s-uom', $m['id'])] ?: $m['uom'];
 
 					switch ($qom) {
 						case 'N/A':
@@ -144,13 +147,14 @@ class Update extends \App\Controller\Result\View
 					ON CONFLICT (lab_result_id, lab_metric_id)
 					DO UPDATE SET qom = :q0, uom = :u0
 					SQL;
-					// 					   WHERE lab_result_id = :lr0 AND lab_metric_id = :lm0
-					$dbc->query($sql, [
+
+					//
+					$dbc_user->query($sql, [
 						// 'id' => _ulid(),
 						':lr0' => $LR['id'],
 						':lm0' => $m['id'],
 						':q0' => floatval($qom),
-						':u0' => $m['uom'],
+						':u0' => $uom,
 						// 'lod' => $m['meta']['lod'],
 						// 'loq' => $m['meta']['loq'],
 					]);
@@ -161,12 +165,12 @@ class Update extends \App\Controller\Result\View
 						case '018NY6XC00LM49CV7QP9KM9QH9': // d9-thc
 						case '018NY6XC00LM877GAKMFPK7BMC': // d8-thc
 						case '018NY6XC00LMB0JPRM2SF8F9F2': // thca
-							$thc_list[] = $lrm1['qom'];
+							$thc_list[] = $qom;
 							break;
 						case '018NY6XC00DEEZ41QBXR2E3T97': // total-cbd
 						case '018NY6XC00LMK7KHD3HPW0Y90N': // cbd
 						case '018NY6XC00LMENDHEH2Y32X903': // cbda
-							$cbd_list[] = $lrm1['qom'];
+							$cbd_list[] = $qom;
 							break;
 					}
 				}
@@ -174,9 +178,31 @@ class Update extends \App\Controller\Result\View
 				$LR['cbd'] = floatval(max($cbd_list));
 				$LR['thc'] = floatval(max($thc_list));
 				$LR['note'] = trim($_POST['terp-note']);
+				$LR['stat'] = $_POST['lab-result-stat'];
+
+				if ( ! empty($_FILES['file'])) {
+					if (0 == $_FILES['file']['error']) {
+						$LR->setCOAFile($_FILES['file']['tmp_name']);
+					}
+				}
+
+				if ('lab-result-commit' == $_POST['a']) {
+					$LR->setFlag(Lab_Result::FLAG_LOCK);
+				}
+
 				$LR->save('Lab/Result/Update by User');
 
-				$dbc->query('COMMIT');
+				// Find Sample
+				// $LS = new Lab_Sample($LR['lab_sample_id']);
+				// $I = new Inventory($LS['inventory_id']);
+				// $LR->bindToInventory($I);
+				// $I->bindToLabResult($LR);
+
+				$dbc_user->query('COMMIT');
+
+				// Publish
+				$subC = new \App\Controller\API\Pub($this->_container);
+				$subR = $subC->_lab_result_publish($RES, $dbc_user, $LR);
 
 				return $RES->withRedirect(sprintf('/result/%s', $LR['id']));
 

@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+use \App\Lab_Result;
+
 ?>
 
 <div class="container">
@@ -12,7 +14,16 @@
 
 	<div>
 		<h1>Result: <?= $data['Lab_Result']['guid'] ?></h1>
-		<h2>Sample: <a href="/sample/<?= $data['Lab_Sample']['id'] ?>"><?= $data['Lab_Sample']['name'] ?></a></h2>
+		<h2>Sample: <?php
+		if (empty($data['Lab_Sample']['id'])) {
+			echo '-orphan-';
+		} else {
+			printf('<a href="/sample/%s">%s</a></h2>'
+				, $data['Lab_Sample']['id']
+				, ($data['Lab_Sample']['name'] ?: $data['Lab_Sample']['id'])
+			);
+		}
+		?>
 	</div>
 
 	<div>
@@ -25,12 +36,29 @@
 		<form method="post" target="_blank">
 
 			<div class="btn-group">
-				<a class="btn btn-outline-primary" href="/result/<?= $data['Lab_Result']['id'] ?>/update"><i class="far fa-edit"></i></a>
+				<a class="btn btn-primary" href="/result/<?= $data['Lab_Result']['id'] ?>/update"><i class="far fa-edit"></i> Edit</a>
+				<button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button>
+				<!-- <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button> -->
+				<div class="dropdown-menu dropdown-menu-lg-end">
+					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=pdf"><i class="fas fa-download"></i> Download COA (PDF)</a>
+					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=png%2Bcoa"><i class="fas fa-download"></i> Download COA (PNG/QR)</a> -->
+					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=csv"><i class="fas fa-download"></i> Download CSV</a> -->
+					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=csv%2Bccrs"><i class="fas fa-download"></i> Download CSV/CCRS</a>
+					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=json"><i class="fas fa-download"></i> Download JSON</a> -->
+					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=json%2Bwcia"><i class="fas fa-download"></i> Download JSON/WCIA</a>
+					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=png"><i class="fas fa-download"></i> Download PNG</a> -->
+				</div>
 			</div>
 
 			<div class="btn-group">
-				<button class="btn btn-outline-primary" name="a" type="submit" value="share"><i class="fas fa-share-alt"></i> Share</button>
-				<a class="btn btn-outline-secondary" href="mailto:?<?= $data['share_mail_link'] ?>"><i class="fas fa-envelope-open-text"></i></a>
+				<?php
+				if ($data['Lab_Result']['flag'] & Lab_Result::FLAG_PUBLIC) {
+					echo '<button class="btn btn-outline-success" name="a" title="Lab Results Published, click to re-publish &amp; view" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
+				} else {
+					echo '<button class="btn btn-outline-warning" name="a" title="Lab Results NOT Published" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
+				}
+				?>
+				<!-- <a class="btn btn-outline-secondary" href="mailto:?<?= $data['share_mail_link'] ?>"><i class="fas fa-envelope-open-text"></i></a> -->
 			</div>
 
 			<?php
@@ -91,6 +119,7 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 
 	if (empty($lms['name'])) {
 		$lms['name'] = '-system-';
+		// var_dump($lms);
 	}
 
 ?>
@@ -136,25 +165,25 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 						$metric['qom'] = 'N/A';
 						$metric['uom'] = '';
 						break;
-					case -1:
-						$metric['qom'] = 'N/A';
+					case -2:
+						$metric['qom'] = 'N/D';
 						$metric['uom'] = '';
 						break;
 					case -3:
-						$metric['qom'] = '-ND-';
+						$metric['qom'] = 'N/T';
+						$metric['uom'] = '';
+						break;
+					case -130:
+						$metric['qom'] = 'T/D';
 						$metric['uom'] = '';
 						break;
 				}
 			?>
-				<div class="result-metric-data">
+				<div class="result-metric-data" data-metric-id="<?= $metric['lab_metric_id'] ?>">
 					<div class="input-group">
 						<div class="input-group-text"><?= __h($result_data['name']) ?></div>
 						<input class="form-control r" readonly style="font-weight: bold;" value="<?= __h($metric['qom']) ?>">
-						<?php
-						if (!empty($metric['uom'])) {
-							printf('<div class="input-group-text">%s</div>', __h($metric['uom']));
-						}
-						?>
+						<div class="input-group-text"><?= App\UOM::nice($metric['uom']) ?></div>
 					</div>
 				</div>
 			<?php
@@ -269,11 +298,15 @@ function _lab_result_status_nice($x)
 		case 100:
 			return 'Pending';
 			break;
+		case 1: // @todo update all stat=1 lab_result to stat=200
 		case 200:
 			return '<span class="text-success">Passed</span>';
 			break;
-		default:
+		case 400:
 			return '<span class="text-danger">Failed</span>';
+			break;
+		default:
+			return sprintf('<span class="text-warning" title="Status: %s">-unknown-</span>', $x);
 			break;
 	}
 }

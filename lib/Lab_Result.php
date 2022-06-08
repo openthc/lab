@@ -10,8 +10,17 @@ namespace App;
 class Lab_Result extends \OpenTHC\SQL\Record
 {
 	const FLAG_SYNC = 0x00100000;
+	const FLAG_LOCK = 0x00200000;
 	const FLAG_MUTE = 0x04000000;
 	const FLAG_DEAD = 0x08000000;
+
+	const FLAG_PUBLIC     = 0x00000400;
+	const FLAG_PUBLIC_COA = 0x00000800;
+
+	const STAT_WAIT = 100;
+	const STAT_PASS = 200;
+	const STAT_PART = 206;
+	const STAT_FAIL = 400;
 
 	protected $_table = 'lab_result';
 
@@ -24,6 +33,7 @@ class Lab_Result extends \OpenTHC\SQL\Record
 SELECT lab_result_metric.*
 , lab_metric.name AS lab_metric_name
 , lab_metric.type AS lab_metric_type
+, lab_metric.lab_metric_type_id AS lab_metric_type_id
 , lab_metric.meta AS lab_metric_meta
 FROM lab_result_metric
 JOIN lab_metric ON lab_result_metric.lab_metric_id = lab_metric.id
@@ -43,6 +53,34 @@ SQL;
 		}
 
 		return $ret;
+	}
+
+	/**
+	 * Returns a List of Metric Groups w/a list of lab_metric IDs in that group
+	 */
+	function getMetricListGrouped()
+	{
+		$sql = <<<SQL
+		SELECT lab_metric.id
+		  , lab_metric.lab_metric_type_id
+		  , lab_metric.sort
+		  , lab_metric.name
+		FROM lab_metric
+		JOIN lab_metric_type ON lab_metric.lab_metric_type_id = lab_metric_type.id
+		ORDER BY lab_metric.sort, lab_metric.name
+		SQL;
+
+		$res = $this->_dbc->fetchAll($sql);
+		$ret = [];
+		foreach ($res as $rec) {
+			if (empty($ret[ $rec['lab_metric_type_id'] ])) {
+				$ret[ $rec['lab_metric_type_id'] ] = [];
+			}
+			$ret[ $rec['lab_metric_type_id'] ][] = $rec;
+		}
+
+		return $ret;
+
 	}
 
 	/**
@@ -179,6 +217,9 @@ SQL;
 		}
 
 		$x = rename($coa_source, $pdf_output);
+		if ($x) {
+			$this->_data['coa_file'] = $pdf_output;
+		}
 
 		// @todo Inspect the document
 
@@ -227,7 +268,7 @@ SQL;
 		// rename($pdf_middle, $pdf_output);
 
 		// Create PNG Preview
-		// Capture Page 1 of DOCUMENT.pdf into DOCUMENT.png
+		// Capture Page 1 of DOCUMENT.pdf into DOCUMENT.png as Thumbnail
 		$cmd = [];
 		$cmd[] = '/usr/bin/convert';
 		$cmd[] = escapeshellarg(sprintf('%s[0]', $pdf_output));
@@ -236,8 +277,6 @@ SQL;
 		$cmd[] = '2>&1';
 		$cmd = implode(' ', $cmd);
 		$buf = shell_exec($cmd);
-
-		// Now Thumbnail?
 
 		return true;
 
