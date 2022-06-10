@@ -197,3 +197,25 @@ function _draw_unit_pick()
 	return implode('', $html);
 
 }
+
+/**
+ *
+ */
+function _lab_result_status_nice($x)
+{
+	switch ($x) {
+		case 100:
+			return 'Pending';
+			break;
+		case 1: // @todo update all stat=1 lab_result to stat=200
+		case 200:
+			return '<span class="text-success">Passed</span>';
+			break;
+		case 400:
+			return '<span class="text-danger">Failed</span>';
+			break;
+		default:
+			return sprintf('<span class="text-warning" title="Status: %s">-unknown-</span>', $x);
+			break;
+	}
+}
