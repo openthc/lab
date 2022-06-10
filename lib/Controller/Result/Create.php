@@ -132,10 +132,10 @@ class Create extends \App\Controller\Base
 		$LR['guid'] = substr($LR['id'], 0, 16);
 		$LR['license_id'] = $_SESSION['License']['id'];
 		$LR['lab_sample_id'] = $Sample['id'];
-		$LR['stat'] = 200;
+		// $LR['stat'] = STAT_WAIT;
 		$LR['flag'] = 0;
 		// $LR['type'] = 'unknown';
-		$LR['name'] = sprintf('Lab Result for Sample Lot: %s', $Sample['id']);
+		// $LR['name'] = sprintf('Lab Result for Sample Lot: %s', $Sample['id']);
 		$LR['uom'] = 'g';
 		$LR['hash'] = $LR->getHash();
 		$LR->save('Lab_Result/Create');
@@ -200,17 +200,21 @@ class Create extends \App\Controller\Base
 		$LS = new Lab_Sample($dbc, $LR['lab_sample_id']);
 		// $LS->delFlag();
 		// $LS->setFlag();
+		// $LS['qty'] = 0;
 		$LS['stat'] = Lab_Sample::STAT_DONE;
 		// $LS['qty'] = 0; // Configure to Zero-Out on Complete?
 		$LS->save('Lab_Sample/Update');
-		// $dbc->query('UPDATE lab_sample SET flag = flag & :f1, stat = :s1 WHERE id = :ls0', [
-		// 	':ls0' => $LS['id'],
-		// 	':f1' => (Lab_Sample::FLAG_... | Lab_Sample::FLAG_)
-		// 	':s1' => Lab_Sample::STAT_DONE
-		// ]);
 		// $LS->setFlag();
 		// $LS['stat'] =
 		// $LS->save('Lab_Sample/Create by User');
+
+		// Link
+		// @todo Column Rename from lot_id => inventory_id
+		$sql = 'INSERT INTO inventory_lab_result (lot_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		$res = $dbc->query($sql, [
+			':i0' => $Sample['lot_id'],
+			':lr0' => $LR['id']
+		]);
 
 		// Update Inventory Lot?
 		// $L = $Sample['lot_id'];
@@ -232,7 +236,8 @@ class Create extends \App\Controller\Base
 
 		// Link
 		// @todo Column Rename from lot_id => inventory_id
-		$sql = 'INSERT INTO inventory_lab_result (inventory_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		// $sql = 'INSERT INTO inventory_lab_result (inventory_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		$sql = 'INSERT INTO inventory_lab_result (lot_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
 		$res = $dbc->query($sql, [
 			':i0' => $Sample['lot_id'],
 			':lr0' => $LR['id']
