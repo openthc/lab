@@ -93,21 +93,6 @@ use \App\Lab_Result;
 <?= $this->block('potency-summary.php') ?>
 </div>
 
-<style>
-.result-metric-wrap {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	margin: 0;
-	padding: 0;
-}
-
-.result-metric-data {
-	flex: 1 0 33%;
-	padding: 0 0.125rem 0.50rem 0.125rem;
-	min-width: 15em;
-}
-</style>
 
 <div>
 <?php
@@ -285,28 +270,3 @@ $(function() {
 
 });
 </script>
-
-
-
-<?php
-/**
- *
- */
-function _lab_result_status_nice($x)
-{
-	switch ($x) {
-		case 100:
-			return 'Pending';
-			break;
-		case 1: // @todo update all stat=1 lab_result to stat=200
-		case 200:
-			return '<span class="text-success">Passed</span>';
-			break;
-		case 400:
-			return '<span class="text-danger">Failed</span>';
-			break;
-		default:
-			return sprintf('<span class="text-warning" title="Status: %s">-unknown-</span>', $x);
-			break;
-	}
-}

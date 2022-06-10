@@ -168,6 +168,21 @@
 	flex: auto;
 }
 
+.result-metric-wrap {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin: 0;
+	padding: 0;
+}
+
+.result-metric-data {
+	flex: 1 0 33%;
+	padding: 0 0.125rem 0.50rem 0.125rem;
+	min-width: 15em;
+}
+
+
 
 /**
  * Config Shit
