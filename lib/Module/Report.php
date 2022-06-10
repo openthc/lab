@@ -27,7 +27,7 @@ class Report extends \OpenTHC\Module\Base
 
 		$a->map([ 'GET', 'POST'], '/{id}', 'OpenTHC\Lab\Controller\Report\Single');
 
-		// $a->get('/{id}/download', 'App\Controller\Result\Download');
+		$a->get('/{id}/download', 'OpenTHC\Lab\Controller\Report\Download');
 
 		// $a->get('/{id}/update', 'App\Controller\Result\Update');
 		// $a->post('/{id}/update', 'App\Controller\Result\Update:post');

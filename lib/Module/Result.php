@@ -21,13 +21,13 @@ class Result extends \OpenTHC\Module\Base
 		$a->get('/create', 'App\Controller\Result\Create');
 		$a->post('/create', 'App\Controller\Result\Create:save');
 
-		$a->get('/download', 'App\Controller\Result\Download');
-
 		$a->map(['GET','POST'], '/upload', 'App\Controller\Result\Upload');
 		$a->get('/upload/preview', 'App\Controller\Result\Upload:preview');
 		$a->map(['GET','POST'], '/upload/queue', 'App\Controller\Result\Queue');
 
 		$a->map([ 'GET', 'POST'], '/{id}', 'App\Controller\Result\View');
+
+		$a->get('/{id}/download', 'App\Controller\Result\Download');
 
 		$a->get('/{id}/update', 'App\Controller\Result\Update');
 		$a->post('/{id}/update', 'App\Controller\Result\Update:post');
