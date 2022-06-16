@@ -14,7 +14,7 @@ use OpenTHC\Lab\Lab_Report;
 <div class="d-flex flex-row flex-wrap justify-content-between mt-2">
 
 	<div>
-		<h1>Report: <?= $data['Lab_Report']['guid'] ?></h1>
+		<h1>Report: <?= $data['Lab_Report']['name'] ?></h1>
 		<h2>Sample: <?php
 		if (empty($data['Lab_Sample']['id'])) {
 			echo '-orphan-';
@@ -29,8 +29,6 @@ use OpenTHC\Lab\Lab_Report;
 
 	<div>
 		<h3>Status: <?= _lab_result_status_nice($data['Lab_Report']['stat']) ?></h3>
-		<!-- @todo this is only relevant when it's a Lab showing this result -->
-		<!-- <h3>Origin: {{ Sample.lot_id_source }}</h3> -->
 	</div>
 
 	<div class="r">
@@ -91,6 +89,7 @@ use OpenTHC\Lab\Lab_Report;
 </div>
 
 <div class="mb-2">
+<!-- Depends on Lab_Result_Metric_list -->
 <?= $this->block('potency-summary.php') ?>
 </div>
 
@@ -98,26 +97,30 @@ use OpenTHC\Lab\Lab_Report;
 <?php
 $Result_Metric_By_Type_list = [];
 $lab_metric_list = $data['Lab_Report']['meta']['lab_metric_list'];
-foreach ($lab_metric_list as $lm) {
-	$lmtid = $lm['lab_metric_type_id'];
+foreach ($lab_metric_list as $lm1) {
+
+	$lmtid = $lm1['lab_metric_type_id'];
+	$lmt = $data['lab_metric_type_list'][ $lmtid ];
+
 	if (empty($Result_Metric_By_Type_list[ $lmtid ])) {
-		$Result_Metric_By_Type_list[ $lmtid ] = [
-			'id' => $lmtid,
-			'name' => $lmtid,
-			'metric_list' => [],
-		];
+		$lmt['metric_list'] = [];
+		$Result_Metric_By_Type_list[ $lmtid ] = $lmt;
 	}
-	$Result_Metric_By_Type_list[ $lmtid ]['metric_list'][] = $lm;
+
+	$lm0 = $data['lab_metric_list'][ $lm1['lab_metric_id'] ];
+	$lm0['metric'] = $lm1;
+
+	$Result_Metric_By_Type_list[ $lmtid ]['metric_list'][] = $lm0;
 }
 
-foreach ($data['Lab_Metric_Type_list'] as $lmt) {
+foreach ($data['lab_metric_type_list'] as $lmt) {
 
 	$lms = $Result_Metric_By_Type_list[ $lmt['id'] ];
 
 	if (empty($lms['metric_list'])) {
-		// echo '<!--';
+		echo '<!--';
 		printf('<div class="alert alert-secondary">%s: No Metrics</div>', $lmt['name']);
-		// echo '-->';
+		echo '-->';
 		continue;
 	}
 
@@ -128,11 +131,10 @@ foreach ($data['Lab_Metric_Type_list'] as $lmt) {
 ?>
 	<hr>
 	<section>
-		<h3><?= $lms['name'] ?></h3>
+		<h3><?= $lmt['name'] ?></h3>
 		<div class="result-metric-wrap">
 			<?php
 			// Spin too many times but, whatever /djb 20220222
-			$out = false;
 			foreach ($lms['metric_list'] as $lm_id => $result_data) {
 
 				if (empty($result_data['metric'])) {
@@ -155,10 +157,6 @@ foreach ($data['Lab_Metric_Type_list'] as $lmt) {
 								$metric['qom'] = 'Pass';
 								break;
 						}
-						break;
-					case 'pct':
-						// Something Else
-						$metric['uom'] = '%';
 						break;
 				}
 

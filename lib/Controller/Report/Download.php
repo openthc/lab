@@ -116,6 +116,7 @@ class Download extends \App\Controller\Result\View
 			'id' => $Lab_Report['id'],
 			'created_at' => $Lab_Report['created_at'],
 		];
+		$data['Lab_Sample'] = $Lab_Sample->toArray();
 
 		$m = $Lab_Report->getMeta();
 		$data['Lab_Result_Metric_list'] = $m['lab_metric_list'];
