@@ -51,8 +51,11 @@ SQL;
 			$data['sample_stat'][ $rec['stat'] ] = $rec['c'];
 		}
 
-		$arg = [];
-		$arg[':l0'] = $_SESSION['License']['id'];
+		$sql_param = [];
+		$sql_where = [];
+
+		$sql_where[] = 'lab_sample.license_id = :l0';
+		$sql_param[':l0'] = $_SESSION['License']['id'];
 
 		// Status
 		$stat = $_GET['stat'];
@@ -62,32 +65,36 @@ SQL;
 
 		$sql_select = <<<SQL
 SELECT lab_sample.*
+  , license.name AS source_license_name
   , product.name AS product_name
   , variety.name AS variety_name
 FROM lab_sample
+JOIN license ON lab_sample.license_id_source = license.id
 LEFT JOIN inventory ON lab_sample.lot_id = inventory.id
 LEFT JOIN product ON inventory.product_id = product.id
 LEFT JOIN variety ON inventory.variety_id = variety.id
+{WHERE}
+ORDER BY lab_sample.created_at DESC
+OFFSET %d
+LIMIT %d
 SQL;
 
-		if ('*' == $stat) {
-			$sql = $sql_select . ' WHERE lab_sample.license_id = :l0 ORDER BY lab_sample.created_at DESC OFFSET %d LIMIT %d';
-		} else {
-			$sql = $sql_select . ' WHERE lab_sample.license_id = :l0 AND lab_sample.stat = :s0 ORDER BY lab_sample.created_at DESC OFFSET %d LIMIT %d';
-			$arg[':s0'] = $stat;
+
+		if ('*' != $stat) {
+			$sql_where[] = 'lab_sample.stat = :s0';
+			$sql_param[':s0'] = $stat;
 		}
 
+		if ( ! empty($_GET['q'])) {
+			$sql_where[] = sprintf('(lab_sample.id ILIKE :q83 OR lab_sample.name ILIKE :q83 OR license.name ILIKE :q83 OR license.code ILIKE :q83)');
+			$sql_param[':q83'] = sprintf('%%%s%%', trim($_GET['q']));
+		}
+		$sql_where = implode(' AND ', $sql_where);
+		$sql = str_replace('{WHERE}', sprintf('WHERE %s', $sql_where), $sql_select);
 		$sql = sprintf($sql, $item_offset, $item_limit);
-		// 	$sql = 'SELECT id, stat, meta FROM lab_sample WHERE license_id = :l0 AND flag & :f0 = 0 ORDER BY created_at DESC OFFSET %d LIMIT %d ';
-		// 	$sql = sprintf($sql, $item_offset, $item_limit);
-		// 	$arg = array(
-		// 		':l0' => $_SESSION['License']['id'],
-		// 		':f0' => \App\Lab_Sample::FLAG_DEAD
-		// 	);
-		// }
 
 		// Get Sample Data
-		$sample_list = $dbc->fetchAll($sql, $arg);
+		$sample_list = $dbc->fetchAll($sql, $sql_param);
 		array_walk($sample_list, function(&$v, $k) {
 			$v['meta'] = json_decode($v['meta'], true);
 		});
@@ -100,7 +107,7 @@ SQL;
 		$sql_count = preg_replace('/OFFSET.+$/', null, $sql_count);
 		$sql_count = preg_replace('/ORDER BY.+$/', null, $sql_count);
 
-		$c = $dbc->fetchOne($sql_count, $arg);
+		$c = $dbc->fetchOne($sql_count, $sql_param);
 		$Pager = new \App\UI\Pager($c, 100, $_GET['p']);
 
 		$data['page_list_html'] = $Pager->getHTML();

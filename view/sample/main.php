@@ -11,15 +11,18 @@
 	<div>
 		<h1>Samples</h1>
 	</div>
-	<div>
-		<a class="btn btn-outline-primary" href="/sample/create"><i class="fas fa-plus"></i></a>
+	<div class="pt-2">
+		<a class="btn btn-primary" href="/sample/create"><i class="fas fa-plus"></i> Create</a>
 	</div>
 </div>
 
-
+<form autocomplete="off">
 <div class="d-flex mb-2">
 	<div>
-		<input class="form-control" name="q" placeholder="- search -">
+		<div class="input-group">
+			<input autocomplete="off" class="form-control" name="q" placeholder="- search -" value="<?= __h($_GET['q']) ?>">
+			<button class="btn btn-outline-secondary"><i class="fas fa-search"></i></button>
+		</div>
 	</div>
 	<div class="ms-2">
 		<div class="btn-group">
@@ -48,6 +51,7 @@
 <p>A List of all Active Samples, use Filters or Search to find old stuff.</p>
 -->
 </div>
+</form>
 
 <div><?= $data['page_list_html'] ?></div>
 
@@ -56,7 +60,8 @@
 	<tr>
 		<th>ID</th>
 		<th>Product</th>
-		<th>Strain</th>
+		<th>Variety</th>
+		<th>Origin</th>
 		<th>Options</th>
 		<th class="r">Quantity</th>
 		<th></th>
@@ -75,26 +80,31 @@ foreach ($data['sample_list'] as $s) {
 		</td>
 		<td><?= __h($s['product_name']) ?></td>
 		<td><?= __h($s['variety_name']) ?></td>
+		<td><?= __h($s['source_license_name']) ?></td>
 		<td>
 			<!-- {{ s.meta.Lot.medically_compliant ? "Medical" }} -->
 		</td>
 		<td class="r">
 			<?= trim(sprintf('%0.1f %s', $s['qty'], $s['meta']['Lot']['uom'])) ?>
 		</td>
-
 		<td class="r">
 		<?php
-		if ($s['meta']['Lot']['global_lab_result_id']) {
-		?>
-			<a class="btn btn-sm btn-outline-secondary" href="/result/{{ s.meta.Lot.global_lab_result_id }}/edit">
-				<i class="fas fa-edit"></i> Edit
-			</a>
-			<a class="btn btn-sm btn-outline-success" href="/result/{{ s.meta.Lot.global_lab_result_id }}"><i class="fas fa-tasks"></i> View</a>
-		<?php
-		} else {
-		?>
-			<a title="Add Results" class="btn btn-sm btn-outline-primary" href="/result/create?sample_id={{ s.id }}"><i class="fas fa-flask"></i> Add Result</i></a>
-		<?php
+		switch ($s['stat']) {
+		case 100:
+			echo '<button class="btn btn-sm btn-primary"><i class="far fa-check-square"></i> Accept</button>';
+			// <a title="Add Results" class="btn btn-sm btn-outline-primary" href="/result/create?sample_id="><i class="fas fa-flask"></i> Add Result</i></a>
+			break;
+		case 200:
+			printf('<a title="Add Results" class="btn btn-sm btn-primary" href="/result/create?sample_id=%s"><i class="fas fa-flask"></i> Add Result</i></a>', $s['id']);
+			break;
+		case 300:
+		case 302:
+			// View Most Recent Lab Result
+			// Share?
+			// printf('<a title="Add Results" class="btn btn-sm btn-primary" href="/result/create?sample_id=%s"><i class="fas fa-flask"></i> Add Result</i></a>', $s['id']);
+			break;
+		case 400:
+			break;
 		}
 		?>
 		</td>
