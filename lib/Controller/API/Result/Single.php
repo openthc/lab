@@ -30,21 +30,23 @@ class Single extends \OpenTHC\Controller\Base
 		switch ($meta['@context']) {
 			case 'http://leafdatazone.com/2017':
 				// Garbage
-				break;
-			case 'http://openthc.org/lab/2018':
-				$meta['Lab_Result'] = $meta['Result'];
-				$meta['Lab_Sample'] = $meta['Sample'];
-				unset($meta['Result']);
-				unset($meta['Sample']);
-				break;
-			case 'http://openthc.org/lab/2021':
+				// $meta['Lab_Result']
 				break;
 		}
 
-		$coa_file = $LR->getCOAFile();
-		if (is_file($coa_file)) {
+		$coa_file = $meta['Lab_Result']['coa_file'];
+		if ( ! empty($coa_file) && ! is_file($meta['Lab_Result']['coa_file'])) {
+			$coa_file = null;
+		}
+		if (empty($$coa_file)) {
+			$coa_file = $LR->getCOAFile();
+			if ( ! is_file($meta['Lab_Result']['coa_file'])) {
+				$coa_file = null;
+			}
+		}
+
+		if ( ! empty($coa_file)) {
 			$meta['Lab_Result']['coa'] = sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $LR['id']);
-			$meta['Lab_Result']['coa_file'] = $coa_file;
 			$meta['Lab_Result']['coa_link'] = sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $LR['id']);
 		}
 
