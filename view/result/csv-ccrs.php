@@ -5,6 +5,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  *
  * @see https://lcb.wa.gov/sites/default/files/publications/Marijuana/CCRS/Lab%20Test%20CSV%20TestName%20data%20field%20expanded%20detail.pdf
+ *
+ * Please use the listed TestName's when reporting TestValues. Unit of measure will be included in the
+ * TestName and NOT in the the TestValue.
+ * For the puposes of our reporting we will use the following units as equivalent:
+ * ug/g = parts per million (ppm)
+ * ug/kg = parts per billion (ppb)
  */
 
 use OpenTHC\CRE\CCRS;
@@ -16,13 +22,18 @@ $csv_config = [];
 $csv_config['lab_name'] = $_SESSION['Company']['name'];
 // $data['License_Laboratory']['code']
 
-header('content-type: text/plain');
+header('content-type: text/csv');
+header(sprintf('content-disposition: inline; filename="labtest_%s_%s_%s.csv"'
+	, $data['License_Laboratory']['code']
+	, $data['Lab_Sample']['name']
+	, $data['Lab_Result']['id']
+));
 
 $dt0 = new DateTime($data['Lab_Result']['created_at']);
 
 // Here's the Metric IDs we want to capture and the CCRS Names
 $out_metric_list = [];
-$out_metric_list['01FZ1H5VDP9GJZM5KBEYTGBQ50'] = '-?-';
+// $out_metric_list['01FZ1H5VDP9GJZM5KBEYTGBQ50'] = '-?-';
 $out_metric_list['018NY6XC00LM49CV7QP9KM9QH9'] = 'Potency - D9THC (%)'; // (mg/g) | (mg/mL) | (mg/serving)
 $out_metric_list['018NY6XC00LMB0JPRM2SF8F9F2'] = 'Potency - D9THCA (%)'; // (mg/g) | (mg/mL) | (mg/serving)
 $out_metric_list['018NY6XC00LMK7KHD3HPW0Y90N'] = 'Potency - CBD (%)'; // (mg/g) | (mg/mL) | (mg/serving)
@@ -137,6 +148,9 @@ $csv_output = [];
 foreach ($out_metric_list as $mk0 => $mn0) {
 
 	$lrm = $data['Lab_Result_Metric_list'][$mk0];
+	if (empty($lrm)) {
+		continue;
+	}
 
 	$csv_output[] = [
 		$data['License_Source']['code'], // License Owner
@@ -192,6 +206,8 @@ function _ccrs_uom_fix($q)
 	if ($q <= 0) {
 		$q = 0;
 	}
+
+	$q = sprintf('%0.2f', $q);
 
 	return $q;
 
