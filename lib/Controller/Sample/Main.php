@@ -80,14 +80,14 @@ LIMIT %d
 SQL;
 
 
-		if ('*' != $stat) {
-			$sql_where[] = 'lab_sample.stat = :s0';
-			$sql_param[':s0'] = $stat;
-		}
-
 		if ( ! empty($_GET['q'])) {
 			$sql_where[] = sprintf('(lab_sample.id ILIKE :q83 OR lab_sample.name ILIKE :q83 OR license.name ILIKE :q83 OR license.code ILIKE :q83)');
 			$sql_param[':q83'] = sprintf('%%%s%%', trim($_GET['q']));
+		} else {
+			if ('*' != $stat) {
+				$sql_where[] = 'lab_sample.stat = :s0';
+				$sql_param[':s0'] = $stat;
+			}
 		}
 		$sql_where = implode(' AND ', $sql_where);
 		$sql = str_replace('{WHERE}', sprintf('WHERE %s', $sql_where), $sql_select);
