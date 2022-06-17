@@ -10,37 +10,45 @@ $lab_result_metric = $data['Lab_Result_Metric_list'];
 // Data to Return
 $wcia = [
 	'document_name' => 'WCIA Lab Result Schema',
-	'document_schema_version' => '1.0.0.0',
+	'document_schema_version' => '2.0.0',
 	'sample' => [
-		'id' => $data['Lab_Sample']['id'],
-		'source_id' => $data['Lot']['id'],
+		'id' => $data['Lab_Sample']['guid'],
+		'source_id' => $data['Lot']['guid'],
 	],
-	'labresult_id' => $data['Lab_Result']['id'],
+	'labresult_id' => $data['Lab_Result']['guid'],
 	'status' => 'pass',
-	'coa' => sprintf('https://%s/pub/%s/coa.pdf', $_SERVER['SERVER_NAME'], $data['Lab_Result']['id']),
+	'coa' => sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $data['Lab_Result']['id']),
 	'metric_list' => [
 		'Cannabinoids' => [
 			'test_id' => 'Cannabinoids',
 			'test_type' => 'Cannabinoids',
-			'metrics' => []
+			'metrics' => [],
 		],
 		'Terpenes' => [
 			'test_id' => 'Terpenes',
 			'test_type' => 'Terpenes',
-			'metrics' => []
+			'metrics' => [],
 		],
 		'General' => [
 			'test_id' => 'General',
 			'test_type' => 'General',
 			'metrics' => [],
 		],
-		'Heavy Metals' => [],
+		'Heavy Metals' => [
+			'test_id' => 'Metals',
+			'test_type' => 'Metals',
+			'metrics' => [],
+		],
 		'Microbes' => [
 			'test_id' => 'Microbes',
 			'test_type' => 'Microbes',
-			'metrics' => []
+			'metrics' => [],
 		],
-		'Mycotoxin' => [],
+		'Mycotoxin' => [
+			'test_id' => 'Mycotoxins',
+			'test_type' => 'Mycotoxins',
+			'metrics' => [],
+		],
 		// 'Water Activity' => [],
 		// 'Foreign Matter' => [],
 		// 'Loss on Drying' => [],

@@ -30,7 +30,7 @@
 </style>
 
 
-<div class="container mt-4">
+<div class="mt-4" id="pub-html-2018-001">
 
 <h1>Result: <?= __h($data['Lab_Result']['id_nice']) ?></h1>
 <h2>Sample: <?= __h($data['Lab_Sample']['id_nice']) ?></h2>
@@ -58,6 +58,7 @@
 			<?php
 			if ($data['Lab_Result']['coa_file']) {
 			?>
+			<!-- <?= $data['Lab_Result']['coa_file'] ?> -->
 				<a class="btn btn-block btn-outline-primary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.pdf" target="_blank"><i class="fas fa-print"></i> Print COA</a>
 			<?php
 			} else {
