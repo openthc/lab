@@ -18,36 +18,16 @@ d=$(dirname "$f")
 
 cd "$d"
 
-output_base="webroot/test-output"
-output_main="$output_base/index.html"
-mkdir -p "$output_base"
+declare -rx OUTPUT_BASE="webroot/test-output"
+declare -rx OUTPUT_MAIN="${OUTPUT_BASE}/index.html"
+declare -rx SOURCE_LIST="boot.php api/ bin/ controller/ lib/ sbin/ test/ view/"
 
-code_list=(
-	boot.php api/ bin/ controller/ lib/ sbin/ test/ view/
-)
-
-
-OUTPUT_BASE="${output_base}"
-OUTPUT_MAIN="${output_main}"
-SOURCE_LIST="${code_list}"
-
-export OUTPUT_BASE OUTPUT_MAIN SOURCE_LIST
+mkdir -p "${OUTPUT_BASE}"
 
 
 #
 # Lint
-if [ ! -f "$output_base/phplint.txt" ]
-then
-
-	echo '<h1>Linting...</h1>' > "$output_main"
-
-	find "${code_list[@]}" -type f -name '*.php' -exec php -l {} \; \
-		| grep -v 'No syntax' || true \
-		>"$output_base/phplint.txt"
-
-	[ -s "$output_base/phplint.txt" ] || echo "Linting OK" >"$output_base/phplint.txt"
-
-fi
+vendor/openthc/common/test/phplint.sh
 
 
 #
@@ -62,15 +42,15 @@ vendor/openthc/common/test/phpstan.sh
 
 #
 # PHPUnit
-vendor/openthc/common/test/phpstan.sh "$@"
+vendor/openthc/common/test/phpunit.sh "$@"
 
 
 #
 # Final Output
 test_date=$(date)
-test_note=$(tail -n1 "$out_file")
+test_note=$(tail -n1 "${OUTPUT_BASE}/phpunit.txt")
 
-cat <<HTML > "$output_main"
+cat <<HTML > "${OUTPUT_MAIN}"
 <html>
 <head>
 <meta charset="utf-8">
@@ -86,7 +66,7 @@ html {
 </head>
 <body>
 <h1>Test Result ${test_date}</h1>
-<h2>${note}</h2>
+<h2>${test_note}</h2>
 <p>Linting: <a href="phplint.txt">phplint.txt</a></p>
 <p>PHPCPD: <a href="phpcpd.txt">phpcpd.txt</a></p>
 <p>PHPStan: <a href="phpstan.xml">phpstan.xml</a> and <a href="phpstan.html">phpstan.html</a></p>
