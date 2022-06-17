@@ -3,7 +3,7 @@
  *
  */
 
-namespace OpenTHC\Lab\Test\Result;
+namespace OpenTHC\Lab\Test\D_Result;
 
 class F_Upload_Metric_Test extends \OpenTHC\Lab\Test\Base
 {

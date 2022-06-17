@@ -3,7 +3,7 @@
  *
  */
 
-namespace OpenTHC\Lab\Test\System;
+namespace OpenTHC\Lab\Test\A_System;
 
 class B_Config_Test extends \OpenTHC\Lab\Test\Base
 {

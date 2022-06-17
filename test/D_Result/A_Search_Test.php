@@ -3,7 +3,7 @@
  *
  */
 
-namespace OpenTHC\Lab\Test\Result;
+namespace OpenTHC\Lab\Test\D_Result;
 
 class A_Search_Test extends \OpenTHC\Lab\Test\Base
 {
