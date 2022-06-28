@@ -14,7 +14,7 @@ use OpenTHC\Lab\Lab_Report;
 <div class="d-flex flex-row flex-wrap justify-content-between mt-2">
 
 	<div>
-		<h1>Report: <?= $data['Lab_Report']['name'] ?></h1>
+		<h1><?= $data['Lab_Report']['name'] ?></h1>
 		<h2>Sample: <?php
 		if (empty($data['Lab_Sample']['id'])) {
 			echo '-orphan-';
