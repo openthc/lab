@@ -168,7 +168,7 @@ foreach ($data['lab_metric_type_list'] as $lmt) {
 						break;
 					case -2:
 						$metric['qom'] = 'N/D';
-						$metric['uom'] = '';
+						// $metric['uom'] = 'ppm';
 						break;
 					case -3:
 						$metric['qom'] = 'N/T';
@@ -184,7 +184,11 @@ foreach ($data['lab_metric_type_list'] as $lmt) {
 					<div class="input-group">
 						<div class="input-group-text"><?= __h($result_data['name']) ?></div>
 						<input class="form-control r" readonly style="font-weight: bold;" value="<?= __h($metric['qom']) ?>">
-						<div class="input-group-text"><?= App\UOM::nice($metric['uom']) ?></div>
+						<?php
+						if ( ! empty($metric['uom'])) {
+							printf('<div class="input-group-text">%s</div>', App\UOM::nice($metric['uom']));
+						}
+						?>
 					</div>
 				</div>
 			<?php
