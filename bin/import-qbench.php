@@ -155,18 +155,21 @@ function _qbench_pull_license($dbc, $qbc)
 		foreach ($res['data'] as $rec) {
 
 			$rec['_id'] = sprintf('qbench:%s', $rec['id']);
+			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 			$rec['customer_name'] = trim($rec['customer_name']);
 			$rec['license_number'] = trim($rec['license_number']);
 			if (preg_match('/^\d{6}$/', $rec['license_number'])) {
-				$rec['_code'] = $rec['license_number'];
+				$rec['@code'] = $rec['license_number'];
 			}
-
+			if (empty($rec['@code'])) {
+				$rec['@code'] = $rec['@id'];
+			}
 
 			echo "License: {$rec['id']} ";
 
 			// guid1 and guid0 may be needed here
 			$lic0 = $dbc->fetchRow('SELECT id, code, name FROM license WHERE guid = :g0', [
-				':g0' => $rec['_id']
+				':g0' => $rec['@id']
 			]);
 
 			if (empty($lic0['id'])) {
@@ -175,8 +178,8 @@ function _qbench_pull_license($dbc, $qbc)
 				// License = explode(',', strtolower($rec['email_to']));
 				$lic0 = [
 					'id' => _ulid()
-					, 'guid' => $rec['_id']
-					, 'code' => $rec['_id']
+					, 'guid' => $rec['@id']
+					, 'code' => $rec['@code']
 					, 'name' => $rec['customer_name']
 					// , 'address_full' => trim($rec['address'])
 					// , 'email' => trim($rec['email_address'])
@@ -185,9 +188,6 @@ function _qbench_pull_license($dbc, $qbc)
 					, 'meta' => json_encode($rec)
 					, 'type' => 'Grower'
 				];
-				if ( ! empty($rec['_code'])) {
-					$lic0['code'] = $rec['_code'];
-				}
 				$lic0['hash'] = sha1($lic0['meta']);
 				$dbc->insert('license', $lic0);
 
@@ -195,11 +195,11 @@ function _qbench_pull_license($dbc, $qbc)
 
 			} else {
 
-				if ( ! empty($rec['_code'])) {
-					if ($rec['_code'] != $lic0['code']) {
+				if ( ! empty($rec['@code'])) {
+					if ($rec['@code'] != $lic0['code']) {
 						echo '^';
 						$update = [];
-						$update['code'] = $rec['_code'];
+						$update['code'] = $rec['@code'];
 						$filter = [];
 						$filter['id'] = $lic0['id'];
 						$dbc->update('license', $update, $filter);
@@ -257,6 +257,7 @@ function _qbench_pull_contact($dbc, $qbc)
 		foreach ($res['data'] as $rec) {
 
 			$rec['_id'] = sprintf('qbench:%s', $rec['id']);
+			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 
 			if ( ! empty($rec['email'])) {
 				var_dump($rec);
@@ -265,7 +266,7 @@ function _qbench_pull_contact($dbc, $qbc)
 			// Pending Record?
 			$ct0 = [
 				'id' => _ulid()
-				, 'guid' => $rec['_id']
+				, 'guid' => $rec['@id']
 				, 'meta' => json_encode($rec)
 				, 'type' => 'X'
 				, 'email' => trim(strtolower($rec['email'] ?: $rec['email_address']))
@@ -278,7 +279,7 @@ function _qbench_pull_contact($dbc, $qbc)
 			echo "Contact: {$ct0['guid']} {$ct0['email']} ";
 
 			$chk = $dbc->fetchRow('SELECT id FROM contact WHERE guid = :g0', [
-				':g0' => $rec['_id']
+				':g0' => $rec['@id']
 			]);
 
 			if (empty($chk['id'])) {
@@ -354,14 +355,19 @@ function _qbench_pull_result_import($dbc, $rec)
 	global $lab_assay_list, $lab_panel_list;
 
 	$rec['_id'] = sprintf('qbench:%s', $rec['id']);
-	$rec['_assay_id'] = sprintf('qbench:%s', $rec['assay_id']);
-	if ( ! empty($rec['panel_id'])) {
-		$rec['_panel_id'] = sprintf('qbench:%s', $rec['panel_id']);
-	}
-	$rec['_lab_result_id'] = sprintf('qbench:%s', $rec['id']);
-	$rec['_lab_sample_id'] = sprintf('qbench:%s', $rec['sample_id']);
+	$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 
-	echo "lab_result: {$rec['_id']} ";
+	$rec['_assay_id'] = sprintf('qbench:%s', $rec['assay_id']);
+	$rec['@assay_id'] = sprintf('qbench:%s', $rec['assay_id']);
+
+	if ( ! empty($rec['panel_id'])) {
+		$rec['@panel_id'] = sprintf('qbench:%s', $rec['panel_id']);
+	}
+
+	$rec['@lab_result_id'] = sprintf('qbench:%s', $rec['id']);
+	$rec['@lab_sample_id'] = sprintf('qbench:%s', $rec['sample_id']);
+
+	echo "lab_result: {$rec['@id']} ";
 
 	if (empty($rec['worksheet_data'])) {
 		echo "\n";
@@ -370,42 +376,38 @@ function _qbench_pull_result_import($dbc, $rec)
 
 	switch (strtoupper($rec['state'])) {
 		case 'NOT STARTED':
-			$rec['_stat'] = 100;
+			$rec['@stat'] = 100;
 			break;
 		case 'BEING TESTED':
 		case 'NEEDS GC DATA':
-			$rec['_stat'] = 102;
+			$rec['@stat'] = 102;
 			break;
 		case 'IN DATA REVIEW':
 		case 'WAITING ON MORE SAMPLE':
-			$rec['_stat'] = 102;
+			$rec['@stat'] = 102;
 			break;
 		case 'RETEST - CONFIRMATION':
 		case 'RETEST - DILUTION REQUIRED':
 		case 'RETEST - REPREP REQUIRED':
-			$rec['_stat'] = 307;
+			$rec['@stat'] = 307;
 			break;
 		case 'CANCELLED':
-			$rec['_stat'] = 410;
+			$rec['@stat'] = 410;
 			break;
 		case 'SUBCONTRACTING':
-			$rec['_stat'] = 307;
+			$rec['@stat'] = 307;
 			break;
 		case 'COMPLETED':
-			$rec['_stat'] = 200;
+			$rec['@stat'] = 200;
 			break;
 		default:
 			var_dump($rec);
 			throw new \Exception('Invalid Status [IQB-313]');
 	}
 
-	// __ksort_r($rec);
-	// print_r($rec);
-	// exit;
-
 	// Lab Sample?
 	$ls0 = $dbc->fetchRow('SELECT id FROM lab_sample WHERE id = :g1', [
-		':g1' => $rec['_lab_sample_id']
+		':g1' => $rec['@lab_sample_id']
 	]);
 	if (empty ($ls0['id'])) {
 		echo "Missing Sample {$rec['sample_id']}\n";
@@ -413,15 +415,15 @@ function _qbench_pull_result_import($dbc, $rec)
 	}
 	// Inventory Data
 	$inv = $dbc->fetchRow('SELECT id FROM inventory WHERE id = :g1', [
-		':g1' => $rec['_lab_sample_id']
+		':g1' => $rec['@lab_sample_id']
 	]);
 	if (empty ($inv['id'])) {
-		echo "Missing Inventory for Sample {$rec['_lab_sample_id']}\n";
+		echo "Missing Inventory for Sample {$rec['@lab_sample_id']}\n";
 		return(0);
 	}
 
 	$lr0 = $dbc->fetchRow('SELECT id, name, stat FROM lab_result WHERE (id = :g1 OR guid = :g1)', [
-		':g1' => $rec['_lab_result_id']
+		':g1' => $rec['@lab_result_id']
 	]);
 	if (empty($lr0['id'])) {
 
@@ -429,11 +431,11 @@ function _qbench_pull_result_import($dbc, $rec)
 			'id' => sprintf('qbench:%s', $rec['id'])
 			, 'guid' => sprintf('qbench:%s', $rec['id'])
 			, 'license_id' => $_SESSION['License']['id']
-			, 'lab_sample_id' => $rec['_lab_sample_id']
+			, 'lab_sample_id' => $rec['@lab_sample_id']
 			// , 'inventory_id' => '018NY6XC00L0T0000000000000'
 			, 'hash' => md5(json_encode($rec))
-			, 'name' => ( $lab_assay_list[ $rec['_assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) )
-			, 'stat' => $rec['_stat']
+			, 'name' => ( $lab_assay_list[ $rec['@assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) )
+			, 'stat' => $rec['@stat']
 			, 'uom' => 'g'
 		];
 
@@ -447,8 +449,8 @@ function _qbench_pull_result_import($dbc, $rec)
 		echo '^ ';
 
 		$lr2 = new \App\Lab_Result($dbc, $lr0);
-		$lr2['name'] = ( $lab_assay_list[ $rec['_assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) );
-		$lr2['stat'] = $rec['_stat'];
+		$lr2['name'] = ( $lab_assay_list[ $rec['@assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) );
+		$lr2['stat'] = $rec['@stat'];
 		$lr2->save('Lab/Result Updated via Import');
 
 	}
@@ -468,6 +470,12 @@ function _qbench_pull_result_import($dbc, $rec)
 			$metric_key_ulid = _qbench_map_metric($metric_key);
 			if ('018NY6XC00LM00000000000000' == $metric_key_ulid) {
 				continue;
+			}
+
+			if ('018NY6XC00LMR9PB7SNBP97DAS' == $metric_key_ulid) {
+				echo "It's 018NY6XC00LMR9PB7SNBP97DAS!!\n";
+				var_dump($metric_val);
+				echo "\n";
 			}
 
 			if (empty($metric_key_ulid)) {
