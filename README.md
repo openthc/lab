@@ -15,10 +15,13 @@ composer update
 npm update
 ```
 
+
 ## Install Ghostscript
 
-Get pdf_info.ps from here: http://git.ghostscript.com/?p=ghostpdl.git;a=tree;f=toolbin;hb=HEAD
-Save in ./etc/
+```
+apt install ghostscript
+locate pdf_info.ps
+```
 
 
 # Tests for Laboratory Site
@@ -27,9 +30,10 @@ Save in ./etc/
 ./test/test.sh
 ```
 
-# Processes
 
-## Intake
+## Processes
+
+### Intake
 
 Using the B2B Transfer model incoming materials are record to Lab Sample type lots
 
