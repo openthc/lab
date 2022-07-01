@@ -35,7 +35,15 @@ use OpenTHC\Lab\Lab_Report;
 		<form method="post" target="_blank">
 
 			<div class="btn-group">
-				<a class="btn btn-primary" href="/report/<?= $data['Lab_Report']['id'] ?>/update"><i class="fa-solid fa-flag-checkered"></i> Commit</a>
+				<?php
+				switch ($data['Lab_Report']['stat']) {
+					case 100:
+						printf('<a class="btn btn-primary" href="/report/%s/update"><i class="fa-solid fa-flag-checkered"></i> Commit</a>', $data['Lab_Report']['id']);
+						break;
+					case 200:
+
+				}
+				?>
 				<button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button>
 				<!-- <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button> -->
 				<div class="dropdown-menu dropdown-menu-lg-end">

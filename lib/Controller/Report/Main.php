@@ -24,7 +24,7 @@ class Main extends \App\Controller\Base
 
 		$res = $dbc->fetchAll($sql, $arg);
 
-		$data = [];
+		$data = $this->loadSiteData();
 		$data['Page'] = [ 'title' => 'Lab Reports' ];
 		$data['report_list'] = $res;
 

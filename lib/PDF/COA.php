@@ -7,6 +7,8 @@
 
 namespace OpenTHC\Lab\PDF;
 
+use Edoceo\Radix\DB\SQL;
+
 class COA extends \App\PDF\Base
 {
 	// It's the Font Size + 2, Pre-Calculated Helpers
@@ -18,10 +20,24 @@ class COA extends \App\PDF\Base
 	const FS_16 = 18 / 72;
 
 	private $_data = [];
+	private $_dbc_lab_data = null;
 
+	/**
+	 * Set the Huge Data Blob
+	 */
 	function setData($data)
 	{
 		$this->_data = $data;
+		$this->_dbc_lab_data = new SQL('sqlite::memory:');
+		$this->_dbc_lab_data->query('CREATE TABLE lab_report_data (id, lab_metric_type_id, name, sort, qom, uom, max)');
+	}
+
+	/**
+	 * Add a Lab Result Metric
+	 */
+	function addLabResultMetric($lm)
+	{
+
 	}
 
 	/**
@@ -71,6 +87,14 @@ class COA extends \App\PDF\Base
 		$this->cell(3.25, self::FS_12, sprintf('Date: %s', $dt->format('m/d/Y')), 0, 0, 'C');
 		// $y += self::FS_12;
 
+		$y += self::FS_12;
+		$this->setXY($x, $y);
+		$this->setFont('', 'B', 12);
+		$this->setTextColor(0x00, 0x99, 0x00);
+		$this->cell(3.25, self::FS_12, 'Passed', 0, 0, 'C');
+		$this->setFont('', '', 12);
+		$this->setTextColor(0x00, 0x00, 0x00);
+
 
 		// Laboratory Address
 		$this->setFont('', '', 10);
@@ -80,7 +104,7 @@ class COA extends \App\PDF\Base
 		$y = 0.5;
 
 		$this->setXY($x, $y);
-		$this->cell(1.5, self::FS_10, $this->_data['License_Laboratory']['name']); // $_SESSION['License']['id']);
+		$this->cell(1.5, self::FS_10, $this->_data['License_Laboratory']['name']);
 		$y += self::FS_10;
 
 		$this->setXY($x, $y);
@@ -122,12 +146,17 @@ class COA extends \App\PDF\Base
 		}
 
 		// Client Logo Image
+		$url_logo = 'https://cdn.openthc.com/img/icon.png';
+		$url_logo = $this->_data['License_Source']['icon'];
+
 		$x = 0.50;
 		$y = 1.50;
-		$this->rect($x, $y, 1, 1);
-		$this->setXY($x, $y);
-		$this->cell(1, self::FS_12, 'LOGO');
-		// $this->image();
+		$w = 1;
+		$h = 1;
+		// $this->rect($x, $y, $w, $h);
+		// $this->setXY($x, $y);
+		// $this->cell(1, self::FS_12, 'LOGO');
+		$this->image($url_logo, $x, $y, $w, $h, $type='', $link='', $align='', $resize=true, $dpi=300, $palign='', $ismask=false, $imgmask=false, $border=0, $fitbox='RT');
 
 		// Sample/Product Picture
 		$x = 7.00;
@@ -208,7 +237,14 @@ class COA extends \App\PDF\Base
 		// Disclaimer Text
 		$this->setXY(0.5, 9.5);
 		$this->setFont('', '', 9);
-		$this->multicell(7.5, self::FS_10, $this->_data['footer_text'], $opt['border'], $opt['align'], $opt['fill'], null, 0.5, 10);
+		$chr0 = $this->getCellHeightRatio();
+		$this->setCellHeightRatio(0.9);
+		$this->multicell(7.5 - 3, self::FS_10, $this->_data['footer_text'], $opt['border'], $opt['align'], $opt['fill'], null, 0.5, 10);
+		$this->setCellHeightRatio($chr0);
+
+		// Signature
+
+		// Digital Signature & QR Code
 
 	}
 
@@ -262,56 +298,104 @@ class COA extends \App\PDF\Base
 	function draw_metric_qom($x, $y, $lrm)
 	{
 
+		$uom = $lrm['uom'];
+		$qom = $lrm['qom'];
+		$max = $lrm['meta']['max'];
+
 		$this->setXY($x, $y);
 		$this->cell(2.5, self::FS_10, $lrm['name'], 0, 0, 'L');
 
-		$pfl = $lrm['pfl']; // Pass / Fail Limit
-		$uom = $lrm['uom'];
-		$qom = $lrm['qom'];
-
-		// $this->setXY($x + 1.875, $y);
-		// $this->cell(0.5, self::FS_10, 'A/L', 0, 0, 'R');
-
 		switch ($uom) {
 			case 'bool':
-				$txt = $qom ? 'Pass' : 'Fail';
-				$this->setXY($x + 2.5, $y);
-				$this->cell(0.5, self::FS_10, $txt, 0, 0, 'R');
-				return(0);
+				$qom = ($qom ? 'Pass' : 'Fail');
+				$uom = '';
 				break;
 		}
 
 		switch ($qom) {
 			case -1:
 				$qom = 'N/A';
-				$uom = '-';
 				break;
 			case -2:
 				$qom = 'N/D';
-				$uom = '-';
 				break;
 			case -3:
 				$qom = 'N/T';
-				$uom = '-';
 				break;
 			default:
 				switch ($uom) {
 					case 'pct':
 						$qom = intval($qom);
 						break;
-					// case 'ppm':
-					// case 'ppb':
-					// 	$qom = $qom;
-					// 	break;
 				}
-
 		}
 
+		$this->setXY($x + 2.0, $y);
+		$this->cell(0.5, self::FS_10, $qom, 0, 0, 'C');
+
+		if ( ! empty($max)) {
+			$this->setXY($x + 2.5, $y);
+			$this->cell(0.5, self::FS_10, sprintf('%0.2f', $max['val']), 0, 1, 'L');
+		}
+
+		if ( ! empty($uom)) {
+			$this->setXY($x + 3, $y);
+			$this->cell(0.5, self::FS_10, \App\UOM::nice($uom), 0, 0, 'C');
+		}
+	}
+
+	/**
+	 *
+	 */
+	function draw_metric_table_header($x, $y, $metric_name)
+	{
+		// @todo checkPageBreak for my expected height
+		$y_want = $y + self::FS_14 + self::FS_14;
+		// if ($this->checkPageBreak($y_want, $y)) {
+			// We're on a new page
+			// And the Header is Done?
+			// $x = 0.50;
+			// $y = 1.75;
+			// $this->setXY($x, $y);
+		// }
+
+		$this->setFont('', 'B', 14);
+
+		$this->setXY($x, $y);
+		$this->cell(7.5, self::FS_14, $metric_name);
+		$y += self::FS_14;
+
+		// Table Header - Column 0
+		$this->setFont('', '', 10);
+
+		$this->setXY($x, $y);
+		$this->cell(2.5, self::FS_12, 'Metric', 'B', 0, 'L');
+
+		$this->setXY($x + 2.0, $y);
+		$this->cell(0.5, self::FS_12, 'Result', 'B', 0, 'C');
+
 		$this->setXY($x + 2.5, $y);
-		$this->cell(0.5, self::FS_10, $qom, 0, 0, 'R');
+		$this->cell(0.5, self::FS_12, 'A/L', 'B', 0, 'C');
 
 		$this->setXY($x + 3, $y);
-		$this->cell(0.5, self::FS_10, \App\UOM::nice($uom), 0, 0, 'L');
+		$this->cell(0.5, self::FS_12, 'UOM', 'B', 0, 'C');
+
+
+		$x = 4.25;
+		$this->setXY($x, $y);
+		$this->cell(2.5, self::FS_12, 'Metric', 'B', 0, 'L');
+
+		$this->setXY($x + 2, $y);
+		$this->cell(0.5, self::FS_12, 'Result', 'B', 0, 'C');
+
+		$this->setXY($x + 2.5, $y);
+		$this->cell(0.5, self::FS_12, 'A/L', 'B', 0, 'C');
+
+		$this->setXY($x + 3, $y);
+		$this->cell(0.5, self::FS_12, 'UOM', 'B', 0, 'C');
+
+		$y += self::FS_14;
+		$this->setXY($x, $y);
 
 	}
 
@@ -324,10 +408,10 @@ class COA extends \App\PDF\Base
 		$y = $this->getY();
 
 		// Section Header
-		$this->setXY($x, $y);
-		$this->setFont('', 'B', 14);
-		$this->cell(7.5, self::FS_14, $metric_name);
-		$this->setXY($x, $y + self::FS_14);
+		$this->draw_metric_table_header($x, $y, $metric_name);
+
+		$x = $this->getX();
+		$y = $this->getY();
 		$this->setFont('', '', 10);
 
 
@@ -388,12 +472,10 @@ class COA extends \App\PDF\Base
 				// We're on the new page
 				$x = 0.50;
 				$y = 1.75;
-				$this->setXY($x, $y);
+				$this->draw_metric_table_header($x, $y, $metric_name);
 
-				// Table Header
-				$this->setFont('', 'B', 14);
-				$this->cell(7.5, self::FS_14, sprintf('%s (continued)', $metric_name));
-				$this->setXY($x, $y + self::FS_14);
+				$x = $this->getX();
+				$y = $this->getY();
 				$this->setFont('', '', 10);
 
 			}

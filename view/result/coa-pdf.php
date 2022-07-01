@@ -5,9 +5,6 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-// $lab_result_metric = $meta['Lab_Result_Metric_list'];
-// $lab_result_section_metric = $meta['Lab_Result_Section_Metric_list'];
-
 use OpenTHC\Lab\PDF\COA;
 
 
@@ -64,11 +61,12 @@ if ($metric_list_count > 0) {
 
 
 // Metals
-$x = 0.5;
-$y = $pdf->getY() + COA::FS_14;
-$pdf->setXY($x, $y);
-$pdf->draw_metric_table_2_col_a_then_d('Metals', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR']['metric_list']);
-
+if ( ! empty($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR']['metric_list'])) {
+	$x = 0.5;
+	$y = $pdf->getY() + COA::FS_14;
+	$pdf->setXY($x, $y);
+	$pdf->draw_metric_table_2_col_a_then_d('Metals', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR']['metric_list']);
+}
 
 // Microbes
 $x = 0.5;
@@ -85,16 +83,15 @@ $pdf->draw_metric_table_2_col_a_then_d('Mycotoxins', $data['Lab_Result_Section_M
 
 
 // Solvents
-$x = 0.50;
-$y = $pdf->getY();
-$y = $y + COA::FS_14;
-$pdf->setXY($x, $y);
-$pdf->draw_metric_table_2_col_a_then_d('Solvents', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW']['metric_list']);
+if ( ! empty($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW']['metric_list'])) {
+	$x = 0.50;
+	$y = $pdf->getY();
+	$y = $y + COA::FS_14;
+	$pdf->setXY($x, $y);
+	$pdf->draw_metric_table_2_col_a_then_d('Solvents', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW']['metric_list']);
+}
 
-
-
-// $pdf->addPage();
-
+// Pesticides
 $x = 0.50;
 $y = $pdf->getY();
 $y += COA::FS_14;
@@ -115,6 +112,7 @@ $pdf->draw_metric_table_2_col_a_then_d('Pesticides', $metric_list);
 // $pdf->draw_metric_table($metric_listB);
 
 // Signature? Details QR Code Linking to .... ?
+// $pdf->setFont();
 
 // More disclaimer text
 

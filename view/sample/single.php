@@ -119,45 +119,6 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 </div>
 
 
-<?php
-if ( ! empty($data['Lab_Result_list'])) {
-?>
-
-	<hr>
-	<h2 style="margin-bottom:0;">Lab Results</h2>
-	<table class="table table-sm">
-	<?php
-	foreach ($data['Lab_Result_list'] as $lr) {
-		echo '<tr>';
-		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['guid']) );
-		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
-		printf('<td class="r"><input name="lab-result[]" type="checkbox" value="%s"></td>', $lr['id']);
-		echo '</tr>';
-	}
-	echo '</table>';
-}
-?>
-
-<?php
-if ( ! empty($data['Lab_Report_list'])) {
-?>
-
-	<hr>
-	<h2 style="margin-bottom:0;">Lab Reports</h2>
-	<table class="table table-sm">
-	<?php
-	foreach ($data['Lab_Report_list'] as $lr) {
-		echo '<tr>';
-		printf('<td><a href="/report/%s"><code>%s</code></a></td>', $lr['id'], substr($lr['id'], -6) );
-		printf('<td><a href="/report/%s">%s</a></td>', $lr['id'], __h($lr['name']) );
-		// printf('<td><a href="/report/%s">%s</a></td>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
-		// printf('<td class="r"><input name="lab-report[]" type="checkbox" value="%s"></td>', $lr['id']);
-		echo '</tr>';
-	}
-	echo '</table>';
-}
-?>
-
 <div class="form-actions">
 	<?php
 	switch ($data['Lab_Sample']['stat']) {
@@ -170,12 +131,63 @@ if ( ! empty($data['Lab_Report_list'])) {
 	}
 	?>
 	<button class="btn btn-primary" name="a" type="submit" value="save"><i class="fas fa-save"></i> Save</button>
-	<button class="btn btn-outline-secondary" name="a" type="submit" value="lab-report-create"><i class="fa-solid fa-file-signature"></i> Report</button>
 	<!-- <a class="btn btn-secondary" href="/sample/<?= $data['Lab_Sample']['id'] ?>/edit"><i class="fas fa-edit"></i> Edit</a> -->
 	<!-- <button class="btn btn-secondary" name="a" type="submit" value="done"><i class="fas fa-check-square"></i> Finish</button> -->
 	<button class="btn btn-outline-danger" name="a" type="submit" value="void"><i class="fas fa-ban"></i> Void</button>
 	<button class="btn btn-outline-danger" name="a" type="submit" value="drop"><i class="fas fa-trash"></i> Delete</button>
 </div>
+</form>
+
+<?php
+if ( ! empty($data['Lab_Result_list'])) {
+?>
+
+	<hr>
+	<form autocomplete="off" enctype="multipart/form-data" method="post">
+	<h2 style="margin-bottom:0;">Lab Results</h2>
+	<table class="table table-sm">
+	<?php
+	foreach ($data['Lab_Result_list'] as $lr) {
+		echo '<tr>';
+		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['guid']) );
+		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
+		printf('<td class="r"><input name="lab-result[]" type="checkbox" value="%s"></td>', $lr['id']);
+		echo '</tr>';
+	}
+	?>
+	</table>
+	<div class="form-actions">
+		<button class="btn btn-outline-secondary" name="a" type="submit" value="lab-report-create"><i class="fa-solid fa-file-signature"></i> Report</button>
+	</div>
+	</form>
+<?php
+}
+?>
+
+<?php
+if ( ! empty($data['Lab_Report_list'])) {
+?>
+
+	<hr>
+	<h2 style="margin-bottom:0;">Lab Reports</h2>
+	<table class="table table-sm">
+	<?php
+	foreach ($data['Lab_Report_list'] as $lr) {
+
+		$dt = new \DateTime($lr['created_at']);
+
+		echo '<tr>';
+		printf('<td><a href="/report/%s"><code>%s</code></a></td>', $lr['id'], substr($lr['id'], -6) );
+		printf('<td>%s</td>', $dt->format('Y-m-d'));
+		printf('<td><a href="/report/%s">%s</a></td>', $lr['id'], __h($lr['name']) );
+		// printf('<td><a href="/report/%s">%s</a></td>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
+		// printf('<td class="r"><input name="lab-report[]" type="checkbox" value="%s"></td>', $lr['id']);
+		echo '</tr>';
+	}
+	echo '</table>';
+}
+?>
+
 
 </div>
 </form>

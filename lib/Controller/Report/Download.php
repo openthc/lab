@@ -11,7 +11,7 @@ use OpenTHC\Lab\Lab_Report;
 use App\Lab_Result;
 use App\Lab_Sample;
 
-class Download extends \App\Controller\Result\View
+class Download extends \OpenTHC\Lab\Controller\Report\Single
 {
 	private $_fh;
 	private $_eol = "\r\n";
@@ -56,24 +56,41 @@ class Download extends \App\Controller\Result\View
 	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
+		// Get Result
+		$dbc_user = $this->_container->DBC_User;
+		$Lab_Report = new Lab_Report($dbc_user, $ARG['id']);
+		if (empty($Lab_Report['id'])) {
+			_exit_html_warn('<h1>Lab Report Not Found [CRS-030]', 404);
+		}
+		$data = $this->_load_data($dbc_user, $Lab_Report);
+
+		// Alias the data into this field
+		$data['Lab_Result'] = [
+			'id' => $Lab_Report['id'],
+			'guid' => $data['Lab_Sample']['name'],
+			'name' => $Lab_Report['name'],
+			'created_at' => $Lab_Report['created_at'],
+		];
+
+
 		switch ($_GET['f']) {
 			case 'csv':
-				return $this->csv($RES, $ARG);
+				return $this->csv($RES, $ARG, $data);
 			case 'csv+ccrs':
 			case 'csv ccrs':
-				return $this->csv_ccrs($RES, $ARG);
+				return $this->csv_ccrs($RES, $ARG, $data);
 			case 'json':
-				return $this->json($RES, $ARG);
+				return $this->json($RES, $ARG, $data);
 			case 'json+wcia':
 			case 'json wcia':
-				return $this->json_wcia($RES, $ARG);
+				return $this->json_wcia($RES, $ARG, $data);
 			case 'pdf':
-				return $this->pdf($RES, $ARG);
+				return $this->pdf($RES, $ARG, $data);
 			case 'png':
-				return $this->png($RES, $ARG);
+				return $this->png($RES, $ARG, $data);
 			case 'png+coa':
 			case 'png coa':
-				return $this->png_coa($RES, $ARG);
+				return $this->png_coa($RES, $ARG, $data);
 		}
 
 		_exit_html_fail('Invalid Request [CRD-079]', 400);
@@ -83,7 +100,7 @@ class Download extends \App\Controller\Result\View
 	/**
 	 *
 	 */
-	function csv($RES, $ARG)
+	function csv($RES, $ARG, $data)
 	{
 		__exit_text('Dump as CSV', 501);
 	}
@@ -91,7 +108,7 @@ class Download extends \App\Controller\Result\View
 	/**
 	 * Dump as CCRS CSV File
 	 */
-	function csv_ccrs($RES, $ARG)
+	function csv_ccrs($RES, $ARG, $data)
 	{
 		$dbc = $this->_container->DBC_User;
 
@@ -114,6 +131,8 @@ class Download extends \App\Controller\Result\View
 		// Have to Make it look like the way the 'result' outputter wants it to be.
 		$data['Lab_Result'] = [
 			'id' => $Lab_Report['id'],
+			'guid' => $Lab_Report['guid'],
+			'name' => $Lab_Report['guid'],
 			'created_at' => $Lab_Report['created_at'],
 		];
 		$data['Lab_Sample'] = $Lab_Sample->toArray();
@@ -137,7 +156,7 @@ class Download extends \App\Controller\Result\View
 
 	}
 
-	function json($RES, $ARG)
+	function json($RES, $ARG, $data)
 	{
 		__exit_text('Dump as JSON', 501);
 	}
@@ -145,30 +164,25 @@ class Download extends \App\Controller\Result\View
 	/**
 	 *
 	 */
-	function json_wcia($RES, $ARG)
+	function json_wcia($RES, $ARG, $data)
 	{
-		$data = $this->_load_data($ARG);
-
 		// require_once(APP_ROOT . '/view/result/json-wcia.php');
 		$json = require_once(APP_ROOT . '/view/pub/json.wcia-2022-062.php');
 
 		return $RES->withJSON($json, 200, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
 
 	}
 
 	/**
 	 * Generate a PDF Linking to this Page
 	 */
-	function pdf($RES, $ARG)
+	function pdf($RES, $ARG, $data)
 	{
-		$data = $this->_load_data($ARG);
-
-		$sample_file = sprintf('%s/var/%s/sample/%s.*', APP_ROOT, $_SESSION['Company']['id'], $data['Lab_Sample']['id']);
-		$sample_file = glob($sample_file);
-		if ( ! empty($sample_file)) {
-			$data['Lab_Sample']['img_file'] = $sample_file[0];
-		}
+		// $sample_file = sprintf('%s/var/%s/sample/%s.*', APP_ROOT, $_SESSION['Company']['id'], $data['Lab_Sample']['id']);
+		// $sample_file = glob($sample_file);
+		// if ( ! empty($sample_file)) {
+		// 	$data['Lab_Sample']['img_file'] = $sample_file[0];
+		// }
 
 		$dbc = $this->_container->DBC_User;
 		$C0 = new \OpenTHC\Company($dbc, $_SESSON['Company']['id']);
@@ -179,18 +193,48 @@ class Download extends \App\Controller\Result\View
 		$data['License_Laboratory']['website'] = $C0->getOption('coa/website');
 		$data['License_Laboratory']['icon'] =    $C0->getOption('coa/icon');
 
-		//
-		// $data['Client'] = [];
-		// $data['Client']['icon'] =
+		// $data['License_Client'] = [];
+		// $License = new License($dbc, $data['License_Source']['id']);
+		// $License->getIcon();
+		$url = sprintf('https://directory.openthc.com/api/license/%s', $data['License_Source']['id']);
+		$req = _curl_init($url);
+		$res = curl_exec($req);
+		$res = json_decode($res, true);
+		$res = $res['data'];
+
+		$data['License_Source']['icon'] = sprintf('https://directory.openthc.com/img/company/%s/icon.png', $res['company']['id']);
 
 		$data['footer_text'] = $C0->getOption('coa/footer');
+
+		// Base the Lab Metric List
+		$data['Lab_Result_Metric_list'] = [];
+		foreach ($data['Lab_Report']['meta']['lab_result_metric_list'] as $x) {
+
+			$lm = $dbc->fetchRow('SELECT * FROM lab_metric WHERE id = :lm0', [ ':lm0' => $x['lab_metric_id'] ]);
+			$lm['meta'] = json_decode($lm['meta'], true);
+
+			$x['name'] = $lm['name'];
+			$x['meta']['max'] = $lm['meta']['max'];
+
+			$data['Lab_Result_Metric_list'][ $x['lab_metric_id'] ] = $x;
+		}
+
+		$data['Lab_Result_Section_Metric_list'] = [];
+		foreach ($data['lab_metric_type_list'] as $lmt) {
+			$lmt['metric_list'] = [];
+			$data['Lab_Result_Section_Metric_list'][ $lmt['id'] ] = $lmt;
+		}
+
+		foreach ($data['Lab_Result_Metric_list'] as $lrm) {
+			$lmt_id = $lrm['lab_metric_type_id'];
+			$data['Lab_Result_Section_Metric_list'][ $lmt_id ]['metric_list'][ $lrm['lab_metric_id'] ] = [
+				'id' => $lrm['lab_metric_id'],
+			];
+		}
 
 		if ('dump' == $_GET['_']) {
 			__exit_text($data);
 		}
-
-		// Filter out Lab Metrics w/o Metrics
-		// ['metric']
 
 		require_once(APP_ROOT . '/view/result/coa-pdf.php');
 
@@ -250,50 +294,7 @@ class Download extends \App\Controller\Result\View
 
 		// echo $qrCode->writeString();
 
-	}
-
-	/**
-	 * Load the Full Lab Data
-	 */
-	function _load_data($ARG)
-	{
-		$dbc = $this->_container->DBC_User;
-
-		$data = $this->load_lab_result_full($ARG['id']);
-		// if (empty($Lab_Result['id'])) {
-		// 	_exit_html_fail('<h1>Lab Result Not Found [CRD-123]</h1>', 400);
-		// }
-		// $Lab_Sample = new Lab_Sample($dbc, $Lab_Result['lab_sample_id']);
-		// if (empty($Lab_Sample['id'])) {
-		// }
-
-		$Lab_Result = new Lab_Result($dbc, $data['Lab_Result']);
-
-		$data['Lab_Result_Section_Metric_list'] = $Lab_Result->getMetrics_Grouped();
-
-		$data['Lab_Result_Metric_Type_list'] = $Lab_Result->getMetricListGrouped();
-
-		// $data['Lot'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i0', [
-		// 	':i0' => $data['Lab_Sample']['lot_id']
-		// ]);
-
-		// $data['Product'] = $dbc->fetchRow('SELECT * FROM product WHERE id = :i0', [
-		// 	':i0' => $data['Lot']['product_id']
-		// ]);
-
-		// $data['Product_Type'] = $dbc->fetchRow('SELECT * FROM product_type WHERE id = :i0', [
-		// 	':i0' => $data['Product']['product_type_id']
-		// ]);
-
-		$data['License_Laboratory'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
-			':l0' => $data['Lab_Result']['license_id']
-		]);
-
-		$data['License_Source'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
-			':l0' => $data['Lab_Sample']['license_id_source']
-		]);
-
-		return $data;
+		// exit(0);
 
 	}
 

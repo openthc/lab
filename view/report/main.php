@@ -18,29 +18,31 @@ $search_data['search_field_list'] = [
 
 <h1>Reports</h1>
 
-<?= $this->block('search-filter', $search_data); ?>
+<?php
+// $this->block('search-filter', $search_data);
+?>
 
-<div class="d-flex mb-2">
+<!-- <div class="d-flex mb-2">
 	<div>
 		<input class="form-control" name="q" placeholder="- search -">
 	</div>
 	<div class="ms-2">
 		<div class="btn-group">
-			<a class="btn btn-outline-secondary" href="?stat=100">Pending: <?= $data['result_stat']['100'] ?></a>
-			<a class="btn btn-outline-primary" href="?stat=200">Passed: <?= $data['result_stat']['200'] ?></a>
-			<a class="btn btn-outline-danger" href="?stat=400">Failed: <?= $data['result_stat']['400'] ?></a>
+			<a class="btn btn-outline-secondary" href="?stat=100">Pending: <?= $data['report_stat']['100'] ?></a>
+			<a class="btn btn-outline-primary" href="?stat=200">Passed: <?= $data['report_stat']['200'] ?></a>
+			<a class="btn btn-outline-danger" href="?stat=400">Failed: <?= $data['report_stat']['400'] ?></a>
 			<a class="btn btn-outline-secondary" href="?stat=*">All</a>
 		</div>
 	</div>
 	<div class="ms-2">
 		<div class="btn-group">
-			<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['older']) ?>"><i class="fas fa-arrow-left"></i></a>
-			<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['newer']) ?>"><i class="fas fa-arrow-right"></i></a>
+			<a class="btn btn-outline-secondary" href="?p=<?= ($data['report_page']['older']) ?>"><i class="fas fa-arrow-left"></i></a>
+			<a class="btn btn-outline-secondary" href="?p=<?= ($data['report_page']['newer']) ?>"><i class="fas fa-arrow-right"></i></a>
 		</div>
 	</div>
-</div>
+</div> -->
 
-<!-- <p>A List of all Active and Recent Results, use Filters or Search to find old stuff.</p> -->
+<!-- <p>A List of all Active and Recent Reports, use Filters or Search to find old stuff.</p> -->
 
 <table class="table table-sm">
 <thead class="table-dark">
@@ -55,7 +57,7 @@ $search_data['search_field_list'] = [
 		<th class="c">Status</th>
 		<th class="r" colspan="2">
 			<!-- Send them to dump.openthc -->
-			<!-- <a class="btn btn-sm btn-outline-secondary" href="/result/download"><i class="fas fa-download"></i> -->
+			<!-- <a class="btn btn-sm btn-outline-secondary" href="/report/download"><i class="fas fa-download"></i> -->
 		</th>
 	</tr>
 </thead>
@@ -67,7 +69,7 @@ foreach ($data['report_list'] as $s) {
 
 ?>
 	<tr>
-		<td><a href="/result/<?= $s['id'] ?>"><?= $s['id_nice'] ?></a></td>
+		<td><a href="/report/<?= $s['id'] ?>"><?= $s['id_nice'] ?></a></td>
 		<td><?php
 		if ( ! empty($s['lab_sample_id'])) {
 			printf('<a href="/sample/%s">%s</a>', $s['lab_sample_id'], __h($s['lab_sample_guid']));
@@ -98,7 +100,7 @@ foreach ($data['report_list'] as $s) {
 
 
 <script>
-var sync_base = '/result/';
+var sync_base = '/report/';
 var sync_wait = 500;
 
 function syncExec($b, cbf)
