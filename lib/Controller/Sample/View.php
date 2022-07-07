@@ -210,19 +210,14 @@ class View extends \App\Controller\Base
 		// $lr1['contact_id'] = $_SESSION['Contact']['id'];
 		$lr1['license_id'] = $_SESSION['License']['id'];
 		$lr1['license_id_source'] = $_SESSION['License']['id'];
-		$lr1['license_id_client'] = $_POST['source-license-id'];
+		$lr1['license_id_client'] = $Lab_Sample['license_id_source'];
 		$lr1['name'] = sprintf('Lab Report for Sample %s', $Lab_Sample['name']);
 		$lr1['meta'] = json_encode([
-			'lab_report_list' => $_POST['lab-result'],
-			'lab_metric_list' => $lab_metric_list,
+			'lab_report_list' => $_POST['lab-result'], // @deprecated
+			'lab_result_list' => $_POST['lab-result'],
+			'lab_metric_list' => $lab_metric_list, // @deprecated
+			'lab_result_metric_list' => $lab_metric_list,
 		]);
-
-		// __exit_text([
-		// 	'_POST' => $_POST,
-		// 	// 'Lab_Sample' => $Lab_Sample,
-		// 	'Lab_Report' => $lr1,
-		// 	// 'lab_result_metric' => $lab_metric_list
-		// ]);
 
 		$dbc->insert('lab_report', $lr1);
 
@@ -361,6 +356,7 @@ class View extends \App\Controller\Base
 		]);
 		// If not found, get from Directory and add
 		if (empty($L0['id'])) {
+
 			$dir = new \OpenTHC\Service\OpenTHC('dir');
 			$res = $dir->get(sprintf('/api/license/%s', $Lab_Sample['license_id_source']));
 
@@ -372,6 +368,7 @@ class View extends \App\Controller\Base
 				'type' => $res['data']['type'],
 				'hash' => '-',
 			]);
+
 		}
 
 		$Lab_Sample['name'] = trim($_POST['lab-sample-name']);
@@ -406,7 +403,7 @@ class View extends \App\Controller\Base
 	}
 
 	/**
-	 *
+	 * Voids the Sample
 	 */
 	function _voidSample($RES, $ARG)
 	{
