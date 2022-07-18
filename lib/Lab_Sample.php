@@ -78,4 +78,24 @@ class Lab_Sample extends \OpenTHC\SQL\Record
 
 	}
 
+	/**
+	 *
+	 */
+	function addFile()
+	{
+
+	}
+
+	/**
+	 *
+	 */
+	function getFiles() : array
+	{
+		$img_path = sprintf('%s/var/%s/sample/%s.*', APP_ROOT, $_SESSION['Company']['id'], $this->_data['id']);
+		$img_list = glob($img_path);
+		// sprintf('%s/var/%s/sample/%s.%s', APP_ROOT, $_SESSION['Company']['id'], $Lab_Sample['id'], $output_type);
+		return $img_list;
+	}
+
+
 }

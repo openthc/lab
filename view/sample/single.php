@@ -26,6 +26,23 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 	</div>
 	<div class="col-md-6">
 		<div class="mb-2">
+			<label>Image:</label>
+			<div class="input-group">
+				<input accept=".png,.jpeg,.jpg,image/png,image/jpeg" capture="environment" class="form-control" name="sample-file" type="file">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-6">
+		<div class="mb-2">
+			<label>Source Lot Identifier:</label>
+			<input class="form-control" name="source-lot-guid" value="<?= $data['Lot']['guid'] ?>">
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="mb-2">
 			<label>Source License:</label>
 			<div class="input-group">
 				<input name="source-license-name" class="form-control license-autocomplete" value="<?= __h($data['License_Source']['name']) ?>">
@@ -37,14 +54,7 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 	</div>
 </div>
 
-
 <div class="row">
-	<div class="col-md-6">
-		<div class="mb-2">
-			<label>Source Lot Identifier:</label>
-			<input class="form-control" name="source-lot-guid" value="<?= $data['Lot']['guid'] ?>">
-		</div>
-	</div>
 	<div class="col-md-6">
 		<div class="mb-2">
 			<label>Product Type:</label>
@@ -56,8 +66,6 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 			</div>
 		</div>
 	</div>
-</div>
-<div class="row">
 	<div class="col-md-6">
 		<div class="mb-2">
 			<label>Product:</label>
@@ -65,16 +73,6 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 				<input class="form-control product-autocomplete" name="product-name" value="<?= __h($data['Product']['name']) ?>">
 				<input id="product-id" name="product-id" type="hidden" value="<?= $data['Product']['id'] ?>">
 				<div class="input-group-text"><?= ($data['Lab_Sample']['flag_medical'] ? 'Med' : 'Rec') ?></div>
-				<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
-			</div>
-		</div>
-	</div>
-	<div class="col-md-6">
-		<div class="mb-2">
-			<label>Variety:</label>
-			<div class="input-group">
-				<input class="form-control variety-autocomplete" name="variety-name" value="<?= __h($data['Variety']['name']) ?>">
-				<input class="" name="variety-id" type="hidden" value="<?= $data['Variety']['id'] ?>">
 				<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
 			</div>
 		</div>
@@ -92,18 +90,20 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 <div class="row">
 	<div class="col-md-6">
 		<div class="mb-2">
-			<label>Quantity:</label>
+			<label>Variety:</label>
 			<div class="input-group">
-				<input class="form-control r" name="sample-qty" min="1" step="0.01" type="number" value="<?= __h($data['Lab_Sample']['qty']) ?>">
-				<div class="input-group-text"><?= __h($data['Product']['uom']) ?></div>
+				<input class="form-control variety-autocomplete" name="variety-name" value="<?= __h($data['Variety']['name']) ?>">
+				<input class="" name="variety-id" type="hidden" value="<?= $data['Variety']['id'] ?>">
+				<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
 			</div>
 		</div>
 	</div>
 	<div class="col-md-6">
 		<div class="mb-2">
-			<label>Image:</label>
+			<label>Quantity:</label>
 			<div class="input-group">
-				<input accept=".png,.jpeg,.jpg,image/png,image/jpeg" capture="environment" class="form-control" name="sample-file" type="file">
+				<input class="form-control r" name="sample-qty" min="1" step="0.01" type="number" value="<?= __h($data['Lab_Sample']['qty']) ?>">
+				<div class="input-group-text"><?= __h($data['Product']['uom']) ?></div>
 			</div>
 		</div>
 	</div>
@@ -117,6 +117,18 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 		</div>
 	</div>
 </div>
+
+<?php
+if ( ! empty($data['Lab_Sample']['img_link'])) {
+	echo '<section>';
+	echo '<h2>Sample Media</h2>';
+	echo '<div class="img-fluid">';
+	printf('<img alt="Sample Image" src="%s" style="max-width:360px;">', $data['Lab_Sample']['img_link']);
+	echo '</div>';
+	echo '</section>';
+}
+?>
+
 
 
 <div class="form-actions">
@@ -149,9 +161,9 @@ if ( ! empty($data['Lab_Result_list'])) {
 	<?php
 	foreach ($data['Lab_Result_list'] as $lr) {
 		echo '<tr>';
+		printf('<td class="r"><input checked name="lab-result[]" type="checkbox" value="%s"></td>', $lr['id']);
 		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['guid']) );
 		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
-		printf('<td class="r"><input name="lab-result[]" type="checkbox" value="%s"></td>', $lr['id']);
 		echo '</tr>';
 	}
 	?>

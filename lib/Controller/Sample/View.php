@@ -101,7 +101,54 @@ class View extends \App\Controller\Base
 			$data['Product']['uom'] = 'g';
 		}
 
+		// Sample Image
+		$data['Lab_Sample']['img_list'] = $Lab_Sample->getFiles();
+		if (count($data['Lab_Sample']['img_list'])) {
+			$img = $data['Lab_Sample']['img_list'][0];
+			$ext = (preg_match('/\.(\w+)$/', $img, $m) ? $m[1] : 'jpeg');
+			$data['Lab_Sample']['img_link'] = sprintf('/sample/%s.%s', $Lab_Sample['id'], $ext);
+		}
+
 		return $RES->write( $this->render('sample/single.php', $data) );
+
+	}
+
+	/**
+	 *
+	 */
+	function image($REQ, $RES, $ARG)
+	{
+		if (empty($ARG['id'])) {
+			_exit_html_fail('Invalid Request [CSV-124]', 400);
+		}
+
+		$dbc = $this->_container->DBC_User;
+
+		$Lab_Sample = new \App\Lab_Sample($dbc, $ARG['id']);
+		if (empty($Lab_Sample['id'])) {
+			__exit_text('Invalid Lab Sample [CSV-131]', 404);
+		}
+
+		$img_list = $Lab_Sample->getFiles();
+		if (empty($img_list)) {
+			__exit_text('Lab Sample Image Not Found [CSV-136]', 404);
+		}
+
+		$img = $img_list[0];
+		$ext = (preg_match('/\.(\w+)$/', $img, $m) ? $m[1] : 'jpeg');
+
+		switch ($ext) {
+			case 'jpeg':
+				header('content-type: image/jpeg');
+				break;
+			case 'png':
+				header('content-type: image/png');
+				break;
+		}
+
+		readfile($img);
+
+		exit(0);
 
 	}
 
@@ -389,10 +436,13 @@ class View extends \App\Controller\Base
 						move_uploaded_file($f0['tmp_name'], $output_file);
 						break;
 					default:
-						// Error
+						// Session::flash();
 				}
 			} else {
 				// Error
+				print_r($f0);
+				throw new \Exception(sprintf('File Upload Error "%d"', $f0['error']));
+				// Session::flash();
 			}
 
 		}
