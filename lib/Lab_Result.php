@@ -105,8 +105,8 @@ SQL;
 
 		// Index the Lab Metric List
 		$lab_metric_list = [];
-		$res_lab_metric = $this->_dbc->fetchAll('SELECT * FROM lab_metric WHERE stat = 200 ORDER BY sort, type, name');
-		foreach ($res_lab_metric as $lm) {
+		$res = $this->_dbc->fetchAll('SELECT * FROM lab_metric WHERE stat = 200 ORDER BY sort, type, name');
+		foreach ($res as $lm) {
 			$lm['meta'] = json_decode($lm['meta'], true);
 			$lab_metric_list[ $lm['id'] ] = $lm;
 		}
@@ -353,6 +353,100 @@ SQL;
 			'data' => $pdf_output,
 			'meta' => []
 		];
+
+	}
+
+	/**
+	 * Updates the Lab_Metric values from new Totals
+	 */
+	function updateCannabinoids()
+	{
+		$sql = <<<SQL
+		SELECT id, lab_metric_id, qom, uom
+		FROM lab_result_metric
+		WHERE lab_result_id = :lr0
+		  AND lab_metric_id IN (SELECT id FROM lab_metric WHERE lab_metric_type_id = :lmt0)
+		SQL;
+		$res = $this->_dbc->fetchAll($sql, [
+			':lr0' => $this->_data['id'],
+			':lmt0' => '018NY6XC00LMT0HRHFRZGY72C7',
+		]);
+		if (empty($res)) {
+			return(false);
+		}
+
+		$sum_all = 0;
+		$sum_cbd = 0;
+		$sum_thc = 0;
+		$uom_list = [];
+
+		foreach ($res as $rec) {
+			switch ($rec['lab_metric_id']) {
+				case '018NY6XC00DEEZ41QBXR2E3T97': // total-cbd
+				case '018NY6XC00PXG4PH0TXS014VVW': // total-thc
+				case '018NY6XC00V7ACCY94MHYWNWRN':
+				case '018NY6XC00SAE8Q4JSMF40YSZ3':
+					break 2;
+				case '018NY6XC00LM49CV7QP9KM9QH9': // d9-thc
+					$sum_thc += $rec['qom'];
+					break;
+				// case '018NY6XC00LM877GAKMFPK7BMC': // d8-thc
+				case '018NY6XC00LMB0JPRM2SF8F9F2': // thca
+					$sum_thc += ($rec['qom'] * 0.877);
+					break;
+				case '018NY6XC00LMK7KHD3HPW0Y90N': // cbd
+					$sum_cbd += $rec['qom'];
+					break;
+				case '018NY6XC00LMENDHEH2Y32X903': // cbda
+					$sum_cbd += ($rec['qom'] * 0.877);
+					break;
+			}
+			$sum_all += $rec['qom'];
+			$uom_list[] = $rec['uom'];
+		}
+
+		// Special Case Lab Metrics for Up-Scaling to the Lab Result
+
+		// Update
+		$sql = <<<SQL
+		INSERT INTO lab_result_metric (lab_result_id, lab_metric_id, qom, uom)
+		VALUES (:lr0, :lm0, :q0, :u0)
+		ON CONFLICT (lab_result_id, lab_metric_id)
+		DO UPDATE SET qom = :q0, uom = :u0
+		SQL;
+
+		// Activated Total THC
+		$this->_dbc->query($sql, [
+			':lr0' => $this->_data['id'],
+			':lm0' => '018NY6XC00PXG4PH0TXS014VVW',
+			':q0' => $sum_thc,
+			':u0' => 'pct',
+		]);
+
+		// Activated Total CBD
+		$this->_dbc->query($sql, [
+			':lr0' => $this->_data['id'],
+			':lm0' => '018NY6XC00DEEZ41QBXR2E3T97',
+			':q0' => $sum_cbd,
+			':u0' => 'pct',
+		]);
+
+		// Total THC+CBD
+		$this->_dbc->query($sql, [
+			':lr0' => $this->_data['id'],
+			':lm0' => '018NY6XC00V7ACCY94MHYWNWRN',
+			':q0' => $sum_thc + $sum_cbd,
+			':u0' => 'pct',
+		]);
+
+
+		// Total Cannabinoids
+		$this->_dbc->query($sql, [
+			':lr0' => $this->_data['id'],
+			':lm0' => '018NY6XC00SAE8Q4JSMF40YSZ3',
+			':q0' => $sum_all,
+			':u0' => 'pct',
+		]);
 
 	}
 

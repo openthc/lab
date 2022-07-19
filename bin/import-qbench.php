@@ -109,21 +109,43 @@ foreach ($res['data'] as $x) {
 // printf("Loaded %d Panel and %d Assay\n", count($lab_panel_list), count($lab_assay_list));
 // exit;
 
+$dts = new DateTime();
+
 // _qbench_pull_report($dbc, $qbc);
 if (in_array('license', $opt['object'])) {
 	_qbench_pull_license($dbc, $qbc);
+	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
+		':k1' => 'sync/license/timestamp',
+		':v1' => json_encode($dts->format(\DateTimeInterface::RFC3339))
+	]);
 }
 if (in_array('contact', $opt['object'])) {
 	_qbench_pull_contact($dbc, $qbc);
+	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
+		':k1' => 'sync/contact/timestamp',
+		':v1' => json_encode($dts->format(\DateTimeInterface::RFC3339))
+	]);
 }
 if (in_array('b2b', $opt['object'])) {
 	_qbench_pull_b2b($dbc, $qbc);
+	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
+		':k1' => 'sync/b2b/timestamp',
+		':v1' => json_encode($dts->format(\DateTimeInterface::RFC3339))
+	]);
 }
 if (in_array('sample', $opt['object'])) {
 	_qbench_pull_sample($dbc, $qbc);
+	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
+		':k1' => 'sync/lab_sample/timestamp',
+		':v1' => json_encode($dts->format(\DateTimeInterface::RFC3339))
+	]);
 }
 if (in_array('result', $opt['object'])) {
 	_qbench_pull_result($dbc, $qbc);
+	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
+		':k1' => 'sync/lab_result/timestamp',
+		':v1' => json_encode($dts->format(\DateTimeInterface::RFC3339))
+	]);
 }
 
 // A Sample Report Contains a Data-Set of Which Test Result objects are included in the REPORT
@@ -146,7 +168,15 @@ if (in_array('result', $opt['object'])) {
 // Get Contact/License Data from QBench
 function _qbench_pull_license($dbc, $qbc)
 {
-	echo "_qbench_pull_license()\n";
+	$dt0 = new DateTime('2000-01-01');
+	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/license/timestamp'");
+	$chk = json_decode($chk, true);
+	if ( ! empty($chk)) {
+		$dt0 = new DateTime($chk);
+		$dt0->sub(new DateInterval('P7D'));
+	}
+
+	printf("_qbench_pull_license(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
 
 	$hit = 0;
 	$idx = 1;
@@ -162,6 +192,13 @@ function _qbench_pull_license($dbc, $qbc)
 		$max = intval($res['total_pages']);
 
 		foreach ($res['data'] as $rec) {
+
+			// Compare to Sync Time
+			$dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
+			if ($dt1 < $dt0) {
+				echo "TIMEOUT\n";
+				return(0);
+			}
 
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 			$rec['customer_name'] = trim($rec['customer_name']);
@@ -234,7 +271,15 @@ function _qbench_pull_license($dbc, $qbc)
 // Get Contact/License Data from QBench
 function _qbench_pull_contact($dbc, $qbc)
 {
-	echo "_qbench_pull_contact()\n";
+	$dt0 = new DateTime('2000-01-01');
+	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/contact/timestamp'");
+	$chk = json_decode($chk, true);
+	if ( ! empty($chk)) {
+		$dt0 = new DateTime($chk);
+		$dt0->sub(new DateInterval('P7D'));
+	}
+
+	printf("_qbench_pull_contact(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
 
 	$idx = 1;
 	$max = $idx;
@@ -252,6 +297,13 @@ function _qbench_pull_contact($dbc, $qbc)
 		echo "Page: $idx/$max";
 
 		foreach ($res['data'] as $rec) {
+
+			// Compare to Sync Time
+			$dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
+			if ($dt1 < $dt0) {
+				echo "TIMEOUT\n";
+				return(0);
+			}
 
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 
@@ -310,7 +362,15 @@ function _qbench_pull_contact($dbc, $qbc)
  */
 function _qbench_pull_result($dbc, $qbc)
 {
-	echo "_qbench_pull_lab_result()\n";
+	$dt0 = new DateTime('2000-01-01');
+	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/lab_result/timestamp'");
+	$chk = json_decode($chk, true);
+	if ( ! empty($chk)) {
+		$dt0 = new DateTime($chk);
+		$dt0->sub(new DateInterval('P7D'));
+	}
+
+	printf("_qbench_pull_lab_result(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
 
 	$hit = 0;
 	$idx = 1;
@@ -324,20 +384,21 @@ function _qbench_pull_result($dbc, $qbc)
 			'sort_order' => 'desc'
 		]));
 
-		echo "Count: " . count($res['data']) . "\n";
-
 		$max = intval($res['total_pages']);
 
-		echo "Page: $idx/$max";
-
 		foreach ($res['data'] as $rec) {
+
+			// Compare to Sync Time
+			// $dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
+			// if ($dt1 < $dt0) {
+			// 	echo "TIMEOUT\n";
+			// 	return(0);
+			// }
 			$x = _qbench_pull_result_import($dbc, $rec);
-			// $hit += $x;
+			$hit += $x;
 		}
 
 		$idx++;
-
-		// echo "\rwhile ($idx < $max); // {$res['total_count']} objects";
 
 		echo "\nwhile (($idx <= $max) && ($hit < 1000));\n";
 
@@ -363,7 +424,6 @@ function _qbench_pull_result_import($dbc, $rec) : int
 	$rec['@lab_sample_id'] = sprintf('qbench:%s', $rec['sample_id']);
 
 	if (empty($rec['worksheet_data'])) {
-		echo "\n";
 		return(0);
 	}
 
@@ -405,6 +465,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 	]);
 	if ( ! empty($lr0['id']) && ($lr0['hash'] == $rec['@hash'])) {
 		// echo "HIT: {$rec['@lab_result_id']}\n";
+		echo '.';
 		return(1);
 	}
 
@@ -445,18 +506,18 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		}
 
 		$dbc->insert('lab_result', $lr1);
-		$lr0 = $lr1;
+		$lr0 = new \App\Lab_Result($dbc, $lr1);
 
 		echo '+';
 
 	} else {
 
-		$lr2 = new \App\Lab_Result($dbc, $lr0);
-		$lr2['hash'] = $rec['@hash'];
-		$lr2['name'] = ( $lab_assay_list[ $rec['@assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) );
-		$lr2['stat'] = $rec['@stat'];
-		$lr2['meta'] = json_encode($rec);
-		$lr2->save('Lab/Result Updated via Import');
+		$lr0 = new \App\Lab_Result($dbc, $lr0);
+		$lr0['hash'] = $rec['@hash'];
+		$lr0['name'] = ( $lab_assay_list[ $rec['@assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) );
+		$lr0['stat'] = $rec['@stat'];
+		$lr0['meta'] = json_encode($rec);
+		$lr0->save('Lab/Result Updated via Import');
 
 		echo '^';
 
@@ -566,6 +627,8 @@ function _qbench_pull_result_import($dbc, $rec) : int
 
 	}
 
+	$lr0->updateCannabinoids();
+
 	return(0);
 
 }
@@ -591,7 +654,15 @@ function _qbench_pull_result_import($dbc, $rec) : int
  */
 function _qbench_pull_sample($dbc, $qbc)
 {
-	echo "_qbench_pull_sample()\n";
+	$dt0 = new DateTime('2000-01-01');
+	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/lab_sample/timestamp'");
+	$chk = json_decode($chk, true);
+	if ( ! empty($chk)) {
+		$dt0 = new DateTime($chk);
+		$dt0->sub(new DateInterval('P7D'));
+	}
+
+	printf("_qbench_pull_sample(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
 
 	$hit = 0;
 	$idx = 1;
@@ -608,6 +679,13 @@ function _qbench_pull_sample($dbc, $qbc)
 		$max = intval($res['total_pages']);
 
 		foreach ($res['data'] as $rec) {
+
+			// Compare to Sync Time
+			$dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
+			if ($dt1 < $dt0) {
+				echo "TIMEOUT\n";
+				return(0);
+			}
 
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 			$rec['@order_id'] = sprintf('qbench:%s', $rec['order_id']);
@@ -798,7 +876,15 @@ function _qbench_pull_sample($dbc, $qbc)
 // Get Orders
 function _qbench_pull_b2b($dbc, $qbc)
 {
-	echo "_qbench_pull_b2b()\n";
+	$dt0 = new DateTime('2000-01-01');
+	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/b2b/timestamp'");
+	$chk = json_decode($chk, true);
+	if ( ! empty($chk)) {
+		$dt0 = new DateTime($chk);
+		$dt0->sub(new DateInterval('P7D'));
+	}
+
+	printf("_qbench_pull_b2b(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
 
 	$hit = 0;
 	$idx = 1;
@@ -816,11 +902,18 @@ function _qbench_pull_b2b($dbc, $qbc)
 
 		foreach ($res['data'] as $rec) {
 
+			// Compare to Sync Time
+			$dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
+			if ($dt1 < $dt0) {
+				echo "TIMEOUT\n";
+				return(0);
+			}
+
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 			$rec['@hash'] = CRE_Base::recHash($rec);
 
 			$chk = $dbc->fetchRow('SELECT id, hash, stat FROM b2b_incoming WHERE guid = :x1', [
-				':x1' => sprintf('qbench:%s', $rec['id'])
+				':x1' => $rec['@id']
 			]);
 			if ( ! empty($chk['id']) && ($rec['@hash'] == $chk['hash'])) {
 				$hit++;
@@ -856,7 +949,7 @@ function _qbench_pull_b2b($dbc, $qbc)
 					break;
 			}
 
-			if (empty($b2b_chk['id'])) {
+			if (empty($chk['id'])) {
 
 				echo '+';
 
@@ -896,17 +989,16 @@ function _qbench_pull_b2b($dbc, $qbc)
 				$update = [];
 				$update['hash'] = $rec['@hash'];
 				$update['stat'] = $b2b0['stat'];
+				$update['meta'] = json_encode($rec);
 				$update['updated_at'] = date(\DateTime::RFC3339, $rec['last_updated']);
 
 				$filter = [];
-				$filter['id'] = $b2b_chk['id'];
+				$filter['id'] = $rec['@id'];
 
 				$dbc->update('b2b_incoming', $update, $filter);
 				echo '^';
 
 			}
-
-			echo "\n";
 
 		}
 
