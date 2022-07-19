@@ -18,6 +18,10 @@ class Metric extends \App\Controller\Base
 		$data = $this->loadSiteData();
 		$data['Page'] = [ 'title' => 'Config :: Metrics' ];
 
+		if ( ! empty($_GET['id'])) {
+			return $this->single($RES, $dbc);
+		}
+
 		$metric_list = [];
 		$res = $dbc->fetchAll('SELECT * FROM lab_metric ORDER BY type, sort, name');
 		foreach ($res as $m) {
@@ -84,6 +88,17 @@ class Metric extends \App\Controller\Base
 		}
 
 		return $RES->write( $this->render('config/metric.php', $data) );
+
+	}
+
+	/**
+	 *
+	 */
+	function single($RES, $dbc)
+	{
+		$Lab_Metric = $dbc->fetchRow('SELECT * FROM lab_metric WHERE id = :lm0', [ ':lm0' => $_GET['id'] ]);
+
+		return $RES->write( $this->render('config/metric-single.php', $data) );
 
 	}
 }

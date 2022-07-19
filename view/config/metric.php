@@ -67,6 +67,7 @@ foreach ($this->data['metric_list'] as $m) {
 			<th>LOD</th>
 			<th>LOQ-LB</th>
 			<th>LOQ-UB</th>
+			<th>Limit</th>
 			<!-- <th colspan="3">Products</th> -->
 			<th></th>
 		</tr>
@@ -82,19 +83,19 @@ foreach ($this->data['metric_list'] as $m) {
 		} else {
 		?>
 		<td>
-			<?php
-			// echo $m['meta']['uom'];
-			echo _draw_select_uom(sprintf('uom-%s', $m['id']), $m['meta']['uom']);
-			?>
+			<?= _draw_select_uom(sprintf('uom-%s', $m['id']), $m['meta']['uom']); ?>
 		</td>
 		<td class="r">
 			<input class="form-control form-control-sm r" name="<?= sprintf('lod-%s', $m['id']) ?>" value="<?= h($m['meta']['lod']) ?>">
 		</td>
 		<td class="r">
-			<input class="form-control form-control-sm r" name="<?= sprintf('loq-%s', $m['id']) ?>" value="<?= h($m['meta']['loq']) ?>">
+			<input class="form-control form-control-sm r" name="<?= sprintf('loq-lb-%s', $m['id']) ?>" value="<?= h($m['meta']['loq']) ?>">
 		</td>
 		<td class="r">
-			<input class="form-control form-control-sm r" name="<?= sprintf('max-%s', $m['id']) ?>" value="<?= h($m['meta']['max']) ?>">
+			<input class="form-control form-control-sm r" name="<?= sprintf('loq-ub-%s', $m['id']) ?>" value="<?= h($m['meta']['max']) ?>">
+		</td>
+		<td class="r">
+			<input class="form-control form-control-sm r" name="<?= sprintf('lof-%s', $m['id']) ?>" value="<?= h($m['meta']['max']['val']) ?>">
 		</td>
 		<!-- <td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_FLOWER) ? 'checked' : null ?> checked disabled name="<?= sprintf('bud-%s', $m['id']) ?>" type="checkbox"> Flower</label></td> -->
 		<!-- <td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_EDIBLE) ? 'checked' : null ?> checked disabled name="<?= sprintf('edi-%s', $m['id']) ?>" type="checkbox"> Edible</label></td> -->
@@ -107,7 +108,7 @@ foreach ($this->data['metric_list'] as $m) {
 			<?php
 			switch ($m['stat']) {
 				case 200:
-					echo '<button class="btn btn-primary" title="Edit Product Classes" type="button"><i class="far fa-edit"></i></button>';
+					printf('<a class="btn btn-primary" href="/config/metric?id=%s" title="Edit Product Classes"><i class="far fa-edit"></i></a>', $m['id']);
 					printf('<button class="btn btn-success btn-metric-mute-toggle" data-lab-metric-id="%s" type="button" value="hide"><i class="far fa-circle"></i></button>', $m['id']);
 					break;
 				case 308:
