@@ -160,8 +160,12 @@ class Download extends \App\Controller\Result\View
 	{
 		$data = $this->_load_data($ARG);
 
-		require_once(APP_ROOT . '/view/pub/json.wcia-2022-062.php');
 		// require_once(APP_ROOT . '/view/result/json-wcia.php');
+		$json = require_once(APP_ROOT . '/view/pub/json.wcia-2022-062.php');
+
+		return $RES->withJSON($json, 200, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+
 	}
 
 	/**

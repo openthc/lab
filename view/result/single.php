@@ -28,34 +28,41 @@ use \App\Lab_Result;
 
 	<div>
 		<h3>Status: <?= _lab_result_status_nice($data['Lab_Result']['stat']) ?></h3>
-		<!-- @todo this is only relevant when it's a Lab showing this result -->
-		<!-- <h3>Origin: {{ Sample.lot_id_source }}</h3> -->
 	</div>
 
 	<div class="r">
 		<form method="post" target="_blank">
 
 			<div class="btn-group">
-				<a class="btn btn-primary" href="/result/<?= $data['Lab_Result']['id'] ?>/update"><i class="far fa-edit"></i> Edit</a>
-				<button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button>
+				<?php
+				switch ($data['Lab_Result']['stat']) {
+					case 100:
+					case 102:
+					case 200:
+						printf('<a class="btn btn-primary" href="/result/%s/update"><i class="far fa-edit"></i> Edit</a>', $data['Lab_Result']['id']);
+						echo '<button class="btn btn-secondary" name="a" value="lab-result-commit"><i class="fa-solid fa-flag-checkered"></i> Commit</button>';
+						break;
+				}
+				?>
+				<!-- <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button> -->
 				<!-- <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button> -->
-				<div class="dropdown-menu dropdown-menu-lg-end">
-					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=pdf"><i class="fas fa-download"></i> Download COA (PDF)</a>
+				<!-- <div class="dropdown-menu dropdown-menu-lg-end"> -->
+					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=pdf"><i class="fas fa-download"></i> Download COA (PDF)</a> -->
 					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=png%2Bcoa"><i class="fas fa-download"></i> Download COA (PNG/QR)</a> -->
 					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=csv"><i class="fas fa-download"></i> Download CSV</a> -->
-					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=csv%2Bccrs"><i class="fas fa-download"></i> Download CSV/CCRS</a>
+					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=csv%2Bccrs"><i class="fas fa-download"></i> Download CSV/CCRS</a> -->
 					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=json"><i class="fas fa-download"></i> Download JSON</a> -->
-					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=json%2Bwcia"><i class="fas fa-download"></i> Download JSON/WCIA</a>
+					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=json%2Bwcia"><i class="fas fa-download"></i> Download JSON/WCIA</a> -->
 					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=png"><i class="fas fa-download"></i> Download PNG</a> -->
-				</div>
+				<!-- </div> -->
 			</div>
 
 			<div class="btn-group">
 				<?php
 				if ($data['Lab_Result']['flag'] & Lab_Result::FLAG_PUBLIC) {
-					echo '<button class="btn btn-outline-success" name="a" title="Lab Results Published, click to re-publish &amp; view" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
+					echo '<button class="btn btn-outline-success" name="a" title="Lab Report Published, click to re-publish &amp; view" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
 				} else {
-					echo '<button class="btn btn-outline-warning" name="a" title="Lab Results NOT Published" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
+					echo '<button class="btn btn-outline-danger" name="a" title="Lab Report NOT Published" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
 				}
 				?>
 				<!-- <a class="btn btn-outline-secondary" href="mailto:?<?= $data['share_mail_link'] ?>"><i class="fas fa-envelope-open-text"></i></a> -->
@@ -125,10 +132,9 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 
 				$metric = $result_data['metric'];
 
+				// Special UOM
 				switch ($metric['uom']) {
 					case 'bool':
-						// Something
-						$metric['uom'] = '';
 						switch ($metric['qom']) {
 							case 0:
 								$metric['qom'] = 'Fail';
@@ -137,10 +143,6 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 								$metric['qom'] = 'Pass';
 								break;
 						}
-						break;
-					case 'pct':
-						// Something Else
-						$metric['uom'] = '%';
 						break;
 				}
 
@@ -168,7 +170,11 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 					<div class="input-group">
 						<div class="input-group-text"><?= __h($result_data['name']) ?></div>
 						<input class="form-control r" readonly style="font-weight: bold;" value="<?= __h($metric['qom']) ?>">
-						<div class="input-group-text"><?= App\UOM::nice($metric['uom']) ?></div>
+						<?php
+						if ( ! empty($metric['uom'])) {
+							printf('<div class="input-group-text">%s</div>', App\UOM::nice($metric['uom']));
+						}
+						?>
 					</div>
 				</div>
 			<?php

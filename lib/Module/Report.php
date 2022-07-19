@@ -25,7 +25,8 @@ class Report extends \OpenTHC\Module\Base
 		// $a->get('/upload/preview', 'App\Controller\Result\Upload:preview');
 		// $a->map(['GET','POST'], '/upload/queue', 'App\Controller\Result\Queue');
 
-		$a->map([ 'GET', 'POST'], '/{id}', 'OpenTHC\Lab\Controller\Report\Single');
+		$a->get('/{id}', 'OpenTHC\Lab\Controller\Report\Single');
+		$a->post('/{id}', 'OpenTHC\Lab\Controller\Report\Single:post');
 
 		$a->get('/{id}/download', 'OpenTHC\Lab\Controller\Report\Download');
 

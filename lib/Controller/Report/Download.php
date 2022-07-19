@@ -150,9 +150,12 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 			':l0' => $Lab_Sample['license_id_source']
 		]);
 
+		ob_start();
 		require_once(APP_ROOT . '/view/result/csv-ccrs.php');
+		$csv_output = ob_get_clean();
 
-		exit(0);
+		$RES = $RES->withHeader('content-type', 'text/plain; charset=utf-8');
+		return $RES->write($csv_output);
 
 	}
 
@@ -169,6 +172,7 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		// require_once(APP_ROOT . '/view/result/json-wcia.php');
 		$json = require_once(APP_ROOT . '/view/pub/json.wcia-2022-062.php');
 
+		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="Lab_Report_%s.json"', $data['Lab_Result']['id']));
 		return $RES->withJSON($json, 200, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
 	}
@@ -236,9 +240,13 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 			__exit_text($data);
 		}
 
+		ob_start();
 		require_once(APP_ROOT . '/view/result/coa-pdf.php');
+		$pdf_body = ob_get_clean();
 
-		exit(0);
+		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="Lab_Report_%s.pdf"', $data['Lab_Result']['id']));
+
+		return $RES->write($pdf_body);
 
 	}
 

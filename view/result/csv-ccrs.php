@@ -19,16 +19,12 @@ use App\Lab_Result;
 
 // Get Some Configuration Options
 $csv_config = [];
-$csv_config['lab_name'] = $_SESSION['Company']['name'];
-// $data['License_Laboratory']['code']
+$csv_config['lab_name'] = $data['License_Laboratory']['name'] ?: $_SESSION['Company']['name'];
 
-header('content-type: text/csv');
-header(sprintf('content-disposition: inline; filename="labtest_%s_%s_%s.csv"'
-	, $data['License_Laboratory']['code']
-	, $data['Lab_Sample']['name']
-	, $data['Lab_Result']['id']
-));
+header('content-type: text/plain; charset=utf-8');
+header(sprintf('content-disposition: filename="Lab_Report_%s_CCRS.csv"' , $data['Lab_Result']['id']));
 
+// @todo Fix this Date to use the Source Value
 $dt0 = new DateTime($data['Lab_Result']['created_at']);
 
 // Here's the Metric IDs we want to capture and the CCRS Names
@@ -194,8 +190,6 @@ CCRS::fputcsv_stupidly($out_handle, $csv_header);
 foreach ($csv_output as $row) {
 	CCRS::fputcsv_stupidly($out_handle, $row);
 }
-
-exit(0);
 
 /**
  * UOM Helper

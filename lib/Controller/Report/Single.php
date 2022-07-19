@@ -26,10 +26,106 @@ class Single extends \App\Controller\Base
 			_exit_html_warn('<h1>Lab Report Not Found [CRS-030]', 404);
 		}
 
+		// $data['Page'] = [ 'title' => 'Lab Reports' ];
 		$data = $this->_load_data($dbc_user, $Lab_Report);
+		$data = $this->loadSiteData($data);
 		$data['Page'] = [ 'title' => $Lab_Report['name'] ];
 
 		return $RES->write( $this->render('report/single.php', $data) );
+	}
+
+	/**
+	 *
+	 */
+	function post($REQ, $RES, $ARG)
+	{
+		// Get Result
+		$dbc_user = $this->_container->DBC_User;
+		$Lab_Report = new Lab_Report($dbc_user, $ARG['id']);
+		if (empty($Lab_Report['id'])) {
+			_exit_html_warn('<h1>Lab Report Not Found [CRS-044]', 404);
+		}
+
+		switch ($_POST['a']) {
+			case 'lab-report-commit';
+				$Lab_Report['stat'] = 200;
+				// Log a Commit?
+				$Lab_Report->save();
+				break;
+			case 'lab-report-share':
+
+				// Move to PUB somehow?
+				$data = $this->_load_data($dbc_user, $Lab_Report);
+
+				// Alias the data into this field
+				$data['Lab_Result'] = [
+					'id' => $Lab_Report['id'],
+					'guid' => $data['Lab_Sample']['name'],
+					'name' => $Lab_Report['name'],
+					'created_at' => $Lab_Report['created_at'],
+				];
+
+				$dir_base = sprintf('%s/var/%s', APP_ROOT, $Lab_Report['id']);
+				if ( ! is_dir($dir_base)) {
+					mkdir($dir_base, 0755, true);
+				}
+
+				$subC = new \OpenTHC\Lab\Controller\Report\Download($this->_container);
+
+				// Generate the COA/PDF
+				$res1 = $RES->withBody(new \Slim\Http\Body(fopen('php://temp', 'r+')));
+				$res1 = $subC->pdf($res1, $ARG, $data);
+				$out_file = sprintf('%s/output.pdf', $dir_base);
+				$out_body = $res1->getBody();
+				$out_body->rewind();
+				$out_size = $out_body->getSize();
+				$out_data = $out_body->getContents();
+				file_put_contents($out_file, $out_data);
+
+				// Generate the CSV/CCRS
+				$res1 = $RES->withBody(new \Slim\Http\Body(fopen('php://temp', 'r+')));
+				$res1 = $subC->csv_ccrs($res1, $ARG, $data);
+				$out_file = sprintf('%s/output-ccrs.csv', $dir_base);
+				$out_body = $res1->getBody();
+				$out_body->rewind();
+				$out_size = $out_body->getSize();
+				$out_data = $out_body->getContents();
+				file_put_contents($out_file, $out_data);
+
+				// Generate the HTML?
+				// $res1 = $subC->csv_ccrs($RES, $ARG, $data);
+				// Get Response Body into File
+				// $out_file = sprintf('%s/output.html', $dir_base);
+				// unlink($out_file);
+				// $out_body = $res1->getBody();
+				// $out_body->rewind();
+				// $out_size = $out_body->getSize();
+				// $out_data = $out_body->getContents();
+				// file_put_contents($out_file, $out_data);
+
+				// Generate the JSON
+				$res1 = $RES->withBody(new \Slim\Http\Body(fopen('php://temp', 'r+')));
+				$res1 = $subC->json_wcia($res1, $ARG, $data);
+				$out_file = sprintf('%s/output-wcia.json', $dir_base);
+				$out_body = $res1->getBody();
+				$out_body->rewind();
+				$out_size = $out_body->getSize();
+				$out_data = $out_body->getContents();
+				file_put_contents($out_file, $out_data);
+
+				// API to Self
+				// $lab_self = new \OpenTHC\Service\OpenTHC('lab');
+				// $arg = [ 'json' => [
+				// 	'company' => $_SESSION['Company']['id']
+				// 	, 'lab_report' => $Lab_Report['id']
+				// ]];
+				// $res = $lab_self->post('/api/v2018/report/publish', $arg);
+
+				break;
+		}
+
+		return $RES->withRedirect(sprintf('/report/%s', $Lab_Report['id']));
+
 	}
 
 	/**

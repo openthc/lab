@@ -27,9 +27,6 @@ class Upload extends \App\Controller\Base
 
 		case 'POST':
 
-			// var_dump($_POST);
-			// var_dump($_FILES);
-
 			if (1 == count($_FILES)) {
 				if (0 == $_FILES['file']['error']) {
 

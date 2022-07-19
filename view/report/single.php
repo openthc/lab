@@ -32,39 +32,37 @@ use OpenTHC\Lab\Lab_Report;
 	</div>
 
 	<div class="r">
-		<form method="post" target="_blank">
+		<form method="post">
 
 			<div class="btn-group">
 				<?php
 				switch ($data['Lab_Report']['stat']) {
 					case 100:
-						printf('<a class="btn btn-primary" href="/report/%s/update"><i class="fa-solid fa-flag-checkered"></i> Commit</a>', $data['Lab_Report']['id']);
+						echo '<button class="btn btn-primary" name="a" value="lab-report-commit"><i class="fa-solid fa-flag-checkered"></i> Commit</button>';
 						break;
 					case 200:
-
+						if ($data['Lab_Report']['flag'] & Lab_Report::FLAG_PUBLIC) {
+							echo '<button class="btn btn-outline-success" name="a" title="Lab Reports Published, click to re-publish &amp; view" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
+						} else {
+							echo '<button class="btn btn-primary" name="a" title="Lab Results NOT Published" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
+						}
+						break;
 				}
 				?>
 				<button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button>
 				<!-- <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button> -->
 				<div class="dropdown-menu dropdown-menu-lg-end">
-					<a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=pdf"><i class="fas fa-download"></i> Download COA (PDF)</a>
+					<a class="dropdown-item" download href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=pdf"><i class="fas fa-download"></i> Download COA (PDF)</a>
 					<!-- <a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=png%2Bcoa"><i class="fas fa-download"></i> Download COA (PNG/QR)</a> -->
 					<!-- <a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=csv"><i class="fas fa-download"></i> Download CSV</a> -->
-					<a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=csv%2Bccrs"><i class="fas fa-download"></i> Download CSV/CCRS</a>
+					<a class="dropdown-item" download href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=csv%2Bccrs"><i class="fas fa-download"></i> Download CSV/CCRS</a>
 					<!-- <a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=json"><i class="fas fa-download"></i> Download JSON</a> -->
-					<a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=json%2Bwcia"><i class="fas fa-download"></i> Download JSON/WCIA</a>
+					<a class="dropdown-item" download href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=json%2Bwcia"><i class="fas fa-download"></i> Download JSON/WCIA</a>
 					<!-- <a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=png"><i class="fas fa-download"></i> Download PNG</a> -->
 				</div>
 			</div>
 
 			<div class="btn-group">
-				<?php
-				if ($data['Lab_Report']['flag'] & Lab_Report::FLAG_PUBLIC) {
-					echo '<button class="btn btn-outline-success" name="a" title="Lab Reports Published, click to re-publish &amp; view" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
-				} else {
-					echo '<button class="btn btn-outline-warning" name="a" title="Lab Results NOT Published" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
-				}
-				?>
 				<!-- <a class="btn btn-outline-secondary" href="mailto:?<?= $data['share_mail_link'] ?>"><i class="fas fa-envelope-open-text"></i></a> -->
 			</div>
 
