@@ -14,9 +14,6 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 	function __invoke($REQ, $RES, $ARG)
 	{
 
-		// Maybe?
-		// $this->connectCRE();
-
 		unset($_SESSION['cre']);
 		unset($_SESSION['cre-auth']);
 
@@ -33,6 +30,10 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 				$_SESSION['License'] = $chk;
 			}
 
+		}
+
+		if (empty($_SESSION['tz'])) {
+			$_SESSION['tz'] = 'America/Los_Angeles';
 		}
 
 		$ret = $_GET['r'];
