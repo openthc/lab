@@ -11,6 +11,9 @@ use App\Lab_Metric;
 
 class Metric extends \App\Controller\Base
 {
+	/**
+	 *
+	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
 		$dbc = $this->_container->DBC_User;

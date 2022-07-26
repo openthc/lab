@@ -46,6 +46,11 @@ class Menu extends \OpenTHC\Middleware\Base
 				'html' => '<i class="fas fa-check-square"></i> Results',
 			);
 
+			$menu['main'][] = array(
+				'link' => '/report',
+				'html' => '<i class="fa-solid fa-file-signature"></i> Reports',
+			);
+
 			$menu['page'] = array(
 				[
 					'link' => '/config',

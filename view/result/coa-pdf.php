@@ -117,5 +117,3 @@ $pdf->draw_metric_table_2_col_a_then_d('Pesticides', $metric_list);
 // More disclaimer text
 
 $pdf->output(sprintf('coa-%s.pdf', $data['Lab_Result']['guid']), 'I');
-
-exit(0);

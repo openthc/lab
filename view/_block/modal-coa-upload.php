@@ -1,5 +1,6 @@
 <?php
 /**
+ * Modal Dialog for Upload
  *
  * SPDX-License-Identifier: GPL-3.0-only
  */
@@ -22,7 +23,7 @@
 				<div class="form-group">
 					<input class="form-control" name="file" type="file" >
 				</div>
-
+				<!--
 				<hr>
 
 				<div class="form-group">
@@ -43,10 +44,11 @@
 							type="button"><i class="fas fa-clipboard"></i></button>
 					</div>
 				</div>
+				-->
 			</div>
 
 		<div class="modal-footer">
-			<button class="btn btn-outline-primary" name="a" type="submit" value="coa-upload"><i class="fas fa-upload"></i> Upload</button>
+			<button class="btn btn-primary" name="a" type="submit" value="coa-upload"><i class="fas fa-upload"></i> Upload</button>
 		</div>
 
 		</div>

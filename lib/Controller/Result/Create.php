@@ -217,8 +217,7 @@ class Create extends \App\Controller\Base
 		]);
 
 		// Update Inventory Lot?
-		// $L = $Sample['lot_id'];
-		// $IL =
+		// $IL = $Sample['lot_id'];
 		// $IL->delFlag();
 		// $IL->setFlag();
 		// $IL->save();

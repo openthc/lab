@@ -16,11 +16,9 @@
 	});
 
 	$('.lab-metric-uom-bulk').on('click', function() {
-		debugger;
 		var wrap = $(this).closest('section');
-		var sel = this.getAttribute('data-uom');
+		var sel = this.value;
 		wrap.find('.lab-metric-uom').val(sel);
-
 	});
 
 	// Attempt Magic on the THC Values?

@@ -5,6 +5,10 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+$stat_pick_html = _draw_stat_pick();
+$unit_pick_html = _draw_unit_pick();
+
+
 ?>
 
 <h1><a href="/result">Result</a> :: Create</h1>
@@ -73,26 +77,8 @@ foreach ($data['lab_metric_section_list'] as $lms) {
 			<?php
 			if ('General' != $lms['name']) {
 			?>
-				<div>
-					<div class="btn-group btn-group-sm">
-						<button class="btn btn-outline-secondary lab-metric-qom-bulk" type="button" value="OK">OK</button>
-						<button class="btn btn-outline-secondary lab-metric-qom-bulk" type="button" value="N/A">N/A</button>
-						<button class="btn btn-outline-secondary lab-metric-qom-bulk" type="button" value="N/D">N/D</button>
-						<button class="btn btn-outline-secondary lab-metric-qom-bulk" type="button" value="N/T">N/T</button>
-					</div>
-				</div>
-				<div>
-					<div class="btn-group btn-group-sm">
-						<?php
-						foreach (\App\UOM::$uom_list as $k => $v) {
-							printf('<button class="btn btn-outline-secondary lab-metric-uom-bulk" data-uom="%s" type="button">%s</button>'
-								, $k
-								, $v
-							);
-						}
-						?>
-					</div>
-				</div>
+				<div><?= $stat_pick_html ?></div>
+				<div><?= $unit_pick_html ?></div>
 			<?php
 			}
 			?>
@@ -120,7 +106,7 @@ foreach ($data['lab_metric_section_list'] as $lms) {
 
 <div class="form-actions">
 	<input name="sample_id" type="hidden" value="<?= $data['Lab_Sample']['id'] ?>">
-	<button class="btn btn-outline-primary" name="a" value="lab-result-save"><i class="fas fa-save"></i> Save</button>
+	<button class="btn btn-primary" name="a" value="lab-result-save"><i class="fas fa-save"></i> Save</button>
 	<button class="btn btn-outline-danger" name="a" value="lab-result-delete"><i class="fas fa-save"></i> Delete</button>
 </div>
 

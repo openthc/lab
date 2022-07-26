@@ -160,16 +160,20 @@ if ( ! empty($data['Lab_Result_list'])) {
 	<table class="table table-sm">
 	<?php
 	foreach ($data['Lab_Result_list'] as $lr) {
+
+		$dtC = new \DateTime($lr['created_at'], new \DateTimezone($_SESSION['tz']));
+
 		echo '<tr>';
-		printf('<td class="r"><input checked name="lab-result[]" type="checkbox" value="%s"></td>', $lr['id']);
+		printf('<td class="c"><input checked name="lab-result[]" type="checkbox" value="%s"></td>', $lr['id']);
 		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['guid']) );
 		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
+		printf('<td title="%s">%s</td>', $lr['created_at'], $dtC->format('m/d/y'));
 		echo '</tr>';
 	}
 	?>
 	</table>
 	<div class="form-actions">
-		<button class="btn btn-outline-secondary" name="a" type="submit" value="lab-report-create"><i class="fa-solid fa-file-signature"></i> Report</button>
+		<button class="btn btn-primary" name="a" type="submit" value="lab-report-create"><i class="fa-solid fa-file-signature"></i> Report</button>
 	</div>
 	</form>
 <?php

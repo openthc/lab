@@ -34,7 +34,6 @@ class Main extends \App\Controller\Base
 		);
 		$data = $this->loadSiteData($data);
 
-
 		$sql_limit = 100;
 		$sql_offset = 0;
 
@@ -45,6 +44,7 @@ class Main extends \App\Controller\Base
 			$sql_offset = $p * 100;
 		}
 
+		// Status Breakdown
 		$sql = <<<SQL
 SELECT count(id) AS c, stat
 FROM lab_result

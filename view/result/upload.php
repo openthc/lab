@@ -1,6 +1,8 @@
 <?php
 /**
+ * Upload Dropzone for Results
  *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 ?>

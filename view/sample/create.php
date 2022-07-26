@@ -22,15 +22,15 @@ if (empty($data['Lab_Sample']['name'])) {
 	<div class="mb-2">
 		<div class="input-group">
 			<div class="input-group-text">Sample ID:</div>
-			<input autofocus name="sample-name" class="form-control" value="<?= $data['Lab_Sample']['name'] ?>">
+			<input name="sample-name" class="form-control" value="<?= $data['Lab_Sample']['name'] ?>">
 			<button class="btn btn-outline-secondary" id="lab-sample-id-create" type="button"><i class="fas fa-magic"></i></button>
 		</div>
 	</div>
 
 	<div class="mb-2">
 		<div class="input-group">
-			<div class="input-group-text">Origin License:</div>
-			<input autofocus name="license_origin" class="form-control license-autocomplete" value="<?= __h($data['Source_License']['name']) ?>">
+			<div class="input-group-text">Source License:</div>
+			<input autofocus name="license-name" class="form-control license-autocomplete" value="<?= __h($data['Source_License']['name']) ?>">
 			<input class="autocomplete-data-id" id="license-id" name="license-id" type="hidden" value="<?= __h($data['Source_License']['id']) ?>">
 			<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
 		</div>
@@ -38,7 +38,7 @@ if (empty($data['Lab_Sample']['name'])) {
 
 	<div class="mb-2">
 		<div class="input-group">
-			<div class="input-group-text">Origin Identifier:</div>
+			<div class="input-group-text">Source Lot ID:</div>
 			<input name="source-lot-guid" class="form-control" value="<?= __h($data['Source_Lot']['guid']) ?>">
 			<input name="source-lot-id" type="hidden" value="<?= __h($data['Source_Lot']['id']) ?>">
 		</div>
@@ -62,7 +62,7 @@ if (empty($data['Lab_Sample']['name'])) {
 	<div class="mb-2">
 		<div class="input-group">
 			<div class="input-group-text">Product Name:</div>
-			<input name="product" class="form-control product-autocomplete" value="<?= __h($data['Source_Product']['name']) ?>">
+			<input name="product-name" class="form-control product-autocomplete" value="<?= __h($data['Source_Product']['name']) ?>">
 			<input id="product-id" name="product-id" type="hidden" value="<?= __h($data['Source_Product']['id']) ?>">
 			<!-- <div class="input-group-append">
 				<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>

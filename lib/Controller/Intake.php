@@ -2,6 +2,8 @@
 /**
  * Process Sample Intake from Open/Semi-Public Portal
  *
+ * SPDX-License-Identifier: GPL-3.0-only
+ *
  * This file is part of OpenTHC Laboratory Portal
  *
  * OpenTHC Laboratory Portal is free software: you can redistribute it and/or modify
@@ -28,12 +30,30 @@ class Intake extends \App\Controller\Base
 	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
+		$dbc_auth = _dbc('auth');
+		$C0 = $dbc_auth->fetchRow('SELECT id, name, dsn FROM auth_company WHERE id = :c0', [
+			':c0' => $_GET['c']
+		]);
+		if (empty($C0['id'])) {
+			_exit_html_fail('<h1>Invalid Link [LCI-036]</h1>', 400);
+		}
+
+		$dbc_user = _dbc($C0['dsn']);
+		$L0 = $dbc_user->fetchRow('SELECT id, name FROM license WHERE id = :l0', [
+			':l0' => $_GET['l']
+		]);
+		if (empty($L0['id'])) {
+			_exit_html_fail('<h1>Invalid Link [LCI-045]</h1>', 400);
+		}
+
+
 		$data = $this->loadSiteData();
 
 		$sql = 'SELECT id, name FROM product_type WHERE stat = 200 ORDER BY name';
-		$data['product_type'] = $this->_container->DBC_User->fetchMix($sql);
+		$data['product_type'] = $dbc_user->fetchMix($sql);
 
 		return $RES->write( $this->render('intake.php', $data) );
+
 	}
 
 	/**

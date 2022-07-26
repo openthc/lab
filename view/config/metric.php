@@ -97,9 +97,6 @@ foreach ($this->data['metric_list'] as $m) {
 		<td class="r">
 			<input class="form-control form-control-sm r" name="<?= sprintf('lof-%s', $m['id']) ?>" value="<?= h($m['meta']['max']['val']) ?>">
 		</td>
-		<!-- <td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_FLOWER) ? 'checked' : null ?> checked disabled name="<?= sprintf('bud-%s', $m['id']) ?>" type="checkbox"> Flower</label></td> -->
-		<!-- <td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_EDIBLE) ? 'checked' : null ?> checked disabled name="<?= sprintf('edi-%s', $m['id']) ?>" type="checkbox"> Edible</label></td> -->
-		<!-- <td><label class="disabled"><input <?= ($m['flag'] & Lab_Metric::FLAG_EXTRACT) ? 'checked' : null ?> checked disabled name="<?= sprintf('ext-%s', $m['id']) ?>"  type="checkbox"> Extract</label></td> -->
 		<?php
 		}
 		?>

@@ -80,9 +80,10 @@ $unit_pick_html = _draw_unit_pick();
 </section>
 
 <?php
-foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) {
+// $metric_type_list = $data['Lab_Result']->getMetricTypeList();
+foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) { // @todo metric-list-fix
 ?>
-	<section style="margin-bottom:1rem;">
+	<section style="margin-bottom:1rem;" data-section-id="<?= $lms_id ?>">
 
 		<div class="d-flex justify-content-between">
 			<div>
@@ -91,17 +92,8 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) {
 			<?php
 			if ('General' != $lms['name']) {
 			?>
-				<div>
-					<div class="btn-group btn-group-sm">
-						<button class="btn btn-outline-secondary lab-metric-qom-bulk" type="button" value="OK">OK</button>
-						<button class="btn btn-outline-secondary lab-metric-qom-bulk" type="button" value="N/A">N/A</button>
-						<button class="btn btn-outline-secondary lab-metric-qom-bulk" type="button" value="N/D">N/D</button>
-						<button class="btn btn-outline-secondary lab-metric-qom-bulk" type="button" value="N/T">N/T</button>
-					</div>
-				</div>
-				<div>
-					<?= $unit_pick_html ?>
-				</div>
+				<div><?= $stat_pick_html ?></div>
+				<div><?= $unit_pick_html ?></div>
 			<?php
 			}
 			?>
@@ -109,6 +101,7 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) {
 
 		<div class="lab-metric-grid" id="lab-metric-type-<?= $lms['id'] ?>">
 		<?php
+		// $metric_list = $data['Lab_Result']->getMetricList([ 'type' => $lms['id'] ]);
 		foreach ($lms['metric_list'] as $lm_id => $lm) {
 			switch ($lm['meta']['uom']) {
 			case 'bool':
@@ -128,13 +121,27 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) {
 ?>
 
 
-<div class="mb-2">
-	<div class="input-group">
-		<div class="input-group-prepend">
-			<div class="input-group-text">COA File:</div>
+<div class="row">
+<div class="col-md-6">
+	<div class="mb-2">
+		<div class="input-group">
+			<div class="input-group-prepend">
+				<div class="input-group-text">Machine Data:</div>
+			</div>
+			<input class="form-control" name="machine-file" type="file">
 		</div>
-		<input class="form-control" name="file" type="file">
 	</div>
+</div>
+<div class="col-md-6">
+	<div class="mb-2">
+		<div class="input-group">
+			<div class="input-group-prepend">
+				<div class="input-group-text">Upstream COA:</div>
+			</div>
+			<input class="form-control" name="file" type="file">
+		</div>
+	</div>
+</div>
 </div>
 
 <div class="mb-2">
@@ -153,7 +160,6 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) {
 <div class="form-actions">
 	<input name="sample_id" type="hidden" value="<?= $data['Lab_Sample']['id'] ?>">
 	<button class="btn btn-primary" name="a" value="lab-result-save"><i class="fas fa-save"></i> Save</button>
-	<button class="btn btn-secondary" name="a" value="lab-result-commit"><i class="fa-solid fa-flag-checkered"></i> Commit</button>
 	<button class="btn btn-outline-danger" name="a" value="lab-result-delete"><i class="fas fa-save"></i> Delete</button>
 </div>
 

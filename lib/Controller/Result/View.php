@@ -396,31 +396,11 @@ SQL;
 					$LR->save();
 
 					return $RES->withRedirect($res['data']['pub']);
+
 				default:
+
 					throw new \Exception('Unable to Publish to Lab Portal');
 			}
-
-			// @todo Make Sure it's Published in MAIN
-			// unset($data['OpenTHC']);
-			// unset($data['Site']);
-			// unset($data['Page']);
-			// unset($data['menu']);
-			// unset($data['coa_upload_hash']);
-			// unset($data['share_mail_link']);
-			// unset($data['Lab_Sample']);
-			// unset($data['Lab_Result']);
-
-			// Build All Necessary Datas
-			// INSERT/UPDATE to openthc_main.lab_result with a HUGE meta
-
-			// $data['License']['meta'] = json_decode($data['License']['meta'], true);
-
-			// Remove Incomplete Result Metrics
-			// $data['Lab_Result_Metric_list'] = array_filter($data['Lab_Result_Metric_list'], function($v, $k) {
-			// 	return !empty($v['lab_result_metric_id']);
-			// }, ARRAY_FILTER_USE_BOTH);
-
-			// return $RES->withRedirect(sprintf('/pub/%s.html', $LR['id']));
 
 			break;
 
