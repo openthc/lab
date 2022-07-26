@@ -97,5 +97,14 @@ class Lab_Sample extends \OpenTHC\SQL\Record
 		return $img_list;
 	}
 
+	/**
+	 *
+	 */
+	function getImageFile() : ?string
+	{
+		$img_list = $this->getFiles();
+		$img_file = $img_list[0];
+		return $img_file;
+	}
 
 }

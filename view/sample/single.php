@@ -102,7 +102,7 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 		<div class="mb-2">
 			<label>Quantity:</label>
 			<div class="input-group">
-				<input class="form-control r" name="sample-qty" min="1" step="0.01" type="number" value="<?= __h($data['Lab_Sample']['qty']) ?>">
+				<input class="form-control r" name="sample-qty" min="0" step="0.01" type="number" value="<?= __h($data['Lab_Sample']['qty']) ?>">
 				<div class="input-group-text"><?= __h($data['Product']['uom']) ?></div>
 			</div>
 		</div>

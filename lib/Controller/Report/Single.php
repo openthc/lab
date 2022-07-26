@@ -139,6 +139,7 @@ class Single extends \App\Controller\Base
 
 		$Lab_Sample = new Lab_Sample($dbc_user, $data['Lab_Report']['lab_sample_id']);
 		$data['Lab_Sample'] = $Lab_Sample->toArray();
+		$data['Lab_Sample']['img_file'] = $Lab_Sample->getImageFile();
 
 		$Lot = $dbc_user->fetchRow('SELECT id, product_id, variety_id FROM inventory WHERE id = :i0', [ ':i0' => $Lab_Sample['inventory_id'] ?: $Lab_Sample['lot_id'] ]);
 		// $data['Lot'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i0', [

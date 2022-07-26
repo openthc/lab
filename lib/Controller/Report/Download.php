@@ -245,6 +245,8 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		$pdf_body = ob_get_clean();
 
 		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="Lab_Report_%s.pdf"', $data['Lab_Result']['id']));
+		$RES = $RES->withHeader('content-transfer-encoding', 'binary');
+		$RES = $RES->withHeader('content-type', 'application/pdf');
 
 		return $RES->write($pdf_body);
 

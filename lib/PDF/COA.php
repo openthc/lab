@@ -159,12 +159,17 @@ class COA extends \App\PDF\Base
 		$this->image($url_logo, $x, $y, $w, $h, $type='', $link='', $align='', $resize=true, $dpi=300, $palign='', $ismask=false, $imgmask=false, $border=0, $fitbox='RT');
 
 		// Sample/Product Picture
-		$x = 7.00;
-		$y = 1.50;
-		$this->rect($x, $y, 1, 1);
-		$this->setXY($x, $y);
-		$this->cell(1, self::FS_12, 'SAMP');
-		// $this->image();
+		$img_file = $this->_data['Lab_Sample']['img_file'];
+		if ($img_file) {
+			$x = 7.00;
+			$y = 1.50;
+			$w = 1;
+			$h = 1;
+			$this->rect($x, $y, $w, $h);
+			$this->image($img_file, $x, $y, 1, 1, $type='', $link='', $align='', $resize=true, $dpi=300, $palign='', $ismask=false, $imgmask=false, $border=0, $fitbox='RT');
+			// $this->setXY($x, $y);
+			// $this->cell(1, self::FS_12, 'SAMP');
+		}
 
 		// Client Information
 		$x = 1.75;
@@ -195,37 +200,6 @@ class COA extends \App\PDF\Base
 		$y += self::FS_12;
 
 		$this->setXY(0.50, 3.75);
-
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public function header_client_info()
-	{
-		// Client Information
-		$x = 0.5;
-		$y = 1.75;
-		// var_dump($y); exit;
-
-		// Client Information
-		$this->setXY($x, $y - self::FS_14);
-		$this->setFont('', 'B', 14);
-		$this->cell(3.25, self::FS_14, sprintf('Client: %s', $this->_data['License_Source']['name']));
-		// $y += self::FS_14;
-
-		$this->setFont('', '', 12);
-
-		// $this->setXY($x, $y);
-		// $this->cell(1.5, self::FS_12, $this->_data['License_Name']);
-		// $y += self::FS_12;
-
-		$this->setXY($x, $y);
-		$this->cell(1.5, self::FS_12, $this->_data['Address_Line_1']);
-		$y += self::FS_12;
-
-		$this->setXY($x, $y);
-		$this->cell(1.5, self::FS_12, $this->_data['Address_Line_2']);
 
 	}
 
@@ -342,6 +316,11 @@ class COA extends \App\PDF\Base
 			$this->setXY($x + 3, $y);
 			$this->cell(0.5, self::FS_10, \App\UOM::nice($uom), 0, 0, 'C');
 		}
+
+		// if ( ! empty($max)) {
+		// 	$this->setXY($x + 2.5, $y);
+		// 	$this->cell(0.5, self::FS_10, sprintf('%0.2f', $max['val']), 0, 1, 'L');
+
 	}
 
 	/**
@@ -374,29 +353,10 @@ class COA extends \App\PDF\Base
 		$this->setXY($x + 2.0, $y);
 		$this->cell(0.5, self::FS_12, 'Result', 'B', 0, 'C');
 
-		$this->setXY($x + 2.5, $y);
-		$this->cell(0.5, self::FS_12, 'A/L', 'B', 0, 'C');
-
-		$this->setXY($x + 3, $y);
-		$this->cell(0.5, self::FS_12, 'UOM', 'B', 0, 'C');
-
-
-		$x = 4.25;
-		$this->setXY($x, $y);
-		$this->cell(2.5, self::FS_12, 'Metric', 'B', 0, 'L');
-
-		$this->setXY($x + 2, $y);
-		$this->cell(0.5, self::FS_12, 'Result', 'B', 0, 'C');
-
-		$this->setXY($x + 2.5, $y);
-		$this->cell(0.5, self::FS_12, 'A/L', 'B', 0, 'C');
-
-		$this->setXY($x + 3, $y);
-		$this->cell(0.5, self::FS_12, 'UOM', 'B', 0, 'C');
-
-		$y += self::FS_14;
-		$this->setXY($x, $y);
-
+		if ( ! empty($uom)) {
+			$this->setXY($x + 3, $y);
+			$this->cell(0.5, self::FS_10, \App\UOM::nice($uom), 0, 0, 'C');
+		}
 	}
 
 	/**
