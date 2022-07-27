@@ -36,6 +36,7 @@ use \App\Lab_Result;
 			<div class="btn-group">
 				<?php
 				switch ($data['Lab_Result']['stat']) {
+					case 0:
 					case 100:
 					case 102:
 					case 200:

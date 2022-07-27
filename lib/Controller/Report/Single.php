@@ -169,6 +169,33 @@ class Single extends \App\Controller\Base
 			$data['lab_metric_list'][ $rec['id'] ] = $rec;
 		}
 
+		// Upscale Data for PDF, JSON, etc
+		$data['Lab_Result_Metric_list'] = [];
+		foreach ($data['Lab_Report']['meta']['lab_result_metric_list'] as $x) {
+
+			$lm = $dbc_user->fetchRow('SELECT * FROM lab_metric WHERE id = :lm0', [ ':lm0' => $x['lab_metric_id'] ]);
+			$lm['meta'] = json_decode($lm['meta'], true);
+
+			$x['name'] = $lm['name'];
+			$x['meta']['max'] = $lm['meta']['max'];
+
+			$data['Lab_Result_Metric_list'][ $x['lab_metric_id'] ] = $x;
+		}
+
+		$data['Lab_Result_Section_Metric_list'] = [];
+		foreach ($data['lab_metric_type_list'] as $lmt) {
+			$lmt['metric_list'] = [];
+			$data['Lab_Result_Section_Metric_list'][ $lmt['id'] ] = $lmt;
+		}
+
+		foreach ($data['Lab_Result_Metric_list'] as $lrm) {
+			$lmt_id = $lrm['lab_metric_type_id'];
+			$data['Lab_Result_Section_Metric_list'][ $lmt_id ]['metric_list'][ $lrm['lab_metric_id'] ] = [
+				'id' => $lrm['lab_metric_id'],
+			];
+		}
+
+
 		// Another Name for the THing
 		// $data['Lab_Result_Section_Metric_list'] = $Lab_Result->getMetrics_Grouped();
 

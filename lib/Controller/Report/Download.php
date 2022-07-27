@@ -154,7 +154,10 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		require_once(APP_ROOT . '/view/result/csv-ccrs.php');
 		$csv_output = ob_get_clean();
 
+		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="Lab_Report_%s_CCRS.csv"', $data['Lab_Result']['id']));
+		$RES = $RES->withHeader('content-transfer-encoding', 'binary');
 		$RES = $RES->withHeader('content-type', 'text/plain; charset=utf-8');
+
 		return $RES->write($csv_output);
 
 	}
@@ -169,10 +172,12 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 	 */
 	function json_wcia($RES, $ARG, $data)
 	{
-		// require_once(APP_ROOT . '/view/result/json-wcia.php');
 		$json = require_once(APP_ROOT . '/view/pub/json.wcia-2022-062.php');
 
 		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="Lab_Report_%s.json"', $data['Lab_Result']['id']));
+		$RES = $RES->withHeader('content-transfer-encoding', 'binary');
+		$RES = $RES->withHeader('content-type', 'application/json');
+
 		return $RES->withJSON($json, 200, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
 	}
@@ -209,32 +214,6 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		$data['License_Source']['icon'] = sprintf('https://directory.openthc.com/img/company/%s/icon.png', $res['company']['id']);
 
 		$data['footer_text'] = $C0->getOption('coa/footer');
-
-		// Base the Lab Metric List
-		$data['Lab_Result_Metric_list'] = [];
-		foreach ($data['Lab_Report']['meta']['lab_result_metric_list'] as $x) {
-
-			$lm = $dbc->fetchRow('SELECT * FROM lab_metric WHERE id = :lm0', [ ':lm0' => $x['lab_metric_id'] ]);
-			$lm['meta'] = json_decode($lm['meta'], true);
-
-			$x['name'] = $lm['name'];
-			$x['meta']['max'] = $lm['meta']['max'];
-
-			$data['Lab_Result_Metric_list'][ $x['lab_metric_id'] ] = $x;
-		}
-
-		$data['Lab_Result_Section_Metric_list'] = [];
-		foreach ($data['lab_metric_type_list'] as $lmt) {
-			$lmt['metric_list'] = [];
-			$data['Lab_Result_Section_Metric_list'][ $lmt['id'] ] = $lmt;
-		}
-
-		foreach ($data['Lab_Result_Metric_list'] as $lrm) {
-			$lmt_id = $lrm['lab_metric_type_id'];
-			$data['Lab_Result_Section_Metric_list'][ $lmt_id ]['metric_list'][ $lrm['lab_metric_id'] ] = [
-				'id' => $lrm['lab_metric_id'],
-			];
-		}
 
 		if ('dump' == $_GET['_']) {
 			__exit_text($data);
