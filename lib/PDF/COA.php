@@ -9,7 +9,7 @@ namespace OpenTHC\Lab\PDF;
 
 use Edoceo\Radix\DB\SQL;
 
-class COA extends \App\PDF\Base
+class COA extends \OpenTHC\Lab\PDF\Base
 {
 	// It's the Font Size + 2, Pre-Calculated Helpers
 	const FS_08 = 9 / 72;
@@ -71,13 +71,13 @@ class COA extends \App\PDF\Base
 		$x = 2.5;
 		$y = 0.5;
 		$this->setXY($x, $y);
-		$this->setFont('', 'B', 16);
+		$this->setFont('freesans', 'B', 16);
 		$this->cell(3.5, self::FS_16, 'Certificate of Analysis', 0, 0, 'C');
 
 		$y += self::FS_16;
 		$this->setXY($x, $y);
 		// $this->cell(3.5, self::FS_12, $this->_data['Lab_Sample']['name'], 0, 0, 'C');
-		$this->setFont('', '', 12);
+		$this->setFont('freesans', '', 12);
 		$this->cell(3.5, self::FS_12, $this->_data['Lab_Result']['guid'], 0, 0, 'C');
 
 		$y += self::FS_12;
@@ -89,15 +89,15 @@ class COA extends \App\PDF\Base
 
 		$y += self::FS_12;
 		$this->setXY($x, $y);
-		$this->setFont('', 'B', 12);
+		$this->setFont('freesans', 'B', 12);
 		$this->setTextColor(0x00, 0x99, 0x00);
 		$this->cell(3.25, self::FS_12, 'Passed', 0, 0, 'C');
-		$this->setFont('', '', 12);
+		$this->setFont('freesans', '', 12);
 		$this->setTextColor(0x00, 0x00, 0x00);
 
 
 		// Laboratory Address
-		$this->setFont('', '', 10);
+		$this->setFont('freesans', '', 10);
 
 		// Header Laboratory License Information
 		$x = 0.5;
@@ -175,13 +175,13 @@ class COA extends \App\PDF\Base
 		$x = 1.75;
 		$y = 1.43;
 
-		$this->setFont('', 'B', 14);
+		$this->setFont('freesans', 'B', 14);
 
 		$this->setXY($x, $y);
 		$this->cell(3.25, self::FS_14, $this->_data['License_Source']['name']);
 		$y += self::FS_14;
 
-		$this->setFont('', '', 12);
+		$this->setFont('freesans', '', 12);
 
 		$this->setXY($x, $y);
 		$this->cell(3.25, self::FS_12, sprintf('Sample: %s', $this->_data['Lab_Sample']['name']));
@@ -210,15 +210,29 @@ class COA extends \App\PDF\Base
 	{
 		// Disclaimer Text
 		$this->setXY(0.5, 9.5);
-		$this->setFont('', '', 9);
+		$this->setFont('freesans', '', 9);
 		$chr0 = $this->getCellHeightRatio();
 		$this->setCellHeightRatio(0.9);
-		$this->multicell(7.5 - 3, self::FS_10, $this->_data['footer_text'], $opt['border'], $opt['align'], $opt['fill'], null, 0.5, 10);
+		$this->multicell(4.5, self::FS_10, $this->_data['footer_text'], $opt['border'], $opt['align'], $opt['fill'], null, 0.5, 10);
 		$this->setCellHeightRatio($chr0);
 
 		// Signature
+		$x = 5.25;
+		$y = 10; // 9.5;
+		$this->setXY($x, $y);
+		$this->setFont('cedarvillecursive', '', 18);
+		// $pdf->setFont('homemadeapple');
+		$this->cell(2.75, self::FS_16, 'Contact Signature', 'B');
 
-		// Digital Signature & QR Code
+		$this->setXY($x, $y + (self::FS_16 * 1.25));
+		$this->setFont('freesans', '', 12, '', true);
+		$this->cell(2.75, self::FS_16, 'Contact Signature');
+
+		// 'Page '.$this->getAliasNumPage().'/'.$this->getAliasNbPages()
+		$cp = $this->getAliasNumPage(); // Current Page
+		$pc = $this->getAliasNbPages(); // Page Count
+		$this->setXY($x + 2.125, $y + (self::FS_16 * 2));
+		$this->cell(0.75, self::FS_16, sprintf('Page %s/%s', $cp, $pc), 0, 0, 'L');
 
 	}
 
@@ -269,7 +283,7 @@ class COA extends \App\PDF\Base
 	/**
 	 * Draw the Metric for the Specific LRM
 	 */
-	function draw_metric_qom($x, $y, $lrm)
+	function draw_metric_qom($x, $y, $lrm) : void
 	{
 
 		$uom = $lrm['uom'];
@@ -281,8 +295,21 @@ class COA extends \App\PDF\Base
 
 		switch ($uom) {
 			case 'bool':
-				$qom = ($qom ? 'Pass' : 'Fail');
-				$uom = '';
+				// $qom = ($qom ? 'Pass' : 'Fail');
+				// $uom = '';
+				$this->setXY($x + 2.0, $y);
+				if ($qom) {
+					// PASS
+					// $c0 = $this->getTextColor();
+					$this->setTextColorArray([ 0x00, 0x99, 0x00 ]);
+					$this->cell(0.5, self::FS_10, 'Pass', 0, 0, 'R');
+				} else {
+					// FAIL
+					$this->setTextColorArray([ 0xCC, 0x00, 0x00 ]);
+					$this->cell(0.5, self::FS_10, 'FAIL', 0, 0, 'R');
+				}
+				$this->setTextColorArray([ 0x00, 0x00, 0x00 ]);
+				return;
 				break;
 		}
 
@@ -299,17 +326,18 @@ class COA extends \App\PDF\Base
 			default:
 				switch ($uom) {
 					case 'pct':
-						$qom = intval($qom);
+						// $qom = intval($qom);
+						$qom = sprintf('%0.2f', $qom);
 						break;
 				}
 		}
 
 		$this->setXY($x + 2.0, $y);
-		$this->cell(0.5, self::FS_10, $qom, 0, 0, 'C');
+		$this->cell(0.5, self::FS_10, $qom, 0, 0, 'R');
 
 		if ( ! empty($max)) {
 			$this->setXY($x + 2.5, $y);
-			$this->cell(0.5, self::FS_10, sprintf('%0.2f', $max['val']), 0, 1, 'L');
+			$this->cell(0.5, self::FS_10, sprintf('%0.2f', $max['val']), 0, 1, 'C');
 		}
 
 		if ( ! empty($uom)) {
@@ -338,25 +366,52 @@ class COA extends \App\PDF\Base
 			// $this->setXY($x, $y);
 		// }
 
-		$this->setFont('', 'B', 14);
+		$this->setFont('freesans', 'B', 14);
 
 		$this->setXY($x, $y);
 		$this->cell(7.5, self::FS_14, $metric_name);
 		$y += self::FS_14;
 
-		// Table Header - Column 0
-		$this->setFont('', '', 10);
+		// Table Header - Column A
+		$this->setFont('freesans', '', 10);
 
 		$this->setXY($x, $y);
-		$this->cell(2.5, self::FS_12, 'Metric', 'B', 0, 'L');
+		$this->cell(2.0, self::FS_12, 'Metric', 'B', 0, 'L');
 
 		$this->setXY($x + 2.0, $y);
-		$this->cell(0.5, self::FS_12, 'Result', 'B', 0, 'C');
+		$this->cell(1.0, self::FS_12, 'Result', 'B', 0, 'C');
 
-		if ( ! empty($uom)) {
-			$this->setXY($x + 3, $y);
-			$this->cell(0.5, self::FS_10, \App\UOM::nice($uom), 0, 0, 'C');
-		}
+		// if ( ! empty($uom)) {
+		// 	$this->setXY($x + 3, $y);
+		// 	$this->cell(0.5, self::FS_12, \App\UOM::nice($uom), 0, 0, 'C');
+		// }
+
+		$this->setXY($x + 3, $y);
+		$this->cell(0.5, self::FS_12, 'UOM', 'B', 0, 'C');
+
+		$this->setXY(0.5, $y + self::FS_12);
+
+		// Table Header - Column B
+		$this->setFont('freesans', '', 10);
+
+		$x = 4.50;
+		$this->setXY($x, $y);
+		$this->cell(2.0, self::FS_12, 'Metric', 'B', 0, 'L');
+
+		$this->setXY($x + 2.0, $y);
+		$this->cell(1.0, self::FS_12, 'Result', 'B', 0, 'C');
+
+		// if ( ! empty($uom)) {
+		// 	$this->setXY($x + 3, $y);
+		// 	$this->cell(0.5, self::FS_12, \App\UOM::nice($uom), 0, 0, 'C');
+		// }
+
+		$this->setXY($x + 3, $y);
+		$this->cell(0.5, self::FS_12, 'UOM', 'B', 0, 'C');
+
+		$this->setXY(0.5, $y + self::FS_12);
+
+
 	}
 
 	/**
@@ -372,7 +427,7 @@ class COA extends \App\PDF\Base
 
 		$x = $this->getX();
 		$y = $this->getY();
-		$this->setFont('', '', 10);
+		$this->setFont('freesans', '', 10);
 
 
 		$idx = 0;
@@ -405,7 +460,7 @@ class COA extends \App\PDF\Base
 			// $this->cell(0.5, self::FS_10, \App\UOM::nice($lrmA['uom']), 0, 0, 'L');
 
 			// Column 2
-			$x = 4.25;
+			$x = 4.50;
 			if ( ! empty($lrmB)) {
 
 				$this->draw_metric_qom($x, $y, $lrmB);
@@ -436,7 +491,7 @@ class COA extends \App\PDF\Base
 
 				$x = $this->getX();
 				$y = $this->getY();
-				$this->setFont('', '', 10);
+				$this->setFont('freesans', '', 10);
 
 			}
 
