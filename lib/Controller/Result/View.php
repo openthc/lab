@@ -208,21 +208,20 @@ SQL;
 
 		$Lab_Metric = new Lab_Metric($dbc_user);
 
-		$data['License'] = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id'] ]);
-
-		$dbc_main = $this->_container->DBC_Main;
-
-		$data['License_Source'] = $dbc_main->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id_source'] ]);
+		// $data['License'] = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id'] ]);
+		// $dbc_main = $this->_container->DBC_Main;
+		$License_Source = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id_source'] ]);
 
 		return [
-			'Lot' => [],
+			'Lot' => $Lot,
 			'Lab_Sample' => $Lab_Sample,
 			'Lab_Result' => $Lab_Result,
 			'Lab_Result_Metric_list' => $lab_result_metric_list,
 			'Lab_Metric_Type_list' => $Lab_Metric->getTypes(),
 			'Product' => $Product,
 			'Product_Type' => $ProductType,
-			'Variety' => $Variety
+			'Variety' => $Variety,
+			'License_Source' => $License_Source
 		];
 
 	}

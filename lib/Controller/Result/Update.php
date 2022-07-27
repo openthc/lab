@@ -26,38 +26,23 @@ class Update extends \App\Controller\Result\View
 
 		$dbc = $this->_container->DBC_User;
 
-		// $data = $this->load_lab_result_full($id);
-
 		// $chk = $dbc_user->fetchRow('SELECT * FROM lab_result WHERE (id = :lr0 OR guid = :lr0)', [ ':lr0' => $id ]);
 		$Lab_Result = new Lab_Result($dbc, $id);
 		if (empty($Lab_Result['id'])) {
 			_exit_text('Lab Result Not Found [CRU-034]', 400);
 		}
 
-		$Lab_Sample = new Lab_Sample($dbc, $Lab_Result['lab_sample_id']);
-		if (empty($Lab_Sample['id'])) {
-			// _exit_text('WSHERE is SAMPLE');
-		}
+		$data = $this->load_lab_result_full($id);
 
-		$data['Page'] = [
-			'title' => 'Result :: Update'
-		];
 		$data = $this->loadSiteData($data);
+		$data['Page']['title'] = sprintf('Result :: %s :: Update', $data['Lab_Result']['guid']);
 
-		$data['Lab_Sample'] = $Lab_Sample->toArray();
-		$data['Lab_Result'] = $Lab_Result->toArray();
-
-		$data['Lab_Result']['coa_file'] = $Lab_Result->getCOAFile();
+		$data['Lab_Result']['coa_file'] = $data['Lab_Result']->getCOAFile();
 		if (!is_file($data['Lab_Result']['coa_file'])) {
 			$data['Lab_Result']['coa_file'] = null;
 		}
 
-		$data['Result_Metric_Group_list'] = $Lab_Result->getMetrics_Grouped();
-
-		$data['Lot'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i0', [ ':i0' => $Lab_Sample['lot_id'] ]);
-		$data['Product'] = $dbc->fetchRow('SELECT * FROM product WHERE id = ?', [ $data['Lot']['product_id'] ]);
-		$data['Product_Type'] = $dbc->fetchRow('SELECT * FROM product_type WHERE id = ?', [ $data['Product']['product_type_id'] ]);
-		$data['Variety'] = $dbc->fetchRow('SELECT * FROM variety WHERE id = ?', [ $data['Lot']['variety_id'] ]);
+		$data['Result_Metric_Group_list'] = $data['Lab_Result']->getMetrics_Grouped();
 
 		return $RES->write( $this->render('result/update.php', $data) );
 
