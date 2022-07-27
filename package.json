@@ -1,0 +1,28 @@
+{
+  "name": "@openthc/lab",
+  "version": "420.22.207",
+  "description": "OpenTHC Laboratory Module",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.1.2",
+    "bootstrap": "^5.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openthc/lab.git"
+  },
+  "author": "OpenTHC, Inc.",
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/openthc/lab/issues"
+  },
+  "homepage": "https://github.com/openthc/lab#readme"
+}

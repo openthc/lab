@@ -12,10 +12,10 @@
 			"OpenTHC\\Lab\\Test\\": "./test"
 		}
 	},
+	"minimum-stability": "dev",
 	"require": {
 		"chrome-php/chrome": "1.6.1",
 		"edoceo/lowline_php": "dev-master",
-		"edoceo/radix": "dev-master",
 		"endroid/qr-code": "4.4.9",
 		"google/protobuf": "3.21.1",
 		"grpc/grpc": "1.42.0",
