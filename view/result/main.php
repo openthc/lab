@@ -5,6 +5,15 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+
+$search_data = [];
+$search_data['search_field_list'] = [
+	'Result ID',
+	'Sample ID',
+	'Origin',
+	'Variety',
+];
+
 ?>
 
 <div class="d-flex justify-content-between">
@@ -16,26 +25,7 @@
 	</div>
 </div>
 
-
-<div class="d-flex mb-2">
-	<div>
-		<input class="form-control" name="q" placeholder="- search -">
-	</div>
-	<div class="ms-2">
-		<div class="btn-group">
-			<a class="btn btn-outline-secondary" href="?stat=100">Pending: <?= $data['result_stat']['100'] ?></a>
-			<a class="btn btn-outline-primary" href="?stat=200">Passed: <?= $data['result_stat']['200'] ?></a>
-			<a class="btn btn-outline-danger" href="?stat=400">Failed: <?= $data['result_stat']['400'] ?></a>
-			<a class="btn btn-outline-secondary" href="?stat=*">All</a>
-		</div>
-	</div>
-	<div class="ms-2">
-		<div class="btn-group">
-			<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['older']) ?>"><i class="fas fa-arrow-left"></i></a>
-			<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['newer']) ?>"><i class="fas fa-arrow-right"></i></a>
-		</div>
-	</div>
-</div>
+<?= $this->block('search-filter', $search_data); ?>
 
 <!-- <p>A List of all Active and Recent Results, use Filters or Search to find old stuff.</p> -->
 
@@ -44,11 +34,9 @@
 	<tr>
 		<th>Result ID</th>
 		<th>Sample ID</th>
+		<th>Inventory ID</th>
 		<th>Date</th>
 		<th>Type</th>
-		<th>Options</th>
-		<th class="r">THC</th>
-		<th class="r">CBD</th>
 		<th class="c">Status</th>
 		<th class="r" colspan="2">
 			<!-- Send them to dump.openthc -->
@@ -60,20 +48,38 @@
 <?php
 foreach ($data['result_list'] as $s) {
 
-	$s['id_nice'] = _nice_id($s['id'], $s['guid']);
+	$s['id_nice'] = $s['guid'] ?: $s['id'];
 
 ?>
 	<tr>
 		<td><a href="/result/<?= $s['id'] ?>"><?= $s['id_nice'] ?></a></td>
-		<td><a href="/sample/<?= $s['lab_sample_id'] ?>"><?= $s['lab_sample_guid'] ?></a></td>
+		<td><?php
+		if ( ! empty($s['lab_sample_id'])) {
+			printf('<a href="/sample/%s">%s</a>', $s['lab_sample_id'], __h($s['lab_sample_guid']));
+		} else {
+			echo '-';
+		}
+		?></td>
+		<td><a href="/inventory/<?= $s['inventory_id'] ?>"><?= __h($s['inventory_guid']) ?></a></td>
 		<td><?= $s['created_at'] ?></td>
-		<td><?= $s['type_nice'] ?></td>
-		<td><?= $s['medically_compliant'] ? "Medical" : '' ?></td>
-		<td class="r"><?= $s['thc'] ?></td>
-		<td class="r"><?= $s['cbd'] ?></td>
+		<td><?= __h($s['name']) ?></td>
 		<td class="r"><?= $s['status_html'] ?></td>
 		<td class="r">
-			<a class="btn btn-sm btn-outline-secondary" href="/pub/<?= $s['id'] ?>.html" target="_blank"><i class="fas fa-share-alt"></i></a>
+			<form action="" method="post">
+			<div class="btn-group btn-group-sm">
+			<a class="btn btn-sm btn-outline-secondary" href="<?= sprintf('/result/%s/update', $s['id']) ?>"><i class="fas fa-edit"></i></a>
+			<?php
+			// if (100 == $s['stat']) {
+				echo '<button class="btn btn-sm btn-outline-secondary" type="button"><i class="fa-solid fa-flag-checkered"></i></button>';
+			// }
+			?>
+			<!-- <a class="btn btn-sm btn-outline-secondary"
+				href="/pub/<?= $s['id'] ?>.html"
+				target="_blank"
+				title="<?= _('View the published public data') ?>"
+				><i class="fas fa-share-alt"></i></a> -->
+			</div>
+			</form>
 		</td>
 	</tr>
 <?php
@@ -81,6 +87,16 @@ foreach ($data['result_list'] as $s) {
 ?>
 </tbody>
 </table>
+
+<!--
+	Pager....
+ -->
+<div class="ms-2">
+		<div class="btn-group">
+			<a class="btn btn-outline-secondary" href="?<?= http_build_query(array_merge($_GET, [ 'p' => $data['result_page']['older'] ])) ?>"><i class="fas fa-arrow-left"></i></a>
+			<a class="btn btn-outline-secondary" href="?<?= http_build_query(array_merge($_GET, [ 'p' => $data['result_page']['newer'] ])) ?>"><i class="fas fa-arrow-right"></i></a>
+		</div>
+</div>
 
 
 <script>

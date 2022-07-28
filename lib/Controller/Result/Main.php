@@ -24,12 +24,6 @@ class Main extends \App\Controller\Base
 			'result_page' => [
 				'older' => (intval($_GET['p']) - 1),
 				'newer' => (intval($_GET['p']) + 1),
-			],
-			'result_stat' => [
-				'100' => 0,
-				'102' => 0,
-				'200' => 0,
-				'400' => 0,
 			]
 		);
 		$data = $this->loadSiteData($data);
@@ -44,21 +38,6 @@ class Main extends \App\Controller\Base
 			$sql_offset = $p * 100;
 		}
 
-		// Status Breakdown
-		$sql = <<<SQL
-SELECT count(id) AS c, stat
-FROM lab_result
-WHERE license_id = :l0
-GROUP BY stat
-ORDER BY stat
-SQL;
-		$arg = [];
-		$arg[':l0'] = $_SESSION['License']['id'];
-		$res = $dbc->fetchAll($sql, $arg);
-		foreach ($res as $rec) {
-			$data['result_stat'][ $rec['stat'] ] = $rec['c'];
-		}
-
 
 		// Stuff my Company is linked to?
 		$sql = <<<SQL
@@ -67,8 +46,8 @@ SELECT lab_result.*
   , lab_sample.name AS lab_sample_guid
 FROM lab_result
 JOIN lab_sample ON lab_result.lab_sample_id = lab_sample.id
-WHERE lab_result.license_id = :l0
-ORDER BY created_at DESC, lab_result.id
+WHERE {WHERE}
+ORDER BY {SORTBY}
 OFFSET $sql_offset
 LIMIT $sql_limit
 SQL;
@@ -78,7 +57,51 @@ SQL;
 			$sql = preg_replace('/LIMIT \d+/', '', $sql);
 		}
 
-		$arg = [ ':l0' => $_SESSION['License']['id'] ];
+		$sql_filter = [];
+		$sql_filter[] = [
+			'sql' => 'lab_result.license_id = :l0',
+			'arg' => [
+				':l0' => $_SESSION['License']['id']
+			]
+		];
+
+		if ( ! empty($_GET['q'])) {
+			$_GET['q'] = trim($_GET['q']);
+			$sql_filter[] = [
+				'sql' => '(lab_result.id LIKE :q73 OR lab_result.name LIKE :q73 OR lab_sample.id LIKE :q73 OR lab_sample.name LIKE :q73)',
+				'arg' => [
+					':q73' => sprintf('%%%s%%', $_GET['q'])
+				]
+			];
+		}
+
+		$arg = [];
+		$tmp = [];
+		foreach ($sql_filter as $i => $f) {
+			$tmp[] = $f['sql'];
+			$arg = array_merge($arg, $f['arg']);
+		}
+		$tmp = implode(' AND ', $tmp);
+		$sql = str_replace('{WHERE}', $tmp, $sql);
+
+		// Sorting
+		$sql_sortby = [
+			'lab_result.created_at DESC',
+			'lab_result.id'
+		];
+		if ( ! empty($_GET['sort'])) {
+			switch ($_GET['sort']) {
+				case 'created-at':
+					// DEFAULT
+					break;
+				case 'result-id':
+				case 'sample-id':
+			}
+		}
+		$tmp = implode(', ', $sql_sortby);
+		$sql = str_replace('{SORTBY}', $tmp, $sql);
+
+		// Query
 		$res = $dbc->fetchAll($sql, $arg);
 
 		foreach ($res as $rec) {
