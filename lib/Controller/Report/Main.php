@@ -19,7 +19,20 @@ class Main extends \App\Controller\Base
 
 		$dbc = $this->_container->DBC_User;
 
-		$sql = 'SELECT * FROM lab_report WHERE license_id = :l0 ORDER BY id LIMIT 100';
+		$sql = <<<SQL
+		SELECT lab_report.id, lab_report.name, lab_report.stat, lab_report.created_at
+		  , lab_sample.id AS lab_sample_id, lab_sample.name AS lab_sample_guid
+		  , inventory.id AS inventory_id, inventory.guid AS inventory_guid
+		  , license.id AS client_license_id, license.name AS client_license_name
+		FROM lab_report
+		JOIN lab_sample ON lab_report.lab_sample_id = lab_sample.id
+		JOIN inventory ON lab_sample.lot_id = inventory.id
+		JOIN license ON lab_report.license_id_client = license.id
+		WHERE lab_report.license_id = :l0
+		ORDER BY lab_report.id DESC
+		LIMIT 100
+		SQL;
+
 		$arg = [ ':l0' => $_SESSION['License']['id'] ];
 
 		$res = $dbc->fetchAll($sql, $arg);

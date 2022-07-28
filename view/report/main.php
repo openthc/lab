@@ -47,18 +47,14 @@ $search_data['search_field_list'] = [
 <table class="table table-sm">
 <thead class="table-dark">
 	<tr>
-		<th>Report ID</th>
-		<th>Sample ID</th>
-		<th>Inventory ID</th>
 		<th>Date</th>
+		<th>Report</th>
+		<th>Sample</th>
+		<th>Inventory</th>
+		<th>Client</th>
 		<th>Type</th>
-		<!-- <th class="r">THC</th>
-		<th class="r">CBD</th> -->
 		<th class="c">Status</th>
-		<th class="r" colspan="2">
-			<!-- Send them to dump.openthc -->
-			<!-- <a class="btn btn-sm btn-outline-secondary" href="/report/download"><i class="fas fa-download"></i> -->
-		</th>
+		<th class="r" colspan="2"></th>
 	</tr>
 </thead>
 <tbody>
@@ -67,8 +63,11 @@ foreach ($data['report_list'] as $s) {
 
 	$s['id_nice'] = $s['guid'] ?: $s['id'];
 
+	$dt = new DateTime($s['created_at'], new DateTimezone($_SESSION['tz']));
+
 ?>
 	<tr>
+		<td title="<?= $s['created_at'] ?>"><?= $dt->format('m/d/y H:i') ?></td>
 		<td><a href="/report/<?= $s['id'] ?>"><?= $s['id_nice'] ?></a></td>
 		<td><?php
 		if ( ! empty($s['lab_sample_id'])) {
@@ -78,11 +77,8 @@ foreach ($data['report_list'] as $s) {
 		}
 		?></td>
 		<td><a href="/inventory/<?= $s['inventory_id'] ?>"><?= __h($s['inventory_guid']) ?></a></td>
-		<td><?= $s['created_at'] ?></td>
+		<td><?= __h($s['client_license_name']) ?></td>
 		<td><?= $s['type_nice'] ?></td>
-		<td><?= $s['medically_compliant'] ? "Medical" : '' ?></td>
-		<td class="r"><?= $s['thc'] ?></td>
-		<td class="r"><?= $s['cbd'] ?></td>
 		<td class="r"><?= $s['status_html'] ?></td>
 		<td class="r">
 			<a class="btn btn-sm btn-outline-secondary"
