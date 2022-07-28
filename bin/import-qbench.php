@@ -523,6 +523,11 @@ function _qbench_pull_result_import($dbc, $rec) : int
 
 	}
 
+	// Update Lab Sample to point to Status
+	$dbc->query('UPDATE lab_sample SET stat = 200 WHERE id = :ls0 AND stat != 200', [
+		':ls0' => $rec['@lab_sample_id']
+	]);
+
 
 	// What is this?
 	if ( ! empty($rec['worksheet_data'])) {
@@ -539,17 +544,17 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			if ('018NY6XC00LM00000000000000' == $metric_key_ulid) {
 				continue;
 			}
-
-			if ('018NY6XC00LMR9PB7SNBP97DAS' == $metric_key_ulid) {
-				echo "It's 018NY6XC00LMR9PB7SNBP97DAS!!\n";
-				var_dump($metric_val);
-				echo "\n";
-			}
-
 			if (empty($metric_key_ulid)) {
 				echo "Create: $metric_key [BIQ-346]\n";
 				exit(0);
 			}
+
+			// if ('018NY6XC00LMR9PB7SNBP97DAS' == $metric_key_ulid) {
+			// 	echo "It's 018NY6XC00LMR9PB7SNBP97DAS!!\n";
+			// 	var_dump($metric_val);
+			// 	echo "\n";
+			// 	exit(0);
+			// }
 
 			$lrm0 = $dbc->fetchRow('SELECT id FROM lab_result_metric WHERE lab_result_id = :lr0 AND lab_metric_id = :lm0', [
 				':lr0' => $lr0['id']
@@ -561,7 +566,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 				if ( ! is_numeric($val)) {
 					// Sadly, these can be basically anything
 					// And are defined by each user of QBench
-					switch ($val) {
+					switch (strtoupper($val)) {
 						case 'DET': // Detected
 						case 'Det': // GT-LOD < LOQ-LB
 							$val = -130;
@@ -573,7 +578,12 @@ function _qbench_pull_result_import($dbc, $rec) : int
 							$val = -134; // v0
 							$val = -3; // v1
 							break;
-						case 'TNTC': // @todo what is this?
+						case 'PASS':
+							$val = 1;
+							// $val = -587;
+							// $uom = bool;
+							break;
+						case 'TNTC': // Too Numerous to Count
 							$val = -138;
 							break;
 						case 'TRACE':
@@ -600,25 +610,26 @@ function _qbench_pull_result_import($dbc, $rec) : int
 							// [value] => >1%
 							// [value] => >20
 							// [value] => >20
-							// Det
-							// throw new \Exception('Invalid Value');
-							echo "Invalid Value: {$metric_val['value']}\n";
+							// echo "Invalid Value: {$metric_val['value']}\n";
 					}
 				}
 
+				$lrm1 = [
+					'id' => _ulid()
+					, 'lab_result_id' => $lr0['id']
+					, 'lab_metric_id' => $metric_key_ulid
+					, 'qom' => $val
+					, 'uom' => 'pct'
+				];
+
 				try {
-					$lrm1 = [
-						'id' => _ulid()
-						, 'lab_result_id' => $lr0['id']
-						, 'lab_metric_id' => $metric_key_ulid
-						, 'qom' => $val
-						, 'uom' => 'pct'
-					];
 					$dbc->insert('lab_result_metric', $lrm1);
 				} catch (\Exception $e) {
-					var_dump($lrm1);
+					echo "\n!!!!\n";
 					echo $e->getMessage();
-					// exit(0);
+					var_dump($lrm1);
+					echo "\n####\n";
+					exit(0);
 				}
 
 			}
@@ -1038,22 +1049,6 @@ function _qbench_pull_report($dbc, $qbc)
  */
 function _qbench_map_metric($k)
 {
-	if (preg_match('/toxin/', $k)) {
-		echo "Toxin Match: $k\n";
-		// Toxin Match: aflatoxin_pf
-		// Toxin Match: ochratoxin_a
-		// Toxin Match: ochratoxin_a_pf
-		// Toxin Match: total_aflatoxins
-	}
-
-	if (preg_match('/_pf$/', $k)) {
-		return '018NY6XC00LM00000000000000';
-	}
-
-	if (preg_match('/^total_/', $k)) {
-		return '018NY6XC00LM00000000000000';
-	}
-
 	static $metric_map = [
 		  'a_bisabolol_percent' => '018NY6XC00LMQW96F7VFGSCTYK'
 		, 'a_bisabolol' => '018NY6XC00LM00000000000000'
@@ -1413,17 +1408,18 @@ function _qbench_map_metric($k)
 		, 'thiophanate_methyl' => '018NY6XC008N5MR09YY8T1HRMR'
 		, 'toluene' => '018NY6XC00LMGG9JR3SM0MEDGQ'
 		, 'total_aflatoxins' => '018NY6XC00LMR9PB7SNBP97DAS' // Calculated?
-		, 'total_cbd_mg_g' => ''
-		, 'total_cbd_mg_ml' => ''
-		, 'total_cbd_mg_serving' => ''
-		, 'total_cbd_percent' => ''
-		, 'total_terpenes_percent' => ''
-		, 'total_terpenes' => ''
-		, 'total_thc_mg_g' => ''
-		, 'total_thc_mg_ml' => ''
-		, 'total_thc_mg_serving' => ''
-		, 'total_thc_percent' => ''
-		, 'total_unit_serving' => ''
+		, 'total_cbd_mg_g' => '018NY6XC00LM00000000000000'
+		, 'total_cbd_mg_ml' => '018NY6XC00LM00000000000000'
+		, 'total_cbd_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'total_cbd_percent' => '018NY6XC00LM00000000000000'
+		, 'total_terpenes' => '018NY6XC00LM00000000000000'
+		, 'total_terpenes_percent' => '018NY6XC00LM00000000000000'
+		, 'total_terpenes_ug_g' => '018NY6XC00LM00000000000000'
+		, 'total_thc_mg_g' => '018NY6XC00LM00000000000000'
+		, 'total_thc_mg_ml' => '018NY6XC00LM00000000000000'
+		, 'total_thc_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'total_thc_percent' => '018NY6XC00LM00000000000000'
+		, 'total_unit_serving' => '018NY6XC00LM00000000000000'
 		, 'trans_nerolidol' => '018NY6XC00LM00000000000000'
 		, 'trans_nerolidol_percent' => '018NY6XC00LMJ3HV06KJXPR9F3'
 		, 'trans_nerolidol_ug_g' => '018NY6XC00LMJ3HV06KJXPR9F3'
@@ -1444,6 +1440,17 @@ function _qbench_map_metric($k)
 	$k = strtolower($k);
 
 	$r = $metric_map[$k];
+
+	if (empty($r)) {
+		// Ignore the Pass/Failers
+		if (preg_match('/_pf$/', $k)) {
+			$r = '018NY6XC00LM00000000000000';
+		}
+		// if (preg_match('/^total_/', $k)) {
+		// 	return '018NY6XC00LM00000000000000';
+		// }
+
+	}
 
 	return $r;
 
