@@ -88,13 +88,14 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		// $y += self::FS_12;
 
 		$y += self::FS_12;
-		$this->setXY($x, $y);
-		$this->setFont('freesans', 'B', 12);
-		$this->setTextColor(0x00, 0x99, 0x00);
-		$this->cell(3.25, self::FS_12, 'Passed', 0, 0, 'C');
-		$this->setFont('freesans', '', 12);
-		$this->setTextColor(0x00, 0x00, 0x00);
-
+		// if ($this->_data['Lab_Report']['stat'] == 200) {
+			$this->setXY($x, $y);
+			$this->setFont('freesans', 'B', 12);
+			$this->setTextColor(0x00, 0x99, 0x00);
+			$this->cell(3.25, self::FS_12, 'Passed', 0, 0, 'C');
+			$this->setFont('freesans', '', 12);
+			$this->setTextColor(0x00, 0x00, 0x00);
+		// }
 
 		// Laboratory Address
 		$this->setFont('freesans', '', 10);
@@ -217,22 +218,26 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$this->setCellHeightRatio($chr0);
 
 		// Signature
+		$sig_name = $_SESSION['Contact']['fullname'];
+
 		$x = 5.25;
 		$y = 10; // 9.5;
 		$this->setXY($x, $y);
 		$this->setFont('cedarvillecursive', '', 18);
 		// $pdf->setFont('homemadeapple');
-		$this->cell(2.75, self::FS_16, 'Contact Signature', 'B');
+		$this->cell(2.75, self::FS_16, $sig_name, 'B');
 
 		$this->setXY($x, $y + (self::FS_16 * 1.25));
 		$this->setFont('freesans', '', 12, '', true);
-		$this->cell(2.75, self::FS_16, 'Contact Signature');
+		$this->cell(2.75, self::FS_16, $sig_name);
 
 		// 'Page '.$this->getAliasNumPage().'/'.$this->getAliasNbPages()
 		$cp = $this->getAliasNumPage(); // Current Page
 		$pc = $this->getAliasNbPages(); // Page Count
 		$this->setXY($x + 2.125, $y + (self::FS_16 * 2));
 		$this->cell(0.75, self::FS_16, sprintf('Page %s/%s', $cp, $pc), 0, 0, 'L');
+
+		// Digital Signature & QR Code
 
 	}
 
@@ -400,6 +405,9 @@ class COA extends \OpenTHC\Lab\PDF\Base
 
 		$this->setXY($x + 2.0, $y);
 		$this->cell(1.0, self::FS_12, 'Result', 'B', 0, 'C');
+
+		// $this->setXY($x + 2.5, $y);
+		// $this->cell(0.5, self::FS_12, 'A/L', 'B', 0, 'C');
 
 		// if ( ! empty($uom)) {
 		// 	$this->setXY($x + 3, $y);
