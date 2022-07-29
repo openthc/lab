@@ -423,7 +423,7 @@ class View extends \App\Controller\Base
 
 		if ( ! empty($_FILES['sample-file'])) {
 			$f0 = $_FILES['sample-file'];
-			if (0 == $f0['error']) {
+			if (!empty($f0['size']) && !empty($f0['tmp_name']) && (0 == $f0['error']) ) {
 				switch ($f0['type']) {
 					case 'image/jpeg':
 					case 'image/png':
@@ -440,13 +440,12 @@ class View extends \App\Controller\Base
 				}
 			} else {
 				// Error
-				print_r($f0);
-				throw new \Exception(sprintf('File Upload Error "%d"', $f0['error']));
+				// print_r($f0);
+				// throw new \Exception(sprintf('File Upload Error "%d"', $f0['error']));
 				// Session::flash();
 			}
 
 		}
-
 
 		return $RES->withRedirect(sprintf('/sample/%s', $Lab_Sample['id']));
 
