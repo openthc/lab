@@ -8,8 +8,8 @@
 namespace OpenTHC\Lab\Controller\Report;
 
 use OpenTHC\Lab\Lab_Report;
-use App\Lab_Result;
-use App\Lab_Sample;
+use OpenTHC\Lab\Lab_Result;
+use OpenTHC\Lab\Lab_Sample;
 
 class Download extends \OpenTHC\Lab\Controller\Report\Single
 {

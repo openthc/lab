@@ -5,15 +5,15 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Result;
+namespace OpenTHC\Lab\Controller\Result;
 
 use Edoceo\Radix\Session;
 
-use App\Lab_Metric;
-use App\Lab_Result;
-use App\Lab_Sample;
+use OpenTHC\Lab\Lab_Metric;
+use OpenTHC\Lab\Lab_Result;
+use OpenTHC\Lab\Lab_Sample;
 
-class View extends \App\Controller\Base
+class View extends \OpenTHC\Lab\Controller\Base
 {
 	/**
 	 *
@@ -365,14 +365,14 @@ SQL;
 
 			// Commits to a CRE
 			// require_once(__DIR__ . '/Create_LeafData.php');
-			// $x = new \App\Controller\Result\Create_LeafData($this->_container);
+			// $x = new \OpenTHC\Lab\Controller\Result\Create_LeafData($this->_container);
 			// $_POST['result_id'] = $LR['id'];
 			// return $x->_commit($REQ, $RES, $ARG);
 
 			break;
 
 		case 'mute':
-			$LR->setFlag(\App\Lab_Result::FLAG_MUTE);
+			$LR->setFlag(Lab_Result::FLAG_MUTE);
 			$LR->save();
 			break;
 		case 'lab-result-share':
@@ -391,7 +391,7 @@ SQL;
 				case 201:
 
 					// Success
-					$LR->setFlag(\App\Lab_Result::FLAG_PUBLIC);
+					$LR->setFlag(Lab_Result::FLAG_PUBLIC);
 					$LR->save();
 
 					return $RES->withRedirect($res['data']['pub']);

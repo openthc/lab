@@ -5,11 +5,13 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Sample;
+namespace OpenTHC\Lab\Controller\Sample;
 
 use Edoceo\Radix\Session;
 
-class Create extends \App\Controller\Base
+use \OpenTHC\Lab\Lab_Sample;
+
+class Create extends \OpenTHC\Lab\Controller\Base
 {
 	/**
 	 *
@@ -49,7 +51,7 @@ class Create extends \App\Controller\Base
 
 				$dbc->query('BEGIN');
 
-				$ls = new \App\Lab_Sample($dbc);
+				$ls = new Lab_Sample($dbc);
 				$ls['id'] = _ulid();
 				$ls['name'] = $_POST['sample-name'];
 				$ls['lot_id'] = $_POST['source-lot-id'];

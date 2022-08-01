@@ -5,9 +5,13 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Result;
+namespace OpenTHC\Lab\Controller\Result;
 
-class Queue extends \App\Controller\Result\Upload
+use OpenTHC\Lab\Lab_Result;
+use OpenTHC\Lab\Lab_Sample;
+use OpenTHC\Lab\PDF;
+
+class Queue extends \OpenTHC\Lab\Controller\Result\Upload
 {
 	function __invoke($REQ, $RES, $ARG)
 	{
@@ -58,25 +62,25 @@ class Queue extends \App\Controller\Result\Upload
 
 		$LS = [];
 
-		$Lab_Result = new \App\Lab_Result($dbc_user, $data['lot_link']);
+		$Lab_Result = new Lab_Result($dbc_user, $data['lot_link']);
 		if (empty($Lab_Result['id'])) {
 
 			// Try some LeafData related bullshit
 			if (preg_match('/^WA\w+\.IN\w+/', $data['lot_link'])) {
 				// Sample
-				$LS = new \App\Lab_Sample($dbc_user, $data['lot_link']);
+				$LS = new Lab_Sample($dbc_user, $data['lot_link']);
 				if (empty($LS['id'])) {
 					_exit_html(sprintf('Lab Sample Not Found, please <a href="/sample/%s/sync">sync this result</a>', $data['lot_link']), 404);
 				}
 				$LSm = json_decode($LS['meta'], true);;
 				// _exit_text($LSm);
 				// var_dump($LSm); exit;
-				$Lab_Result = new \App\Lab_Result($dbc_user, $LSm['Lot']['global_lab_result_id']);
+				$Lab_Result = new Lab_Result($dbc_user, $LSm['Lot']['global_lab_result_id']);
 
 			} elseif (preg_match('/WA\w+\.LR\w+/', $data['lot_link'])) {
 
 				// Result
-				$Lab_Result = new \App\Lab_Result($dbc_user, $data['lot_link']);
+				$Lab_Result = new Lab_Result($dbc_user, $data['lot_link']);
 				if (empty($Lab_Result['id'])) {
 					_exit_html(sprintf('Lab Result Not Found, please <a href="/result/%s/sync">sync this result</a>', $data['lot_link']), 404);
 				}
@@ -118,11 +122,11 @@ class Queue extends \App\Controller\Result\Upload
 		// $data['txt_file'] = basename($txt_file);
 
 		// pdf to text
-		$data['txt_data'] = \App\PDF::extract_text($pdf_file);
+		$data['txt_data'] = PDF::extract_text($pdf_file);
 		// var_dump($data); exit;
 
 		// text to data
-		$data['coa_data'] = \App\PDF::extract_coa($data['txt_data']);
+		$data['coa_data'] = PDF::extract_coa($data['txt_data']);
 
 		if (preg_match_all('/(WA\w{2,7}\.(IN|LR)\w+)/', $data['txt_data'], $m)) {
 

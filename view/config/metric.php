@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-use \App\Lab_Metric;
-
+use OpenTHC\Lab\Lab_Metric;
+use OpenTHC\Lab\UOM;
 
 function _draw_select_uom($id, $uom_want)
 {
@@ -16,7 +16,7 @@ function _draw_select_uom($id, $uom_want)
 	$html = [];
 	$html[] = sprintf('<select class="form-control form-control-sm" id="%s" name="%s">', $id, $name);
 
-	foreach (\App\UOM::$uom_list as $v => $n) {
+	foreach (UOM::$uom_list as $v => $n) {
 		$sel = ($v == $uom_want ? ' selected' : null);
 		$html[] = sprintf('<option%s value="%s">%s</option>', $sel, $v, $n);
 	}

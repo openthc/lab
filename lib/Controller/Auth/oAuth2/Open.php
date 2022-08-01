@@ -3,7 +3,7 @@
  * Open oAuth2 authentication process
  */
 
-namespace App\Controller\Auth\oAuth2;
+namespace OpenTHC\Lab\Controller\Auth\oAuth2;
 
 class Open extends \OpenTHC\Controller\Auth\oAuth2
 {

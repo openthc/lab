@@ -7,9 +7,9 @@
  * View a Client
  */
 
-namespace App\Controller\Client;
+namespace OpenTHC\Lab\Controller\Client;
 
-class Main extends \App\Controller\Base
+class Main extends \OpenTHC\Lab\Controller\Base
 {
 	/**
 	 *

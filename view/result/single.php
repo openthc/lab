@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-use \App\Lab_Result;
+use OpenTHC\Lab\Lab_Result;
 
 ?>
 
@@ -173,7 +173,7 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 						<input class="form-control r" readonly style="font-weight: bold;" value="<?= __h($metric['qom']) ?>">
 						<?php
 						if ( ! empty($metric['uom'])) {
-							printf('<div class="input-group-text">%s</div>', App\UOM::nice($metric['uom']));
+							printf('<div class="input-group-text">%s</div>', UOM::nice($metric['uom']));
 						}
 						?>
 					</div>

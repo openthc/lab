@@ -5,12 +5,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller;
+namespace OpenTHC\Lab\Controller;
 
-use \App\Lab_Metric;
-use \App\Lab_Result;
+use OpenTHC\Lab\Lab_Metric;
+use OpenTHC\Lab\Lab_Result;
 
-class Pub extends \App\Controller\Base
+class Pub extends \OpenTHC\Lab\Controller\Base
 {
 	protected $type_want = 'text/html';
 

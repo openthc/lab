@@ -9,10 +9,10 @@ namespace OpenTHC\Lab\Controller\Report;
 
 use Edoceo\Radix\Session;
 
-use App\Lab_Sample;
+use OpenTHC\Lab\Lab_Sample;
 use OpenTHC\Lab\Lab_Report;
 
-class Single extends \App\Controller\Base
+class Single extends \OpenTHC\Lab\Controller\Base
 {
 	/**
 	 *

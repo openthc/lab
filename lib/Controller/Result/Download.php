@@ -5,12 +5,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Result;
+namespace OpenTHC\Lab\Controller\Result;
 
-use App\Lab_Result;
-use App\Lab_Sample;
+use OpenTHC\Lab\Lab_Result;
+use OpenTHC\Lab\Lab_Sample;
 
-class Download extends \App\Controller\Result\View
+class Download extends \OpenTHC\Lab\Controller\Result\View
 {
 	private $_fh;
 	private $_eol = "\r\n";

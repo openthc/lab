@@ -3,9 +3,9 @@
  * Accept Upload of Sampole Files
  */
 
-namespace App\Controller\Result;
+namespace OpenTHC\Lab\Controller\Result;
 
-class Upload extends \App\Controller\Base
+class Upload extends \OpenTHC\Lab\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{

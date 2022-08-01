@@ -3,12 +3,12 @@
  * Details about Sharing
 */
 
-namespace App\Controller;
+namespace OpenTHC\Lab\Controller;
 
 use Edoceo\Radix\Session;
 use Edoceo\Radix\DB\SQL;
 
-class Search extends \App\Controller\Base
+class Search extends \OpenTHC\Lab\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{

@@ -3,9 +3,9 @@
  * Configure External Integrations
  */
 
-namespace App\Controller\Config;
+namespace OpenTHC\Lab\Controller\Config;
 
-class External extends \App\Controller\Base
+class External extends \OpenTHC\Lab\Controller\Base
 {
 	const CONFIG_KEY = 'qbench-auth';
 

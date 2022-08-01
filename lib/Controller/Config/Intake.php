@@ -3,11 +3,11 @@
  * Configure Metrics
  */
 
-namespace App\Controller\Config;
+namespace OpenTHC\Lab\Controller\Config;
 
-use App\Lab_Metric;
+use OpenTHC\Lab\Lab_Metric;
 
-class Intake extends \App\Controller\Base
+class Intake extends \OpenTHC\Lab\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{

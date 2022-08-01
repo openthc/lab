@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Auth\oAuth2;
+namespace OpenTHC\Lab\Controller\Auth\oAuth2;
 
 use Edoceo\Radix\Session;
 

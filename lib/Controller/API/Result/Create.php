@@ -3,9 +3,9 @@
  * Create a Lab Result
  */
 
-namespace App\Controller\API\Result;
+namespace OpenTHC\Lab\Controller\API\Result;
 
-use App\Lab_Result;
+use OpenTHC\Lab\Lab_Result;
 
 class Create extends \OpenTHC\Controller\Base
 {

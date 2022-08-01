@@ -5,14 +5,14 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Result;
+namespace OpenTHC\Lab\Controller\Result;
 
 use Edoceo\Radix\Session;
 
-use App\Lab_Result;
-use App\Lab_Sample;
+use OpenTHC\Lab\Lab_Result;
+use OpenTHC\Lab\Lab_Sample;
 
-class Create extends \App\Controller\Base
+class Create extends \OpenTHC\Lab\Controller\Base
 {
 	/**
 	 *
@@ -92,7 +92,7 @@ class Create extends \App\Controller\Base
 		case 'commit':
 			// return $this->_commit($REQ, $RES, $ARG);
 			// require_once(__DIR__ . '/Create_LeafData.php');
-			// $x = new \App\Controller\Result\Create_LeafData($this->_container);
+			// $x = new \OpenTHC\Lab\Controller\Result\Create_LeafData($this->_container);
 			// return $x->_commit($REQ, $RES, $ARG);
 		case 'save':
 		case 'lab-result-save':

@@ -1,9 +1,11 @@
 <?php
 /**
-	Inflate the JSON inbound
-*/
+ * Inflate the JSON inbound
+ */
 
-class MiddlewareJSON
+namespace OpenTHC\Lab\Middleware;
+
+class JSON
 {
 	public function __invoke($REQ, $RES, $NMW)
 	{

@@ -5,9 +5,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Config;
+namespace OpenTHC\Lab\Controller\Config;
 
-class Sample extends \App\Controller\Base
+class Sample extends \OpenTHC\Lab\Controller\Base
 {
 	const BASE_OPTION_KEY = 'lab-sample-seq-format';
 

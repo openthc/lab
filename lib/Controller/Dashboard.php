@@ -19,9 +19,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller;
+namespace OpenTHC\Lab\Controller;
 
-class Dashboard extends \App\Controller\Base
+class Dashboard extends \OpenTHC\Lab\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{

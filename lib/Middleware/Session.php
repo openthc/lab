@@ -3,7 +3,7 @@
  * Sesssion
  */
 
-namespace App\Middleware;
+namespace OpenTHC\Lab\Middleware;
 
 class Session extends \OpenTHC\Middleware\Session
 {

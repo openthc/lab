@@ -15,23 +15,23 @@ class Report extends \OpenTHC\Module\Base
 	{
 		$a->get('', 'OpenTHC\Lab\Controller\Report\Main');
 
-		// $a->map(['GET','POST'], '/sync', 'App\Controller\Result\Sync');
-		// $a->map(['GET','POST'], '/{id}/sync', 'App\Controller\Result\Sync');
+		// $a->map(['GET','POST'], '/sync', 'OpenTHC\Lab\Controller\Result\Sync');
+		// $a->map(['GET','POST'], '/{id}/sync', 'OpenTHC\Lab\Controller\Result\Sync');
 
-		// $a->get('/create', 'App\Controller\Result\Create');
-		// $a->post('/create', 'App\Controller\Result\Create:save');
+		// $a->get('/create', 'OpenTHC\Lab\Controller\Result\Create');
+		// $a->post('/create', 'OpenTHC\Lab\Controller\Result\Create:save');
 
-		// $a->map(['GET','POST'], '/upload', 'App\Controller\Result\Upload');
-		// $a->get('/upload/preview', 'App\Controller\Result\Upload:preview');
-		// $a->map(['GET','POST'], '/upload/queue', 'App\Controller\Result\Queue');
+		// $a->map(['GET','POST'], '/upload', 'OpenTHC\Lab\Controller\Result\Upload');
+		// $a->get('/upload/preview', 'OpenTHC\Lab\Controller\Result\Upload:preview');
+		// $a->map(['GET','POST'], '/upload/queue', 'OpenTHC\Lab\Controller\Result\Queue');
 
 		$a->get('/{id}', 'OpenTHC\Lab\Controller\Report\Single');
 		$a->post('/{id}', 'OpenTHC\Lab\Controller\Report\Single:post');
 
 		$a->get('/{id}/download', 'OpenTHC\Lab\Controller\Report\Download');
 
-		// $a->get('/{id}/update', 'App\Controller\Result\Update');
-		// $a->post('/{id}/update', 'App\Controller\Result\Update:post');
+		// $a->get('/{id}/update', 'OpenTHC\Lab\Controller\Result\Update');
+		// $a->post('/{id}/update', 'OpenTHC\Lab\Controller\Result\Update:post');
 
 	}
 }

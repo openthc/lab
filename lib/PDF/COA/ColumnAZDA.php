@@ -19,6 +19,8 @@
 
 namespace OpenTHC\Lab\PDF\COA;
 
+use OpenTHC\Lab\UOM;
+
 class ColumnAZDA extends \OpenTHC\Lab\PDF\COA
 {
 	/**
@@ -65,7 +67,7 @@ class ColumnAZDA extends \OpenTHC\Lab\PDF\COA
 			$this->cell(0.5, self::FS_10, _qom_nice($lrmA['qom']), 0, 0, 'R');
 
 			$this->setXY($x + 3, $y);
-			$this->cell(0.5, self::FS_10, \App\UOM::nice($lrmA['uom']), 0, 0, 'L');
+			$this->cell(0.5, self::FS_10, UOM::nice($lrmA['uom']), 0, 0, 'L');
 
 			// Column 2
 			$x = 4.25;
@@ -81,7 +83,7 @@ class ColumnAZDA extends \OpenTHC\Lab\PDF\COA
 				$this->cell(0.5, self::FS_10, _qom_nice($lrmB['qom']), 0, 0, 'R');
 
 				$this->setXY($x + 3, $y);
-				$this->cell(0.5, self::FS_10, \App\UOM::nice($lrmB['uom']), 0, 0, 'L');
+				$this->cell(0.5, self::FS_10, UOM::nice($lrmB['uom']), 0, 0, 'L');
 
 			}
 

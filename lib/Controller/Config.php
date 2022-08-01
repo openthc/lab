@@ -17,9 +17,9 @@
  * along with OpenTHC Laboratory Portal.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace App\Controller;
+namespace OpenTHC\Lab\Controller;
 
-class Config extends \App\Controller\Base
+class Config extends \OpenTHC\Lab\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{

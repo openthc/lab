@@ -7,9 +7,9 @@
  * View a Client
  */
 
-namespace App\Controller\Client;
+namespace OpenTHC\Lab\Controller\Client;
 
-class View extends \App\Controller\Base
+class View extends \OpenTHC\Lab\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{

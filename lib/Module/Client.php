@@ -7,13 +7,13 @@
  * Wraps all the Routing for the Client Module
  */
 
-namespace App\Module;
+namespace OpenTHC\Lab\Module;
 
 class Client extends \OpenTHC\Module\Base
 {
 	function __invoke($a)
 	{
-		$a->get('', 'App\Controller\Client\Main');
-		$a->map([ 'GET', 'POST'], '/{id}', 'App\Controller\Client\View');
+		$a->get('', 'OpenTHC\Lab\Controller\Client\Main');
+		$a->map([ 'GET', 'POST'], '/{id}', 'OpenTHC\Lab\Controller\Client\View');
 	}
 }

@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller;
+namespace OpenTHC\Lab\Controller;
 
 class Base extends \OpenTHC\Controller\Base
 {

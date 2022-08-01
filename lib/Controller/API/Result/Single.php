@@ -5,9 +5,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\API\Result;
+namespace OpenTHC\Lab\Controller\API\Result;
 
-use App\Lab_Result;
+use OpenTHC\Lab\Lab_Result;
 
 class Single extends \OpenTHC\Controller\Base
 {

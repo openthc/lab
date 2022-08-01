@@ -63,7 +63,7 @@ $con['DBC_User'] = function() {
 
 
 // API
-$app->group('/api', 'App\Module\API');
+$app->group('/api', 'OpenTHC\Lab\Module\API');
 
 
 // Legacy v0
@@ -72,10 +72,10 @@ $app->get('/share/{id}', function($REQ, $RES, $ARG) {
 });
 
 // Public
-$app->get('/pub/{id}.{type:html|json|pdf|png|txt}', 'App\Controller\Pub');
-$app->get('/pub/{id}/{type:ccrs.txt}', 'App\Controller\Pub');
-$app->get('/pub/{id}/{type:wcia.json}', 'App\Controller\Pub');
-$app->get('/pub/{id}', 'App\Controller\Pub');
+$app->get('/pub/{id}.{type:html|json|pdf|png|txt}', 'OpenTHC\Lab\Controller\Pub');
+$app->get('/pub/{id}/{type:ccrs.txt}', 'OpenTHC\Lab\Controller\Pub');
+$app->get('/pub/{id}/{type:wcia.json}', 'OpenTHC\Lab\Controller\Pub');
+$app->get('/pub/{id}', 'OpenTHC\Lab\Controller\Pub');
 
 $app->get('/inventory/{id}', function($REQ, $RES, $ARG) {
 
@@ -114,86 +114,86 @@ $app->get('/inventory/{id}', function($REQ, $RES, $ARG) {
 	// __exit_text($_SESSION);
 	// exit(0);
 })
-	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
+	->add('OpenTHC\Lab\Middleware\Auth')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 // Sample Group
-$app->group('/sample', 'App\Module\Sample')
-	->add('App\Middleware\Menu')
-	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
+$app->group('/sample', 'OpenTHC\Lab\Module\Sample')
+	->add('OpenTHC\Lab\Middleware\Menu')
+	->add('OpenTHC\Lab\Middleware\Auth')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Report Group
 $app->group('/report', 'OpenTHC\Lab\Module\Report')
-	->add('App\Middleware\Menu')
-	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
+	->add('OpenTHC\Lab\Middleware\Menu')
+	->add('OpenTHC\Lab\Middleware\Auth')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 // Result Group
-$app->group('/result', 'App\Module\Result')
-	->add('App\Middleware\Menu')
-	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
+$app->group('/result', 'OpenTHC\Lab\Module\Result')
+	->add('OpenTHC\Lab\Middleware\Menu')
+	->add('OpenTHC\Lab\Middleware\Auth')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Client Group
-$app->group('/client', 'App\Module\Client')
-	->add('App\Middleware\Menu')
-	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
+$app->group('/client', 'OpenTHC\Lab\Module\Client')
+	->add('OpenTHC\Lab\Middleware\Menu')
+	->add('OpenTHC\Lab\Middleware\Auth')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Search
-$app->get('/search', 'App\Controller\Search')
-	->add('App\Middleware\Menu')
-	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
+$app->get('/search', 'OpenTHC\Lab\Controller\Search')
+	->add('OpenTHC\Lab\Middleware\Menu')
+	->add('OpenTHC\Lab\Middleware\Auth')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 // Config Group
-$app->group('/config', 'App\Module\Config')
-	->add('App\Middleware\Menu')
-	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
+$app->group('/config', 'OpenTHC\Lab\Module\Config')
+	->add('OpenTHC\Lab\Middleware\Menu')
+	->add('OpenTHC\Lab\Middleware\Auth')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 // Sync
-// $app->get('/sync', 'App\Controller\Sync')
-// 	->add('App\Middleware\Menu')
-// 	->add('App\Middleware\Session');
+// $app->get('/sync', 'OpenTHC\Lab\Controller\Sync')
+// 	->add('OpenTHC\Lab\Middleware\Menu')
+// 	->add('OpenTHC\Lab\Middleware\Session');
 
-// $app->post('/sync', 'App\Controller\Sync:exec')
-// 	->add('App\Middleware\Menu')
-// 	->add('App\Middleware\Session');
+// $app->post('/sync', 'OpenTHC\Lab\Controller\Sync:exec')
+// 	->add('OpenTHC\Lab\Middleware\Menu')
+// 	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Dashboard
-$app->get('/dashboard', 'App\Controller\Dashboard')
-	->add('App\Middleware\Menu')
-	->add('App\Middleware\Auth')
-	->add('App\Middleware\Session');
+$app->get('/dashboard', 'OpenTHC\Lab\Controller\Dashboard')
+	->add('OpenTHC\Lab\Middleware\Menu')
+	->add('OpenTHC\Lab\Middleware\Auth')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Intake
-$app->map(['GET','POST'], '/intake', 'App\Controller\Intake')
-	->add('App\Middleware\Session');
+$app->map(['GET','POST'], '/intake', 'OpenTHC\Lab\Controller\Intake')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Intent
-$app->map(['GET','POST'], '/intent', 'App\Controller\Intent')
-	->add('App\Middleware\Session');
+$app->map(['GET','POST'], '/intent', 'OpenTHC\Lab\Controller\Intent')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Authentication
 $app->group('/auth', function() {
-	$this->get('/open', 'App\Controller\Auth\oAuth2\Open');
-	$this->get('/connect', 'App\Controller\Auth\Connect')->setName('auth/connect'); // would like to merge with Open or Back
-	$this->get('/back', 'App\Controller\Auth\oAuth2\Back')->setName('auth/back');
-	$this->get('/init', 'App\Controller\Auth\Init')->setName('auth/init');
+	$this->get('/open', 'OpenTHC\Lab\Controller\Auth\oAuth2\Open');
+	$this->get('/connect', 'OpenTHC\Lab\Controller\Auth\Connect')->setName('auth/connect'); // would like to merge with Open or Back
+	$this->get('/back', 'OpenTHC\Lab\Controller\Auth\oAuth2\Back')->setName('auth/back');
+	$this->get('/init', 'OpenTHC\Lab\Controller\Auth\Init')->setName('auth/init');
 	$this->get('/ping', 'OpenTHC\Controller\Auth\Ping');
 	$this->get('/shut', 'OpenTHC\Controller\Auth\Shut');
 })
-	->add('App\Middleware\Menu')
-	->add('App\Middleware\Session');
+	->add('OpenTHC\Lab\Middleware\Menu')
+	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Custom Middleware?

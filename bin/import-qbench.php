@@ -11,6 +11,7 @@
 
 use Edoceo\Radix\DB\SQL;
 
+use OpenTHC\Lab\Lab_Result;
 use OpenTHC\CRE\Base as CRE_Base;
 
 require_once(dirname(dirname(__FILE__)) . '/boot.php');
@@ -506,13 +507,13 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		}
 
 		$dbc->insert('lab_result', $lr1);
-		$lr0 = new \App\Lab_Result($dbc, $lr1);
+		$lr0 = new Lab_Result($dbc, $lr1);
 
 		echo '+';
 
 	} else {
 
-		$lr0 = new \App\Lab_Result($dbc, $lr0);
+		$lr0 = new Lab_Result($dbc, $lr0);
 		$lr0['hash'] = $rec['@hash'];
 		$lr0['name'] = ( $lab_assay_list[ $rec['@assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) );
 		$lr0['stat'] = $rec['@stat'];

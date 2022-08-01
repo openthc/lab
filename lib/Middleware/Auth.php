@@ -3,7 +3,7 @@
  * Authentication Middleware
  */
 
-namespace App\Middleware;
+namespace OpenTHC\Lab\Middleware;
 
 use OpenTHC\Company;
 use OpenTHC\Contact;

@@ -5,13 +5,13 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Sample;
+namespace OpenTHC\Lab\Controller\Sample;
 
 use Edoceo\Radix\Session;
 
-use App\Lab_Sample;
+use OpenTHC\Lab\Lab_Sample;
 
-class View extends \App\Controller\Base
+class View extends \OpenTHC\Lab\Controller\Base
 {
 	private $cre;
 
@@ -23,7 +23,7 @@ class View extends \App\Controller\Base
 
 		$dbc = $this->_container->DBC_User;
 
-		$Lab_Sample = new \App\Lab_Sample($dbc, $ARG['id']);
+		$Lab_Sample = new Lab_Sample($dbc, $ARG['id']);
 		if (empty($Lab_Sample['id'])) {
 			_exit_html_fail('Invalid Lab Sample [CSV-026]', 400);
 		}
@@ -124,7 +124,7 @@ class View extends \App\Controller\Base
 
 		$dbc = $this->_container->DBC_User;
 
-		$Lab_Sample = new \App\Lab_Sample($dbc, $ARG['id']);
+		$Lab_Sample = new Lab_Sample($dbc, $ARG['id']);
 		if (empty($Lab_Sample['id'])) {
 			__exit_text('Invalid Lab Sample [CSV-131]', 404);
 		}
@@ -230,7 +230,7 @@ class View extends \App\Controller\Base
 		$lab_metric_type_list = [];
 		foreach ($_POST['lab-result'] as $x) {
 
-			$LR0 = new \App\Lab_Result($dbc, $x);
+			$LR0 = new Lab_Result($dbc, $x);
 			$lrm_list = $LR0->getMetrics();
 
 			$sql = <<<SQL
@@ -288,8 +288,8 @@ class View extends \App\Controller\Base
 		$arg = array(
 			':pk' => $ARG['id'],
 			':l0' => $_SESSION['License']['id'],
-			':s1' => \App\Lab_Sample::STAT_DONE,
-			':f1' => \App\Lab_Sample::FLAG_DONE,
+			':s1' => Lab_Sample::STAT_DONE,
+			':f1' => Lab_Sample::FLAG_DONE,
 		);
 		$res = $dbc->query($sql, $arg);
 
@@ -321,8 +321,8 @@ class View extends \App\Controller\Base
 		// $arg = array(
 		// 	':pk' => $ARG['id'],
 		// 	':l0' => $_SESSION['License']['id'],
-		// 	':s1' => \App\Lab_Sample::STAT_VOID,
-		// 	':f1' => \App\Lab_Sample::FLAG_DEAD,
+		// 	':s1' => Lab_Sample::STAT_VOID,
+		// 	':f1' => Lab_Sample::FLAG_DEAD,
 		// );
 		// $res = $dbc_user->query($sql, $arg);
 
@@ -462,8 +462,8 @@ class View extends \App\Controller\Base
 		$arg = array(
 			':pk' => $ARG['id'],
 			':l0' => $_SESSION['License']['id'],
-			':s1' => \App\Lab_Sample::STAT_VOID,
-			':f1' => \App\Lab_Sample::FLAG_VOID,
+			':s1' => Lab_Sample::STAT_VOID,
+			':f1' => Lab_Sample::FLAG_VOID,
 		);
 		$res = $dbc->query($sql, $arg);
 

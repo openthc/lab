@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App;
+namespace OpenTHC\Lab;
 
 class Lab_Result extends \OpenTHC\SQL\Record
 {

@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Auth;
+namespace OpenTHC\Lab\Controller\Auth;
 
 use OpenTHC\License;
 

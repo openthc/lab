@@ -3,9 +3,9 @@
  * Show the Active Inventory Samples
  */
 
-namespace App\Controller\Sample;
+namespace OpenTHC\Lab\Controller\Sample;
 
-use App\Lab_Sample;
+use OpenTHC\Lab\Lab_Sample;
 
 class Sync extends \OpenTHC\Controller\Base
 {

@@ -5,13 +5,14 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Sample;
+namespace OpenTHC\Lab\Controller\Sample;
 
 use Edoceo\Radix\DB\SQL;
 
-use App\Lab_Sample;
+use OpenTHC\Lab\Lab_Sample;
+use OpenTHC\Lab\UI\Pager;
 
-class Main extends \App\Controller\Base
+class Main extends \OpenTHC\Lab\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{
@@ -108,7 +109,7 @@ SQL;
 		$sql_count = preg_replace('/ORDER BY.+$/', null, $sql_count);
 
 		$c = $dbc->fetchOne($sql_count, $sql_param);
-		$Pager = new \App\UI\Pager($c, 100, $_GET['p']);
+		$Pager = new Pager($c, 100, $_GET['p']);
 
 		$data['page_list_html'] = $Pager->getHTML();
 		$data['page_older'] = max(1, intval($_GET['p']) - 1);

@@ -5,14 +5,14 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Result;
+namespace OpenTHC\Lab\Controller\Result;
 
 use Edoceo\Radix\Session;
 
-use App\Lab_Sample;
-use App\Lab_Result;
+use OpenTHC\Lab\Lab_Sample;
+use OpenTHC\Lab\Lab_Result;
 
-class Update extends \App\Controller\Result\View
+class Update extends \OpenTHC\Lab\Controller\Result\View
 {
 	/**
 	 *
@@ -186,7 +186,7 @@ class Update extends \App\Controller\Result\View
 				$dbc_user->query('COMMIT');
 
 				// Publish
-				$subC = new \App\Controller\API\Pub($this->_container);
+				$subC = new \OpenTHC\Lab\Controller\API\Pub($this->_container);
 				$subR = $subC->_lab_result_publish($RES, $dbc_user, $LR);
 
 				return $RES->withRedirect(sprintf('/result/%s', $LR['id']));

@@ -3,7 +3,7 @@
  * Wraps all the Routing for the API Module
  */
 
-namespace App\Module;
+namespace OpenTHC\Lab\Module;
 
 class API extends \OpenTHC\Module\Base
 {
@@ -13,7 +13,7 @@ class API extends \OpenTHC\Module\Base
 		$a->get('', function($REQ, $RES) {
 			$data = array('Page' => array('title' => 'API'));
 			return $this->view->render($RES, 'page/api/index.html', $data);
-		})->add('App\Middleware\Menu');
+		})->add('OpenTHC\Lab\Middleware\Menu');
 
 		// The Versioned Endpoint
 		$a->group('/v2015', function() {
@@ -39,7 +39,7 @@ class API extends \OpenTHC\Module\Base
 			// Return List of Samples
 			// $this->get('/qa', function($REQ, $RES, $ARG) {
 			// 	return require_once(APP_ROOT . '/api/qa/search.php');
-			// })->add('App\Middleware\Auth');
+			// })->add('OpenTHC\Lab\Middleware\Auth');
 
 			//$this->post('/qa', function($REQ, $RES, $ARG) {
 			//	die('Create QA Sample');
@@ -61,17 +61,17 @@ class API extends \OpenTHC\Module\Base
 
 
 			// Select Specific Lab Result
-			$this->get('/result/{id}', 'App\Controller\API\Result\Single');
+			$this->get('/result/{id}', 'OpenTHC\Lab\Controller\API\Result\Single');
 
 			$this->get('/result/{id}.pdf', function($REQ, $RES, $ARG) {
 				return require_once(APP_ROOT . '/api/qa/result.pdf.php');
 			});
 
 			// Create a Result
-			$this->post('/result', 'App\Controller\API\Result\Create');
+			$this->post('/result', 'OpenTHC\Lab\Controller\API\Result\Create');
 
 			// Update Result
-			$this->post('/result/{id}', 'App\Controller\API\Result\Update');
+			$this->post('/result/{id}', 'OpenTHC\Lab\Controller\API\Result\Update');
 
 		});
 

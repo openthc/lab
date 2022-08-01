@@ -5,9 +5,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Result;
+namespace OpenTHC\Lab\Controller\Result;
 
-class Main extends \App\Controller\Base
+use OpenTHC\Lab\Lab_Result;
+use OpenTHC\Lab\UI\Pager;
+
+class Main extends \OpenTHC\Lab\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{
@@ -113,7 +116,7 @@ SQL;
 
 			// @todo this should be a FLAG on the Lab_Result object
 			// @todo the coa_file should be a property on the lab_result data-model
-			$QAR = new \App\Lab_Result(null, $rec);
+			$QAR = new Lab_Result(null, $rec);
 			$rec['coa_file'] = $QAR->getCOAFile();
 
 			// Try to Read first from META -- our preferred data
@@ -193,7 +196,7 @@ SQL;
 		$sql_count = preg_replace('/ORDER BY.+$/ms', null, $sql_count);
 
 		$res = $dbc->fetchOne($sql_count, $arg);
-		$Pager = new \App\UI\Pager($res, $sql_limit, $_GET['p']);
+		$Pager = new Pager($res, $sql_limit, $_GET['p']);
 
 		$data['page_list_html'] = $Pager->getHTML();
 

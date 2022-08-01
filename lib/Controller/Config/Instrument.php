@@ -3,9 +3,9 @@
  * Configure Instrument
  */
 
-namespace App\Controller\Config;
+namespace OpenTHC\Lab\Controller\Config;
 
-class Instrument extends \App\Controller\Base
+class Instrument extends \OpenTHC\Lab\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{

@@ -17,11 +17,12 @@
  * along with OpenTHC Laboratory Portal.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace App\Controller;
+namespace OpenTHC\Lab\Controller;
 
 use OpenTHC\Company;
+use OpenTHC\Lab\Lab_Result;
 
-class Intent extends \App\Controller\Base
+class Intent extends \OpenTHC\Lab\Controller\Base
 {
 	function __invoke($REQ, $RES, $ARG)
 	{
@@ -64,7 +65,7 @@ class Intent extends \App\Controller\Base
 			switch ($arg['a']) {
 			case 'coa-upload':
 
-				$LR = new \App\Lab_Result($dbc, $arg['r']);
+				$LR = new Lab_Result($dbc, $arg['r']);
 				// var_dump($LR); exit;
 
 				$file = 'page/intent/coa-upload.html';
@@ -169,7 +170,7 @@ class Intent extends \App\Controller\Base
 		switch ($_POST['a']) {
 			case 'create-sample':
 
-				$Lab_Sample = new \App\Lab_Sample($dbc_user);
+				$Lab_Sample = new Lab_Sample($dbc_user);
 				$Lab_Sample['id'] = _ulid();
 				$Lab_Sample['stat'] = 100;
 				$Lab_Sample['license_id'] = $ctx['license'];

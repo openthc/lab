@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+use OpenTHC\Lab\UOM;
+
 ?>
 
 <style>
@@ -205,10 +207,10 @@ function _draw_metric_info_table($metric_list)
 								printf('<td>%s</td><td class="r">%s</td>', __h($v['name']), $v['qom']);
 								break;
 							case 'pct':
-								printf('<td>%s</td><td class="r">%0.3f %s</td>', __h($v['name']), $v['qom'], \App\UOM::nice($v['uom']));
+								printf('<td>%s</td><td class="r">%0.3f %s</td>', __h($v['name']), $v['qom'], UOM::nice($v['uom']));
 								break;
 							default:
-								printf('<td>%s</td><td class="r">%0.3f %s</td>', __h($v['name']), $v['qom'], \App\UOM::nice($v['uom']));
+								printf('<td>%s</td><td class="r">%0.3f %s</td>', __h($v['name']), $v['qom'], UOM::nice($v['uom']));
 								break;
 						}
 				}

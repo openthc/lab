@@ -3,25 +3,25 @@
  * Wraps all the Routing for the Transfer Module
  */
 
-namespace App\Module;
+namespace OpenTHC\Lab\Module;
 
 class Transfer extends \OpenTHC\Module\Base
 {
 	function __invoke($a)
 	{
-		$a->get('', 'App\Controller\Transfer\Home');
+		$a->get('', 'OpenTHC\Lab\Controller\Transfer\Home');
 
-		$a->get('/create', 'App\Controller\Transfer\Create');
-		$a->post('/create', 'App\Controller\Transfer\Create:post');
+		$a->get('/create', 'OpenTHC\Lab\Controller\Transfer\Create');
+		$a->post('/create', 'OpenTHC\Lab\Controller\Transfer\Create:post');
 
-		$a->map(['GET','POST'], '/sync', 'App\Controller\Transfer\Sync');
-		$a->map(['GET', 'POST'], '/{id}/sync', 'App\Controller\Transfer\Sync');
+		$a->map(['GET','POST'], '/sync', 'OpenTHC\Lab\Controller\Transfer\Sync');
+		$a->map(['GET', 'POST'], '/{id}/sync', 'OpenTHC\Lab\Controller\Transfer\Sync');
 
-		$a->get('/{id}', 'App\Controller\Transfer\View');
-		$a->post('/{id}', 'App\Controller\Transfer\View');
+		$a->get('/{id}', 'OpenTHC\Lab\Controller\Transfer\View');
+		$a->post('/{id}', 'OpenTHC\Lab\Controller\Transfer\View');
 
-		$a->get('/{id}/accept', 'App\Controller\Transfer\Accept');
-		$a->post('/{id}/accept', 'App\Controller\Transfer\Accept:accept');
+		$a->get('/{id}/accept', 'OpenTHC\Lab\Controller\Transfer\Accept');
+		$a->post('/{id}/accept', 'OpenTHC\Lab\Controller\Transfer\Accept:accept');
 
 	}
 }

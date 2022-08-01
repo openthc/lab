@@ -5,11 +5,11 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-namespace App\Controller\Config;
+namespace OpenTHC\Lab\Controller\Config;
 
-use App\Lab_Metric;
+use OpenTHC\Lab\Lab_Metric;
 
-class Metric extends \App\Controller\Base
+class Metric extends \OpenTHC\Lab\Controller\Base
 {
 	/**
 	 *

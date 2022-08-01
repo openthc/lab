@@ -19,11 +19,11 @@
  * along with OpenTHC Laboratory Portal.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace App\Controller;
+namespace OpenTHC\Lab\Controller;
 
 use OpenTHC\Company;
 
-class Intake extends \App\Controller\Base
+class Intake extends \OpenTHC\Lab\Controller\Base
 {
 	/**
 	 *

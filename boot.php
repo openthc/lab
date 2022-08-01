@@ -124,7 +124,7 @@ function _draw_metric($lm)
 				style="flex: 0 1 5em; width: 5em;"
 				tabindex="-1">
 			<?php
-			foreach (\App\UOM::$uom_list as $v => $n) {
+			foreach (\OpenTHC\Lab\UOM::$uom_list as $v => $n) {
 				$sel = ($v == $uom ? ' selected' : null);
 				printf('<option%s value="%s">%s</option>', $sel, $v, $n);
 			}
@@ -185,7 +185,7 @@ function _draw_unit_pick()
 {
 	$html = [];
 	$html[] = '<select class="form-control form-control-sm lab-metric-uom-bulk">';
-	foreach (\App\UOM::$uom_list as $k => $v) {
+	foreach (\OpenTHC\Lab\UOM::$uom_list as $k => $v) {
 		$html[] = sprintf('<option data-uom="%s" value="%s">%s</option>'
 			, $k
 			, $k

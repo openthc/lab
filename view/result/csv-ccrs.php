@@ -13,9 +13,9 @@
  * ug/kg = parts per billion (ppb)
  */
 
-use OpenTHC\CRE\CCRS;
+use OpenTHC\Lab\Lab_Result;
 
-use App\Lab_Result;
+use OpenTHC\CRE\CCRS;
 
 // Get Some Configuration Options
 $csv_config = [];
