@@ -59,7 +59,7 @@ foreach ($this->data['metric_list'] as $m) {
 	if ($m['type'] != $type_x) {
 	?>
 		<tr class="thead-dark">
-			<th colspan="6"><h3><?= h($m['type']) ?></h3></th>
+			<th colspan="7"><h3><?= h($m['type']) ?></h3></th>
 		</tr>
 		<tr class="thead-dark">
 			<th>Name</th>
@@ -68,7 +68,6 @@ foreach ($this->data['metric_list'] as $m) {
 			<th>LOQ-LB</th>
 			<th>LOQ-UB</th>
 			<th>Limit</th>
-			<!-- <th colspan="3">Products</th> -->
 			<th></th>
 		</tr>
 	<?php
@@ -79,24 +78,14 @@ foreach ($this->data['metric_list'] as $m) {
 		<td><?= h($m['name']) ?></td>
 		<?php
 		if (308 == $m['stat']) {
-			printf('<td colspan="4">%s</td>', $m['meta']['goto']);
+			printf('<td colspan="5">%s</td>', $m['meta']['goto']);
 		} else {
 		?>
-		<td>
-			<?= _draw_select_uom(sprintf('uom-%s', $m['id']), $m['meta']['uom']); ?>
-		</td>
-		<td class="r">
-			<input class="form-control form-control-sm r" name="<?= sprintf('lod-%s', $m['id']) ?>" value="<?= h($m['meta']['lod']) ?>">
-		</td>
-		<td class="r">
-			<input class="form-control form-control-sm r" name="<?= sprintf('loq-lb-%s', $m['id']) ?>" value="<?= h($m['meta']['loq']) ?>">
-		</td>
-		<td class="r">
-			<input class="form-control form-control-sm r" name="<?= sprintf('loq-ub-%s', $m['id']) ?>" value="<?= h($m['meta']['max']) ?>">
-		</td>
-		<td class="r">
-			<input class="form-control form-control-sm r" name="<?= sprintf('lof-%s', $m['id']) ?>" value="<?= h($m['meta']['max']['val']) ?>">
-		</td>
+		<td><?= __h($m['meta']['uom']) ?></td>
+		<td class="r"><?= __h($m['meta']['lod']) ?></td>
+		<td class="r"><?= h($m['meta']['loq-lb']) ?></td>
+		<td class="r"><?= h($m['meta']['loq-lb']) ?></td>
+		<td class="r"><?= h($m['meta']['max']['val']) ?></td>
 		<?php
 		}
 		?>

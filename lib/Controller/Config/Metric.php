@@ -26,6 +26,12 @@ class Metric extends \OpenTHC\Lab\Controller\Base
 		}
 
 		$metric_list = [];
+		$sql = <<<SQL
+		SELECT lab_metric.id, lab_metric.name, lab_metric.meta
+		FROM lab_metric
+		JOIN lab_metric_type ON lab_metric.lab_metric_type_id = lab_metric_type.id
+		ORDER BY lab_metric_type.sort, lab_metric.sort
+		SQL;
 		$res = $dbc->fetchAll('SELECT * FROM lab_metric ORDER BY type, sort, name');
 		foreach ($res as $m) {
 			$m['meta'] = json_decode($m['meta'], true);
@@ -100,6 +106,11 @@ class Metric extends \OpenTHC\Lab\Controller\Base
 	function single($RES, $dbc)
 	{
 		$Lab_Metric = $dbc->fetchRow('SELECT * FROM lab_metric WHERE id = :lm0', [ ':lm0' => $_GET['id'] ]);
+		$Lab_Metric['meta'] = json_decode($Lab_Metric['meta'], true);
+
+		$data = $this->loadSiteData();
+		$data['Page']['title'] = 'Config :: Metric :: Update';
+		$data['Lab_Metric'] = $Lab_Metric;
 
 		return $RES->write( $this->render('config/metric-single.php', $data) );
 
