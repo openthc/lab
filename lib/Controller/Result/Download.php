@@ -142,7 +142,7 @@ class Download extends \OpenTHC\Lab\Controller\Result\View
 
 		// __exit_text($data);
 
-		require_once(APP_ROOT . '/view/result/csv-ccrs.php');
+		require_once(APP_ROOT . '/view/pub/csv-ccrs.php');
 
 		exit(0);
 
@@ -160,7 +160,7 @@ class Download extends \OpenTHC\Lab\Controller\Result\View
 	{
 		$data = $this->_load_data($ARG);
 
-		// require_once(APP_ROOT . '/view/result/json-wcia.php');
+		// require_once(APP_ROOT . '/view/pub/json-wcia.php');
 		$json = require_once(APP_ROOT . '/view/pub/json.wcia-2022-062.php');
 
 		return $RES->withJSON($json, 200, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -203,7 +203,7 @@ class Download extends \OpenTHC\Lab\Controller\Result\View
 		// Filter out Lab Metrics w/o Metrics
 		// ['metric']
 
-		require_once(APP_ROOT . '/view/result/coa-pdf.php');
+		require_once(APP_ROOT . '/view/pub/coa-pdf.php');
 
 		exit(0);
 

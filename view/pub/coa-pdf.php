@@ -30,10 +30,10 @@ $pdf->draw_metric_table_2_col_a_then_d('General', $data['Lab_Result_Section_Metr
 $x = 0.5;
 $y = $pdf->getY() + COA::FS_14;
 $pdf->setXY($x, $y);
-// $pdf->setFont('', 'B', 14);
+// $pdf->setFont('freesans', 'B', 14);
 // $pdf->cell(7.5, COA::FS_14, );
 // $pdf->setXY(0.5, $y + COA::FS_14);
-// $pdf->setFont('', '', 10);
+// $pdf->setFont('freesans', '', 10);
 // $pdf->draw_metric_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0HRHFRZGY72C7']['metric_list']);
 $metric_list = $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0HRHFRZGY72C7']['metric_list'];
 // $metric_list_count = count($metric_list);
@@ -110,9 +110,6 @@ $pdf->draw_metric_table_2_col_a_then_d('Pesticides', $metric_list);
 // $x = 4.25;
 // $pdf->setXY($x, $y);
 // $pdf->draw_metric_table($metric_listB);
-
-// Signature? Details QR Code Linking to .... ?
-// $pdf->setFont();
 
 // More disclaimer text
 

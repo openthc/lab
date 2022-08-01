@@ -151,7 +151,7 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		]);
 
 		ob_start();
-		require_once(APP_ROOT . '/view/result/csv-ccrs.php');
+		require_once(APP_ROOT . '/view/pub/csv-ccrs.php');
 		$csv_output = ob_get_clean();
 
 		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="Lab_Report_%s_CCRS.csv"', $data['Lab_Result']['id']));
@@ -220,7 +220,7 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		}
 
 		ob_start();
-		require_once(APP_ROOT . '/view/result/coa-pdf.php');
+		require_once(APP_ROOT . '/view/pub/coa-pdf.php');
 		$pdf_body = ob_get_clean();
 
 		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="Lab_Report_%s.pdf"', $data['Lab_Result']['id']));
