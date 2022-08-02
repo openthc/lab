@@ -6,6 +6,7 @@
  */
 
 use OpenTHC\Lab\Lab_Result;
+use OpenTHC\Lab\UOM;
 
 ?>
 
