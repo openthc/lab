@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+use OpenTHC\Lab\Lab_Report;
 
 $search_data = [];
 $search_data['search_field_list'] = [
@@ -18,31 +19,7 @@ $search_data['search_field_list'] = [
 
 <h1>Reports</h1>
 
-<?php
-// $this->block('search-filter', $search_data);
-?>
-
-<!-- <div class="d-flex mb-2">
-	<div>
-		<input class="form-control" name="q" placeholder="- search -">
-	</div>
-	<div class="ms-2">
-		<div class="btn-group">
-			<a class="btn btn-outline-secondary" href="?stat=100">Pending: <?= $data['report_stat']['100'] ?></a>
-			<a class="btn btn-outline-primary" href="?stat=200">Passed: <?= $data['report_stat']['200'] ?></a>
-			<a class="btn btn-outline-danger" href="?stat=400">Failed: <?= $data['report_stat']['400'] ?></a>
-			<a class="btn btn-outline-secondary" href="?stat=*">All</a>
-		</div>
-	</div>
-	<div class="ms-2">
-		<div class="btn-group">
-			<a class="btn btn-outline-secondary" href="?p=<?= ($data['report_page']['older']) ?>"><i class="fas fa-arrow-left"></i></a>
-			<a class="btn btn-outline-secondary" href="?p=<?= ($data['report_page']['newer']) ?>"><i class="fas fa-arrow-right"></i></a>
-		</div>
-	</div>
-</div> -->
-
-<!-- <p>A List of all Active and Recent Reports, use Filters or Search to find old stuff.</p> -->
+<?= $this->block('search-filter', $search_data); ?>
 
 <table class="table table-sm">
 <thead class="table-dark">
@@ -68,7 +45,7 @@ foreach ($data['report_list'] as $s) {
 ?>
 	<tr>
 		<td title="<?= $s['created_at'] ?>"><?= $dt->format('m/d/y H:i') ?></td>
-		<td><a href="/report/<?= $s['id'] ?>"><?= $s['id_nice'] ?></a></td>
+		<td><a href="/report/<?= $s['id'] ?>"><?= $s['name'] ?></a></td>
 		<td><?php
 		if ( ! empty($s['lab_sample_id'])) {
 			printf('<a href="/sample/%s">%s</a>', $s['lab_sample_id'], __h($s['lab_sample_guid']));
@@ -81,11 +58,22 @@ foreach ($data['report_list'] as $s) {
 		<td><?= $s['type_nice'] ?></td>
 		<td class="r"><?= $s['status_html'] ?></td>
 		<td class="r">
+			<form action="/report/<?= $s['id'] ?>" method="post">
+			<div class="btn-group btn-group-sm">
+			<?php
+			if ($s['flag'] & Lab_Report::FLAG_PUBLIC) {
+				echo '<button class="btn btn-outline-success" formtarget="_blank" name="a" title="Lab Reports Published, click to re-publish &amp; view" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
+			} else {
+				echo '<button class="btn btn-primary" formtarget="_blank" name="a" title="Lab Results NOT Published, Click to Publish" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
+			}
+			?>
 			<a class="btn btn-sm btn-outline-secondary"
 				href="/pub/<?= $s['id'] ?>.html"
 				target="_blank"
 				title="<?= _('View the published public data') ?>"
 				><i class="fas fa-share-alt"></i></a>
+			</div>
+			</form>
 		</td>
 	</tr>
 <?php
@@ -93,6 +81,16 @@ foreach ($data['report_list'] as $s) {
 ?>
 </tbody>
 </table>
+
+<div class="ms-2">
+
+	<div><?= $data['page_list_html'] ?></div>
+
+	<div class="btn-group">
+		<a class="btn btn-outline-secondary" href="?<?= http_build_query(array_merge($_GET, [ 'p' => $data['result_page']['older'] ])) ?>"><i class="fas fa-arrow-left"></i></a>
+		<a class="btn btn-outline-secondary" href="?<?= http_build_query(array_merge($_GET, [ 'p' => $data['result_page']['newer'] ])) ?>"><i class="fas fa-arrow-right"></i></a>
+	</div>
+</div>
 
 
 <script>

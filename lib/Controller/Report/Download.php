@@ -110,44 +110,10 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 	 */
 	function csv_ccrs($RES, $ARG, $data)
 	{
-		$dbc = $this->_container->DBC_User;
-
-		$Lab_Report = new Lab_Report($dbc, $ARG['id']);
-		if (empty($Lab_Report['id'])) {
-			_exit_html_fail('<h1>Lab Report Not Found [CRD-123]</h1>', 400);
-		}
-
-		$Lab_Sample = new Lab_Sample($dbc, $Lab_Report['lab_sample_id']);
-		if (empty($Lab_Sample['id'])) {
-			$Lab_Sample = [
-				'id' => '',
-				'guid' => '-notset-',
-				'name' => '-notset-',
-			];
-		}
-
-		$data = [];
-
 		// Have to Make it look like the way the 'result' outputter wants it to be.
-		$data['Lab_Result'] = [
-			'id' => $Lab_Report['id'],
-			'guid' => $Lab_Report['guid'],
-			'name' => $Lab_Report['guid'],
-			'created_at' => $Lab_Report['created_at'],
-		];
-		$data['Lab_Sample'] = $Lab_Sample->toArray();
-
-		$m = $Lab_Report->getMeta();
-		$data['Lab_Result_Metric_list'] = $m['lab_metric_list'];
-
-		$data['Lot'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i0', [
-			':i0' => $Lab_Sample['lot_id']
-		]);
-		$data['License_Laboratory'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
-			':l0' => $Lab_Sample['license_id']
-		]);
-		$data['License_Source'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
-			':l0' => $Lab_Sample['license_id_source']
+		$dbc_user = $this->_container->DBC_User;
+		$data['Lot'] = $dbc_user->fetchRow('SELECT * FROM inventory WHERE id = :i0', [
+			':i0' => $data['Lab_Sample']['lot_id']
 		]);
 
 		ob_start();

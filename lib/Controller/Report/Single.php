@@ -11,6 +11,7 @@ use Edoceo\Radix\Session;
 
 use OpenTHC\Lab\Lab_Sample;
 use OpenTHC\Lab\Lab_Report;
+use OpenTHC\Lab\Lab_Result;
 
 class Single extends \OpenTHC\Lab\Controller\Base
 {
@@ -48,9 +49,9 @@ class Single extends \OpenTHC\Lab\Controller\Base
 
 		switch ($_POST['a']) {
 			case 'lab-report-commit';
-				$Lab_Report['stat'] = 200;
 				// Log a Commit?
-				$Lab_Report->save();
+				$Lab_Report['stat'] = 200;
+				$Lab_Report->save('Lab Report Committed by User');
 				break;
 			case 'lab-report-share':
 
@@ -71,6 +72,17 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				}
 
 				$subC = new \OpenTHC\Lab\Controller\Report\Download($this->_container);
+
+				// Invoke on ourselves for the HTML view
+				// $res1 = $RES->withBody(new \Slim\Http\Body(fopen('php://temp', 'r+')));
+				// $res1 = $this->__invoke($res1, $ARG, $data);
+				// $out_file = sprintf('%s/output.pdf', $dir_base);
+				// $out_body = $res1->getBody();
+				// $out_body->rewind();
+				// $out_size = $out_body->getSize();
+				// $out_data = $out_body->getContents();
+				// file_put_contents($out_file, $out_data);
+
 
 				// Generate the COA/PDF
 				$res1 = $RES->withBody(new \Slim\Http\Body(fopen('php://temp', 'r+')));
@@ -120,6 +132,34 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				// 	, 'lab_report' => $Lab_Report['id']
 				// ]];
 				// $res = $lab_self->post('/api/v2018/report/publish', $arg);
+
+				// Create Lab Report in Main/Public Database
+				$data['@context'] = 'http://openthc.org/lab/2021';
+
+				$dbc_main = $this->_container->DBC_Main;
+				$Lab_Result1 = new Lab_Result($dbc_main, $Lab_Report['id']);
+				$Lab_Result1['id'] = $Lab_Report['id'];
+				$Lab_Result1['license_id'] = $Lab_Report['license_id'];
+				$Lab_Result1['flag'] = $Lab_Report['flag'];
+				$Lab_Result1['stat'] = $Lab_Report['stat'];
+				$Lab_Result1['type'] = 'Lab_Report';
+				$Lab_Result1['name'] = $Lab_Report['name'];
+				$Lab_Result1['meta'] = json_encode($data);
+				$Lab_Result1->save();
+
+				// if (_is_ajax()) {
+				// 	$ret['data'] = [
+				// 		'pub' => sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
+				// 		'coa' => sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
+				// 		'json' => sprintf('https://%s/pub/%s.json', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
+				// 		'wcia' => sprintf('https://%s/pub/%s/wcia.json', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
+				// 	];
+				// }
+
+				$Lab_Report->setFlag(Lab_Report::FLAG_PUBLIC);
+				$Lab_Report->save('Lab Report Published by User');
+
+				return $RES->withRedirect(sprintf('/pub/%s.html', $Lab_Result1['id']));
 
 				break;
 		}
@@ -194,7 +234,6 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				'id' => $lrm['lab_metric_id'],
 			];
 		}
-
 
 		// Another Name for the THing
 		// $data['Lab_Result_Section_Metric_list'] = $Lab_Result->getMetrics_Grouped();

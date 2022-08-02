@@ -43,24 +43,51 @@ use OpenTHC\Lab\UOM;
 						break;
 					case 200:
 						if ($data['Lab_Report']['flag'] & Lab_Report::FLAG_PUBLIC) {
-							echo '<button class="btn btn-outline-success" name="a" title="Lab Reports Published, click to re-publish &amp; view" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
+							echo '<button class="btn btn-outline-success" formtarget="_blank" name="a" title="Lab Reports Published, click to re-publish &amp; view" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
 						} else {
-							echo '<button class="btn btn-primary" name="a" title="Lab Results NOT Published" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
+							echo '<button class="btn btn-primary" formtarget="_blank" name="a" title="Lab Results NOT Published" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
 						}
 						break;
 				}
 				?>
 				<button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button>
 				<!-- <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button> -->
-				<div class="dropdown-menu dropdown-menu-lg-end">
-					<a class="dropdown-item" download href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=pdf"><i class="fas fa-download"></i> Download COA (PDF)</a>
-					<!-- <a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=png%2Bcoa"><i class="fas fa-download"></i> Download COA (PNG/QR)</a> -->
-					<!-- <a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=csv"><i class="fas fa-download"></i> Download CSV</a> -->
-					<a class="dropdown-item" download href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=csv%2Bccrs"><i class="fas fa-download"></i> Download CSV/CCRS</a>
-					<!-- <a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=json"><i class="fas fa-download"></i> Download JSON</a> -->
-					<a class="dropdown-item" download href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=json%2Bwcia"><i class="fas fa-download"></i> Download JSON/WCIA</a>
-					<!-- <a class="dropdown-item" href="/report/<?= $data['Lab_Report']['id'] ?>/download?f=png"><i class="fas fa-download"></i> Download PNG</a> -->
-				</div>
+				<ul class="dropdown-menu dropdown-menu-lg-end">
+					<li class="dropdown-item d-flex justify-content-between">
+						<?php
+						$link = sprintf('/report/%s/download?f=pdf', $data['Lab_Report']['id']);
+						?>
+						<a class="btn btn-sm" href="<?= $link ?>">COA (PDF) <i class="fas fa-print"></i></a>
+						<div class="btn-group btn-group-sm">
+							<a class="btn" download href="<?= $link ?>"><i class="fas fa-download"></i></a>
+							<button class="btn btn-clipcopy" data-clipboard-text="<?= $link ?>" type="button" ><i class="fa-regular fa-clipboard"></i></button>
+						</div>
+					</li>
+					<li class="dropdown-item d-flex justify-content-between">
+						<?php
+						$link = sprintf('/report/%s/download?f=csv%%2Bccrs', $data['Lab_Report']['id']);
+						?>
+						<a class="btn btn-sm" href="<?= $link ?>">CSV/CCRS <i class="fas fa-file-csv"></i></a>
+						<div class="btn-group btn-group-sm">
+							<a class="btn" download href="<?= $link ?>"><i class="fas fa-download"></i></a>
+							<button class="btn btn-clipcopy" data-clipboard-text="<?= $link ?>" type="button" ><i class="fa-regular fa-clipboard"></i></button>
+						</div>
+					</li>
+					<li class="dropdown-item d-flex justify-content-between">
+						<?php
+						$link = sprintf('/report/%s/download?f=json%%2Bwcia', $data['Lab_Report']['id']);
+						?>
+						<a class="btn btn-sm" href="<?= $link ?>">JSON/WCIA <i class="fa-solid fa-code"></i></a>
+						<div class="btn-group btn-group-sm">
+							<a class="btn" download href="<?= $link ?>"><i class="fas fa-download"></i></a>
+							<button class="btn btn-clipcopy" data-clipboard-text="<?= $link ?>" type="button" ><i class="fa-regular fa-clipboard"></i></button>
+						</div>
+					</li>
+					<!-- <a class="dropdown-item" href="<?= $link ?>?f=png%2Bcoa"><i class="fas fa-download"></i> Download COA (PNG/QR)</a> -->
+					<!-- <a class="dropdown-item" href="<?= $link ?>?f=csv"><i class="fas fa-download"></i> Download CSV</a> -->
+					<!-- <a class="dropdown-item" href="<?= $link ?>?f=json"><i class="fas fa-download"></i> Download JSON</a> -->
+					<!-- <a class="dropdown-item" href="<?= $link ?>?f=png"><i class="fas fa-download"></i> Download PNG</a> -->
+				</ul>
 			</div>
 
 			<div class="btn-group">
