@@ -7,8 +7,6 @@
 
 namespace OpenTHC\Lab\Controller\Auth;
 
-use Edoceo\Radix\DB\SQL;
-
 class Connect extends \OpenTHC\Controller\Auth\Connect
 {
 	/**
@@ -27,7 +25,6 @@ class Connect extends \OpenTHC\Controller\Auth\Connect
 			return $this->jwt($jwt, $RES);
 
 		}
-
 
 		$RES = parent::__invoke($REQ, $RES, $ARG);
 
@@ -74,13 +71,9 @@ class Connect extends \OpenTHC\Controller\Auth\Connect
 		}
 
 		// User Specifed Redirect?
-		if (!empty($_GET['r'])) {
-			if (preg_match('/^\/(pub|result|share)\/\w+/', $_GET['r'])) {
-				return $RES->withRedirect($_GET['r']);
-			}
-		}
-
-		return $RES->withRedirect('/auth/init');
+		return $RES->withRedirect('/auth/init?' . http_build_query([
+			'r' => $_GET['r']
+		]));
 
 	}
 
@@ -90,15 +83,7 @@ class Connect extends \OpenTHC\Controller\Auth\Connect
 	function jwt($jwt, $RES)
 	{
 		// Auth Database Connection
-		$cfg = \OpenTHC\Config::get('database/auth');
-		if (empty($cfg)) {
-			return $RES->withJSON([
-				'data' => [],
-				'meta' => [ 'detail' => 'Fatal Database Error [CAC-024]'],
-			], 500);
-		}
-
-		$dbc_auth = new SQL(sprintf('pgsql:host=%s;dbname=%s', $cfg['hostname'], $cfg['database']), $cfg['username'], $cfg['password']);
+		$dbc_auth = _dbc('auth');
 
 		// Lookup Program
 		$sql = 'SELECT * FROM auth_service WHERE code = ?';
@@ -128,70 +113,25 @@ class Connect extends \OpenTHC\Controller\Auth\Connect
 			], 400);
 		}
 
-		$_SESSION['OpenTHC']['app']['base'] = sprintf('https://%s', $App['code']);
-
-		// Lookup Auth_Contact
-		$sql = 'SELECT * FROM auth_contact WHERE id = :ct';
-		$arg = [ ':ct' => $jwt['body']['sub'] ];
-		$this->_Contact_Auth = $dbc_auth->fetchRow($sql, $arg);
-
-		$this->_Company_Auth = $dbc_auth->fetchRow('SELECT * FROM auth_company WHERE id = :c0', [
-			':c0' => $jwt['body']['company']
-		]);
-
-		if (empty($this->_Contact_Auth['id']) || empty($this->_Company_Auth['id'])) {
-			return $RES->withJSON([
-				'data' => null,
-				'meta' => [ 'detail' => 'Invalid Company or Contact [CAC-109]' ]
-			], 403);
-		}
-
-		// Main Database Connection
-		$cfg = \OpenTHC\Config::get('database/main');
-		if (empty($cfg)) {
-			return $RES->withJSON([
-				'meta' => [ 'detail' => 'Fatal Database Error [CAC-125]'],
-				'data' => [],
-			], 500);
-		}
-
-		$dbc_main = new SQL(sprintf('pgsql:host=%s;dbname=%s', $cfg['hostname'], $cfg['database']), $cfg['username'], $cfg['password']);
-
-		// Lookup Main Company
-		$sql = 'SELECT * FROM company WHERE id = :c0';
-		$Company = $dbc_main->fetchRow($sql, [ ':c0' => $this->_Company_Auth['id'] ]);
-		if (empty($Company['id'])) {
-			return $RES->withJSON([
-				'data' => null,
-				'meta' => [ 'detail' => sprintf('Invalid Company "%s" [CAC-067]', $this->_Company_Auth['id']) ],
-			], 400);
-		}
-
-		// Lookup License
-		$sql = 'SELECT * FROM license WHERE company_id = ? AND id = ?';
-		$arg = array($Company['id'], $jwt['body']['license']);
-		$License = $dbc_main->fetchRow($sql, $arg);
-		if (empty($License['id'])) {
-			return $RES->withJSON([
-				'data' => null,
-				'meta' => [ 'detail' => sprintf('Invalid License "%s" [CAC-076]', $jwt['body']['license']) ],
-			], 400);
-		}
-
-		// Lookup Contact
-		$sql = 'SELECT id, flag, email, phone FROM contact WHERE id = :ct0';
-		$arg = [ ':ct0' => $this->_Contact_Auth['id'] ];
-		$this->_Contact_Base = $dbc_main->fetchRow($sql, $arg);
-		if (empty($this->_Contact_Base['id'])) {
-			// Throw Error?
-		}
-
-		// Primary Objects
-		$_SESSION['Contact'] = array_merge($this->_Contact_Base, $this->_Contact_Auth);
-		$_SESSION['Company'] = $Company;
-		$_SESSION['License'] = $License;
+		$_SESSION = [
+			'OpenTHC' => [
+				'app' => [
+					'base' => sprintf('https://%s', $App['code']),
+				]
+			],
+			'Contact' => [
+				'id' => $jwt['body']['sub']
+			],
+			'Company' => [
+				'id' => $jwt['body']['company'],
+			],
+			'License' => [
+				'id' => $jwt['body']['license'],
+			]
+		];
 
 		return $RES->withRedirect('/auth/init?r=' . $_GET['r']);
+
 	}
 
 }
