@@ -362,12 +362,20 @@ SQL;
 			break;
 
 		case 'commit':
+		case 'lab-result-commit':
 
 			// Commits to a CRE
 			// require_once(__DIR__ . '/Create_LeafData.php');
 			// $x = new \OpenTHC\Lab\Controller\Result\Create_LeafData($this->_container);
 			// $_POST['result_id'] = $LR['id'];
 			// return $x->_commit($REQ, $RES, $ARG);
+
+			$LR->setFlag(Lab_Result::FLAG_LOCK);
+			$LR->save('Lab Result Committed by User');
+
+			Session::flash('info', 'Lab Result Committed');
+
+			return $RES->withRedirect(sprintf('/result/%s', $LR['id']));
 
 			break;
 

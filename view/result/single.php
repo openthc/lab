@@ -32,7 +32,7 @@ use OpenTHC\Lab\UOM;
 	</div>
 
 	<div class="r">
-		<form method="post" target="_blank">
+		<form method="post">
 
 			<div class="btn-group">
 				<?php
@@ -41,8 +41,12 @@ use OpenTHC\Lab\UOM;
 					case 100:
 					case 102:
 					case 200:
-						printf('<a class="btn btn-primary" href="/result/%s/update"><i class="far fa-edit"></i> Edit</a>', $data['Lab_Result']['id']);
-						echo '<button class="btn btn-secondary" name="a" value="lab-result-commit"><i class="fa-solid fa-flag-checkered"></i> Commit</button>';
+						if (0 == ($data['Lab_Result']['flag'] & Lab_Result::FLAG_LOCK)) {
+							printf('<a class="btn btn-primary" href="/result/%s/update"><i class="far fa-edit"></i> Edit</a>', $data['Lab_Result']['id']);
+							echo '<button class="btn btn-secondary" name="a" value="lab-result-commit"><i class="fa-solid fa-flag-checkered"></i> Commit</button>';
+						} else {
+							// Nothing
+						}
 						break;
 				}
 				?>
@@ -64,7 +68,7 @@ use OpenTHC\Lab\UOM;
 				if ($data['Lab_Result']['flag'] & Lab_Result::FLAG_PUBLIC) {
 					echo '<button class="btn btn-outline-success" name="a" title="Lab Report Published, click to re-publish &amp; view" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
 				} else {
-					echo '<button class="btn btn-outline-danger" name="a" title="Lab Report NOT Published" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
+					echo '<button class="btn btn-warning" name="a" title="Lab Report NOT Published" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
 				}
 				?>
 				<!-- <a class="btn btn-outline-secondary" href="mailto:?<?= $data['share_mail_link'] ?>"><i class="fas fa-envelope-open-text"></i></a> -->
@@ -74,7 +78,7 @@ use OpenTHC\Lab\UOM;
 			if ($data['Lab_Result']['coa_file']) {
 			?>
 				<div class="btn-group">
-					<button class="btn btn-outline-success" name="a" type="submit" value="coa-download"><i class="fas fa-download"></i> COA</button>
+					<button class="btn btn-outline-primary" name="a" type="submit" value="coa-download"><i class="fas fa-download"></i> COA</button>
 					<!-- <button class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button> -->
 					<button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modal-coa-upload" title="Upload COA" type="button"><i class="fas fa-upload"></i></button>
 					<!-- <button class="btn btn-outline-secondary" name="a" type="submit" value="coa-create"><i class="fas fa-print"></i></button> -->
@@ -83,7 +87,7 @@ use OpenTHC\Lab\UOM;
 			} else {
 			?>
 				<div class="btn-group" id="dropzone-coa-upload">
-					<button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modal-coa-upload" name="a" title="No COA Uploaded" type="button" value="download-coa"><i class="fas fa-upload"></i> COA</button>
+					<button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal-coa-upload" name="a" title="No COA Uploaded" type="button" value="download-coa"><i class="fas fa-upload"></i> COA</button>
 					<!-- <button class="btn btn-outline-secondary" name="a" type="submit" value="coa-create"><i class="fas fa-print"></i></button> -->
 				</div>
 			<?php
