@@ -16,42 +16,12 @@
 	</div>
 </div>
 
-<form autocomplete="off">
-<div class="d-flex mb-2">
-	<div>
-		<div class="input-group">
-			<input autocomplete="off" class="form-control" name="q" placeholder="- search -" value="<?= __h($_GET['q']) ?>">
-			<button class="btn btn-outline-secondary"><i class="fas fa-search"></i></button>
-		</div>
-	</div>
-	<div class="ms-2">
-		<div class="btn-group">
-			<a class="btn btn-outline-secondary" href="?stat=100">Incoming: <?= $data['sample_stat']['100'] ?></a>
-			<a class="btn btn-outline-secondary" href="?stat=200">Active: <?= $data['sample_stat']['200'] ?></a>
-			<a class="btn btn-outline-success" href="?stat=302">Completed: <?= $data['sample_stat']['302'] ?></a>
-			<a class="btn btn-outline-danger" href="?stat=410">Void: <?= $data['sample_stat']['410'] ?></a>
-			<a class="btn btn-outline-secondary" href="?stat=*">All</a>
-		</div>
-	</div>
-	<div class="ms-2">
-		<div class="btn-group">
-			<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['older']) ?>"><i class="fas fa-arrow-left"></i></a>
-			<a class="btn btn-outline-secondary" href="?p=<?= ($data['result_page']['newer']) ?>"><i class="fas fa-arrow-right"></i></a>
-		</div>
-	</div>
-<!--
-<div class="data-filter-info">
-	<button class="btn btn-sm btn-outline-secondary" type="button"><i class="fas fa-filter"></i></button> <em>Active</em>, <em>Untested</em>.
-</div>
-<div class="data-filter-form collapse">
-	<select class="form-control"></select>
-	<select class="form-control"></select>
-	<select class="form-control"></select>
-</div>
-<p>A List of all Active Samples, use Filters or Search to find old stuff.</p>
--->
-</div>
-</form>
+<?= $this->block('search-filter', [
+	'search_field_list' => [
+		'Sample ID',
+		'Origin'
+	]
+]); ?>
 
 <div><?= $data['page_list_html'] ?></div>
 
@@ -114,3 +84,5 @@ foreach ($data['sample_list'] as $s) {
 ?>
 </tbody>
 </table>
+
+<div><?= $data['page_list_html'] ?></div>
