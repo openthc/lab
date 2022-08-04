@@ -25,14 +25,9 @@ class Main extends \OpenTHC\Lab\Controller\Base
 		$data = array(
 			'Page' => [ 'title' => 'Lab Samples' ],
 			'sample_list' => [],
-			'sample_stat' => [
-				Lab_Sample::STAT_OPEN => 0,
-				Lab_Sample::STAT_LIVE => 0,
-				Lab_Sample::STAT_DONE => 0,
-				Lab_Sample::STAT_VOID => 0,
-			]
 		);
 		$data = $this->loadSiteData($data);
+		$data = $this->loadSearchPageData($data);
 
 		$item_offset = 0;
 		if (!empty($_GET['p'])) {
@@ -41,28 +36,11 @@ class Main extends \OpenTHC\Lab\Controller\Base
 		}
 		$item_limit = 100;
 
-		$sql = <<<SQL
-SELECT count(id) AS c, stat FROM lab_sample WHERE license_id = :l0 GROUP BY stat
-SQL;
-		$arg = [
-			':l0' => $_SESSION['License']['id'],
-		];
-		$res = $dbc->fetchAll($sql, $arg);
-		foreach ($res as $rec) {
-			$data['sample_stat'][ $rec['stat'] ] = $rec['c'];
-		}
-
 		$sql_param = [];
 		$sql_where = [];
 
 		$sql_where[] = 'lab_sample.license_id = :l0';
 		$sql_param[':l0'] = $_SESSION['License']['id'];
-
-		// Status
-		$stat = $_GET['stat'];
-		if (empty($stat)) {
-			$stat = Lab_Sample::STAT_OPEN;
-		}
 
 		$sql_select = <<<SQL
 SELECT lab_sample.*
@@ -85,10 +63,15 @@ SQL;
 			$sql_where[] = sprintf('(lab_sample.id ILIKE :q83 OR lab_sample.name ILIKE :q83 OR license.name ILIKE :q83 OR license.code ILIKE :q83)');
 			$sql_param[':q83'] = sprintf('%%%s%%', trim($_GET['q']));
 		} else {
-			if ('*' != $stat) {
-				$sql_where[] = 'lab_sample.stat = :s0';
-				$sql_param[':s0'] = $stat;
-			}
+			// Status Filter
+			// $stat = $_GET['stat'];
+			// if (empty($stat)) {
+			// 	$stat = Lab_Sample::STAT_OPEN;
+			// }
+			// if ('*' != $stat) {
+			// 	$sql_where[] = 'lab_sample.stat = :s0';
+			// 	$sql_param[':s0'] = $stat;
+			// }
 		}
 		$sql_where = implode(' AND ', $sql_where);
 		$sql = str_replace('{WHERE}', sprintf('WHERE %s', $sql_where), $sql_select);
@@ -116,6 +99,33 @@ SQL;
 		$data['page_newer'] = intval($_GET['p']) + 1;
 
 		return $RES->write( $this->render('sample/main.php', $data) );
+	}
+
+	/**
+	 *
+	 */
+	function loadSampleStat(array $data) : array
+	{
+		$data['sample_stat'] = [
+			Lab_Sample::STAT_OPEN => 0,
+			Lab_Sample::STAT_LIVE => 0,
+			Lab_Sample::STAT_DONE => 0,
+			Lab_Sample::STAT_VOID => 0,
+		];
+
+		$sql = <<<SQL
+		SELECT count(id) AS c, stat FROM lab_sample WHERE license_id = :l0 GROUP BY stat
+		SQL;
+		$arg = [
+			':l0' => $_SESSION['License']['id'],
+		];
+		$res = $dbc->fetchAll($sql, $arg);
+		foreach ($res as $rec) {
+			$data['sample_stat'][ $rec['stat'] ] = $rec['c'];
+		}
+
+		return $data;
+
 	}
 
 }

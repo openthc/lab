@@ -22,17 +22,12 @@ class Main extends \OpenTHC\Lab\Controller\Base
 			_exit_text('Invalid Session [CRH-014]', 500);
 		}
 
-		$_GET['p'] = max(1, intval($_GET['p']));
-
 		$data = array(
 			'Page' => array('title' => 'Lab Results'),
 			'result_list' => array(),
-			'result_page' => [
-				'older' => (intval($_GET['p']) - 1),
-				'newer' => (intval($_GET['p']) + 1),
-			]
 		);
 		$data = $this->loadSiteData($data);
+		$data = $this->loadSearchPageData($data);
 
 		$sql_limit = 100;
 		$sql_offset = 0;

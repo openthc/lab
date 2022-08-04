@@ -23,7 +23,10 @@ namespace OpenTHC\Lab\Controller;
 
 class Base extends \OpenTHC\Controller\Base
 {
-	function loadSiteData($data=[])
+	/**
+	 *
+	 */
+	function loadSiteData($data=[]) : array
 	{
 		$base = [
 			'Site' => [
@@ -36,6 +39,29 @@ class Base extends \OpenTHC\Controller\Base
 		$data = array_merge($base, $data);
 
 		return $data;
+	}
+
+	/**
+	 *
+	 */
+	function loadSearchPageData(array $data) : array
+	{
+		$_GET['p'] = max(1, intval($_GET['p']));
+
+		$data['search_page'] = [
+			'cur' => 1,
+			'max' => 0,
+			'older' => (intval($_GET['p']) - 1),
+			'newer' => (intval($_GET['p']) + 1),
+			'limit' => 100,
+		];
+		$data['search_sort'] = [
+			'col' => 'id',
+			'dir' => 'asc'
+		];
+
+		return $data;
+
 	}
 
 }

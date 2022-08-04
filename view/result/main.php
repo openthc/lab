@@ -5,27 +5,26 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-
-$search_data = [];
-$search_data['search_field_list'] = [
-	'Result ID',
-	'Sample ID',
-	'Origin',
-	'Variety',
-];
-
 ?>
 
 <div class="d-flex justify-content-between">
 	<div>
 		<h1>Results</h1>
 	</div>
-	<div>
+	<div class="pt-2">
 		<a class="btn btn-outline-secondary" href="/result/upload"><i class="fas fa-cloud-upload-alt"></i></a>
 	</div>
 </div>
 
-<?= $this->block('search-filter', $search_data); ?>
+<?= $this->block('search-filter', [
+	'search_page' => $data['search_page'],
+	'search_field_list' => [
+		'Result ID',
+		'Sample ID',
+		'Origin',
+		'Variety',
+	]
+]); ?>
 
 <!-- <p>A List of all Active and Recent Results, use Filters or Search to find old stuff.</p> -->
 

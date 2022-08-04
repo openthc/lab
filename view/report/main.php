@@ -7,19 +7,19 @@
 
 use OpenTHC\Lab\Lab_Report;
 
-$search_data = [];
-$search_data['search_field_list'] = [
-	'Report ID',
-	'Sample ID',
-	'Origin',
-	'Variety',
-];
-
 ?>
 
 <h1>Reports</h1>
 
-<?= $this->block('search-filter', $search_data); ?>
+<?= $this->block('search-filter', [
+	'search_page' => $data['search_page'],
+	'search_field_list' => [
+		'Result ID',
+		'Sample ID',
+		'Origin',
+		'Variety',
+	]
+]); ?>
 
 <table class="table table-sm">
 <thead class="table-dark">

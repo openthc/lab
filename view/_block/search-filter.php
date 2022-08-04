@@ -97,8 +97,8 @@ if (empty($data['search_field_list'])) {
 	</div>
 	<div class="ms-2">
 		<div class="btn-group">
-			<a class="btn btn-outline-secondary" href="<?= http_build_query(array_merge($_GET, [ 'p' => $data['result_page']['older'] ])) ?>"><i class="fas fa-arrow-left"></i></a>
-			<a class="btn btn-outline-secondary" href="<?= http_build_query(array_merge($_GET, [ 'p' => $data['result_page']['newer'] ])) ?>"><i class="fas fa-arrow-right"></i></a>
+			<a class="btn btn-outline-secondary" href="?<?= http_build_query(array_merge($_GET, [ 'p' => $data['search_page']['older'] ])) ?>"><i class="fas fa-arrow-left"></i></a>
+			<a class="btn btn-outline-secondary" href="?<?= http_build_query(array_merge($_GET, [ 'p' => $data['search_page']['newer'] ])) ?>"><i class="fas fa-arrow-right"></i></a>
 		</div>
 	</div>
 </div>

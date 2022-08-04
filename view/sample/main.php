@@ -17,6 +17,7 @@
 </div>
 
 <?= $this->block('search-filter', [
+	'search_page' => $data['search_page'],
 	'search_field_list' => [
 		'Sample ID',
 		'Origin'
