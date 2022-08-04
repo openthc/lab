@@ -7,6 +7,10 @@
 
 use OpenTHC\Lab\UOM;
 
+$lab_result_metric = $data['Lab_Result_Metric_list'];
+$lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
+
+
 ?>
 
 <style>
@@ -44,12 +48,19 @@ use OpenTHC\Lab\UOM;
 	<div class="mb-2">
 		<label>Share Link</label>
 		<div class="input-group">
-			<input class="form-control" readonly value="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.html">
-			<!-- <a class="btn btn-outline-secondary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.txt">TXT</a> -->
-			<!-- <a class="btn btn-outline-secondary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.json">JSON</a> -->
-			<a class="btn btn-outline-secondary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>/wcia.json">WCIA</a>
-			<!-- <a class="btn btn-outline-secondary" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>/ccrs.txt">CCRS</a> -->
-			<button class="btn btn-outline-secondary btn-clipcopy" data-clipboard-text="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.html" type="button"><i class="fas fa-clipboard"></i></button>
+			<input class="form-control" readonly type="url" value="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.html">
+			<button class="btn btn-outline-secondary btn-clipcopy"
+				data-clipboard-text="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>/wcia.json"
+				type="button"><i class="fas fa-clipboard"></i></button>
+			<button class="btn btn-outline-secondary dropdown-toggle"
+				data-bs-toggle="dropdown"
+				type="button"></button>
+			<ul class="dropdown-menu dropdown-menu-end">
+				<li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.txt">TXT</a></li>
+				<li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.json">JSON</a></li>
+				<li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>/wcia.json">WCIA</a></li>
+				<li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>/ccrs.txt">CCRS</a></li>
+			</ul>
 		</div>
 	</div>
 </div>
@@ -85,42 +96,42 @@ use OpenTHC\Lab\UOM;
 
 	<div class="metric-section">
 		<h3>General</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0BY5GND653C0C']['metric_list']); ?>
+		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0BY5GND653C0C']['metric_list'], $lab_result_metric); ?>
 	</div>
 
 	<div class="metric-section">
 		<h3>Cannabinoid Profile</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0HRHFRZGY72C7']['metric_list']); ?>
+		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0HRHFRZGY72C7']['metric_list'], $lab_result_metric); ?>
 	</div>
 
 	<div class="metric-section">
 		<h3>Terpene Profile</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT07DPNKHQV2GRS']['metric_list']); ?>
+		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT07DPNKHQV2GRS']['metric_list'], $lab_result_metric); ?>
 	</div>
 
 	<div class="metric-section">
 		<h3>Pesticides</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT09ZG05C2NE7KX']['metric_list']); ?>
+		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT09ZG05C2NE7KX']['metric_list'], $lab_result_metric); ?>
 	</div>
 
 	<div class="metric-section">
 		<h3>Metals</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR']['metric_list']); ?>
+		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR']['metric_list'], $lab_result_metric); ?>
 	</div>
 
 	<div class="metric-section">
 		<h3>Microbes</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0B7NMK7RGYAMN']['metric_list']); ?>
+		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0B7NMK7RGYAMN']['metric_list'], $lab_result_metric); ?>
 	</div>
 
 	<div class="metric-section">
 		<h3>Mycotoxin</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0GDBPF0V9B71Z']['metric_list']); ?>
+		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0GDBPF0V9B71Z']['metric_list'], $lab_result_metric); ?>
 	</div>
 
 	<div class="metric-section">
 		<h3>Solvents</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW']['metric_list']); ?>
+		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW']['metric_list'], $lab_result_metric); ?>
 	</div>
 
 </div>
@@ -138,8 +149,9 @@ use OpenTHC\Lab\UOM;
 /**
  *
  */
-function _draw_metric_info_table($metric_list)
+function _draw_metric_info_table($metric_list, $lab_result_metric)
 {
+	// $lrm = $data['Lab_Result_Metric_list'][$mk0];
 
 	if (empty($metric_list)) {
 		return '<div class="alert alert-info">No Data</div>';
@@ -156,17 +168,20 @@ function _draw_metric_info_table($metric_list)
 
 
 	$out = [];
-	foreach ($metric_list as $lrm) {
+	foreach ($metric_list as $lm) {
 
-		if (empty($lrm['metric'])) {
-			continue;
+		$lrm = $lab_result_metric[ $lm['id'] ];
+
+		// Not sure if this is right
+		if ( ! empty($lrm['metric'])) {
+			$lrm = $lrm['metric'];
 		}
 
 		$out[] = [
 			'lab_metric_id' => $lrm['id'],
 			'name' => $lrm['name'],
-			'qom' => $lrm['metric']['qom'],
-			'uom' => $lrm['metric']['uom'],
+			'qom' => $lrm['qom'],
+			'uom' => $lrm['uom'],
 		];
 	}
 

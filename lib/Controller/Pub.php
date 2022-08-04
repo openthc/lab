@@ -14,12 +14,15 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 {
 	protected $type_want = 'text/html';
 
+	/**
+	 *
+	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
 		$this->type_want = $this->_get_type_want($ARG);
 
-		// Map Extension Out
-		if (preg_match('/^(.+)\.(html|json|pdf|png|txt)$/', $ARG['id'], $m)) { // EXT in URL
+		// Map extension out from URL
+		if (preg_match('/^(.+)\.(html|json|pdf|png|txt)$/', $ARG['id'], $m)) {
 			$ARG['id'] = $m[1];
 		}
 
@@ -46,10 +49,11 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		if (is_string($data['Lab_Result']['meta'])) {
 			$data['Lab_Result']['meta'] = json_decode($data['Lab_Result']['meta'], true);
 		}
+		// $data['Lab_Result']['id'] = $LR['id'];
 		$data['Lab_Result']['id_nice'] = _nice_id($data['Lab_Result']['id'], $data['Lab_Result']['guid']);
-		$data['Lab_Result']['thc'] = sprintf('%0.2f', $data['Lab_Result']['thc']);
-		$data['Lab_Result']['cbd'] = sprintf('%0.2f', $data['Lab_Result']['cbd']);
-		$data['Lab_Result']['sum'] = sprintf('%0.2f', $data['Lab_Result']['sum']);
+		// $data['Lab_Result']['thc'] = sprintf('%0.2f', $data['Lab_Result']['thc']);
+		// $data['Lab_Result']['cbd'] = sprintf('%0.2f', $data['Lab_Result']['cbd']);
+		// $data['Lab_Result']['sum'] = sprintf('%0.2f', $data['Lab_Result']['sum']);
 
 		// Patch Sample
 		if (is_string($data['Lab_Sample']['meta'])) {
@@ -66,6 +70,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		if (preg_match('/^0[0-9A-Z]{25}$/', $chk)) { // v2018
 			// OK, do Nothing
 		} else {
+			// @todo see if anyone still has this?
 			// v2022-WCIA
 			// It's a Nested List, Un Flatten, it's Grouped
 			$lab_result_metric = [];
@@ -83,35 +88,42 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		}
 
 		// Load COA File
+		// @todo this should already be set
 		$coa_file = $LR->getCOAFile();
 		if ( ! empty($coa_file) && is_file($coa_file) && is_readable($coa_file)) {
 			$meta['Lab_Result']['coa_file'] = $coa_file;
+		} else {
+			$meta['Lab_Result']['coa_file'] = null;
 		}
 
-		$chk = $dbc_main->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $data['License_Origin']['id'] ]);
-		$data['License_Source'] = [
-			'id' => $chk['id'],
-			'name' => $chk['name'],
-			'code' => $chk['code'],
-			'guid' => $chk['guid'],
-		];
-		$data['License_Origin'] = [
-			'id' => $chk['id'],
-			'name' => $chk['name'],
-			'code' => $chk['code'],
-			'guid' => $chk['guid'],
-		];
+		if (empty($data['License_Source']['id'])) {
+			$chk = $dbc_main->fetchRow('SELECT id, name, code, guid FROM license WHERE id = :l0', [ ':l0' => $data['Lab_Sample']['license_id_source'] ]);
+			$data['License_Source'] = [
+				'id' => $chk['id'],
+				'name' => $chk['name'],
+				'code' => $chk['code'],
+				'guid' => $chk['guid'],
+			];
+		}
 
-		$data['Product'] = $meta['Product'];
 		if (empty($data['Product']['name'])) {
 			$data['Product']['name'] = '- Not Found -';
 		}
 
-		$data['Variety']  = $meta['Variety'];
-
 		switch ($this->type_want) {
 		case 'text/html':
 		case 'html':
+			break;
+		case 'text/csv+ccrs':
+			// No Session but needs Session Data
+			// $chk = $dbc_main->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $data['Lab_Sample']['license_id']]);
+			// $data['License_Laboratory'] = [
+			// 	'id' => $chk['id'],
+			// 	'code' => $chk['guid'],
+			// 	'name' => $chk['name'],
+			// ];
+			require_once(APP_ROOT . '/view/pub/csv-ccrs.php');
+			exit(0);
 			break;
 		case 'text/plain':
 			require_once(APP_ROOT . '/view/pub/text.php');
@@ -221,9 +233,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 
 		switch ($data['@context']) {
 			case 'http://openthc.org/lab/2021':
-				$meta['Site'] = $data['Site'];
-				$meta['Page'] = $data['Page'];
-				return $RES->write( $this->render('pub/html-2022-062.php', $meta) );
+				return $RES->write( $this->render('pub/html-2022-062.php', $data) );
 				break;
 		}
 
@@ -311,6 +321,9 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 
 	}
 
+	/**
+	 *
+	 */
 	protected function _get_type_want($ARG)
 	{
 		$ret = $this->type_want;
@@ -345,6 +358,9 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			case 'txt':
 				$ret = 'text/plain';
 				break;
+			case 'ccrs.txt':
+				$ret = 'text/csv+ccrs';
+				break;
 			case 'wcia.json':
 				$ret = 'application/json';
 				$_GET['f'] = 'wcia';
@@ -354,6 +370,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			case 'application/pdf':
 			case 'application/json':
 			case 'image/png':
+			case 'text/csv+ccrs':
 			case 'text/html':
 			case 'text/plain':
 				// OK
@@ -363,6 +380,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		}
 
 		return $ret;
+
 	}
 
 }

@@ -35,7 +35,7 @@ echo "Laboratory: {$data['Laboratory']['name']}\n";
 echo "Created: {$data['Lab_Result']['created_at']}\n";
 
 echo str_repeat('-', 72) . "\n";
-print_r($data);
+// print_r($data);
 
 
 $output_text = ob_get_clean();
