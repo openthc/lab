@@ -11,6 +11,9 @@ use OpenTHC\Lab\Lab_Result;
 
 class Update extends \OpenTHC\Controller\Base
 {
+	/**
+	 *
+	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
 		$data = $this->_inputData();
@@ -110,5 +113,41 @@ class Update extends \OpenTHC\Controller\Base
 
 		return $data;
 	}
+
+	/**
+	 *
+	 */
+	function upload($REQ, $RES, $ARG)
+	{
+		$ret = [
+			'data' => $ARG,
+			'meta' => [],
+		];
+
+		$ret['meta']['content-name'] = $_SERVER['HTTP_CONTENT_NAME'];
+		$ret['meta']['content-type'] = $_SERVER['CONTENT_TYPE']; // text/csv
+		$ret['meta']['content-size'] = $_SERVER['CONTENT_LENGTH'];
+
+		$pdf_source = file_get_contents('php://input');
+		// $output_file = sprintf('%s/var/ccrs-incoming/%s', APP_ROOT, $source_name);
+		// $output_size = file_put_contents($output_file, $output_data);
+		// __exit_text("Uploaded $output_file is $output_size bytes\n");
+
+		// $dbc = $this->_container->DBC_Main;
+
+		$LR = new Lab_Result(null, [
+			'id' => $ARG['id'],
+		]);
+
+		$ret['meta']['import-file'] = $LR->getCOAFile();
+
+		$ret['data']['import'] = $LR->importCOA($pdf_source);
+
+		return $RES->withJSON($ret, 200);
+
+		exit(0);
+
+	}
+
 
 }
