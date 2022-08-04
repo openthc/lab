@@ -7,6 +7,8 @@
 
 namespace OpenTHC\Lab\Controller\Auth;
 
+use Edoceo\Radix\Session;
+
 use OpenTHC\License;
 
 class Init extends \OpenTHC\Controller\Auth\oAuth2
@@ -39,6 +41,8 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 		if (empty($ret)) {
 			$ret = '/dashboard';
 		}
+
+		Session::flash('info', sprintf('Signed in as: %s', $_SESSION['Contact']['username']));
 
 		return $RES->withRedirect($ret);
 
@@ -123,7 +127,22 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 	function loadLicense($RES) : object
 	{
 		$dbc_main = _dbc('main');
+		$dbc_user = $this->_container->DBC_User;
 
+		// Set default license if none provided
+		if (empty($_SESSION['License']['id'])) {
+
+			// Find Default License
+			$sql = 'SELECT id FROM license WHERE flag & :f0 = 0 AND flag & :f1 != 0';
+			$arg = [
+				':f0' => License::FLAG_DEAD,
+				':f1' => License::FLAG_MINE
+			];
+			$_SESSION['License']['id'] = $dbc_user->fetchOne($sql, $arg);
+
+		}
+
+		// Look Base License
 		$sql = 'SELECT * FROM license WHERE company_id = :c0 AND id = :l0';
 		$arg = [
 			':c0' => $_SESSION['Company']['id'],
@@ -133,25 +152,41 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 		if (empty($License0['id'])) {
 			return $RES->withJSON([
 				'data' => null,
-				'meta' => [ 'detail' => sprintf('Invalid License "%s" [CAI-133]', $jwt['body']['license']) ],
+				'meta' => [ 'detail' => sprintf('Invalid License "%s" [CAI-133]', $_SESSION['License']['id']) ],
 			], 400);
 		}
 
-		$dbc_user = $this->_container->DBC_User;
-		$sql = 'SELECT * FROM license WHERE flag & :f0 = 0 AND flag & :f1 != 0';
+		// User Specific License Data
+		$sql = 'SELECT * FROM license WHERE id = :l0';
 		$arg = [
-			':f0' => License::FLAG_DEAD,
-			':f1' => License::FLAG_MINE
+			':l0' => $_SESSION['License']['id'],
 		];
 		$License1 = $dbc_user->fetchRow($sql, $arg);
 		if (empty($License1['id'])) {
 			return $RES->withJSON([
 				'data' => null,
-				'meta' => [ 'detail' => sprintf('Invalid License "%s" [CAI-147]', $jwt['body']['license']) ],
+				'meta' => [ 'detail' => sprintf('Invalid License "%s" [CAI-147]', $_SESSION['License']['id']) ],
 			], 400);
 		}
 
 		$License = array_merge($License0, $License1);
+
+		unset($License['address_full']);
+		unset($License['address_meta']);
+		unset($License['city']);
+		unset($License['company_id']);
+		unset($License['cre_meta_hash']);
+		unset($License['created_at']);
+		unset($License['deleted_at']);
+		unset($License['ftsv']);
+		unset($License['geo_lat']);
+		unset($License['geo_lon']);
+		unset($License['name_code']);
+		unset($License['name_cre']);
+		unset($License['name_dba']);
+		unset($License['tags']);
+		unset($License['updated_at']);
+		unset($License['weblink_meta']);
 
 		$_SESSION['License'] = $License;
 
