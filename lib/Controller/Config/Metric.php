@@ -112,6 +112,9 @@ class Metric extends \OpenTHC\Lab\Controller\Base
 		$data['Page']['title'] = 'Config :: Metric :: Update';
 		$data['Lab_Metric'] = $Lab_Metric;
 
+		$sql = 'SELECT id, name FROM product_type WHERE stat = 200 ORDER BY name';
+		$data['Product_Type_list'] = $dbc->fetchMix($sql);
+
 		return $RES->write( $this->render('config/metric-single.php', $data) );
 
 	}
