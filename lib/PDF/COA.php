@@ -196,15 +196,25 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$y += self::FS_12;
 
 		$this->setXY($x, $y);
-		$this->cell(3.25, self::FS_12, sprintf('Product: %s', $this->_data['Product']['name']));
+		$this->cell(3.25, self::FS_12, sprintf('Variety: %s', $this->_data['Variety']['name']));
 		$y += self::FS_12;
 
 		$this->setXY($x, $y);
-		$this->cell(3.25, self::FS_12, sprintf('Product Type: %s', $this->_data['Product_Type']['name']));
+		$this->cell(3.25, self::FS_12, sprintf('Product: %s [%s]'
+			, $this->_data['Product']['name']
+			, $this->_data['Product_Type']['name']
+		));
 		$y += self::FS_12;
 
+		// $this->setXY($x, $y);
+		// $this->cell(3.25, self::FS_12, sprintf('Product Type: %s'));
+		// $y += self::FS_12;
+
 		$this->setXY($x, $y);
-		$this->cell(3.25, self::FS_12, sprintf('Quantity: %s', $this->_data['Lab_Sample']['qty']));
+		$this->cell(3.25, self::FS_12, sprintf('Quantity: %s %s'
+			, $this->_data['Lab_Sample']['qty']
+			, $this->_data['Lab_Sample']['uom']
+		));
 		$y += self::FS_12;
 
 		$this->setXY(0.50, 3.75);
