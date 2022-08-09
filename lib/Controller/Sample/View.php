@@ -9,7 +9,9 @@ namespace OpenTHC\Lab\Controller\Sample;
 
 use Edoceo\Radix\Session;
 
+use OpenTHC\Lab\Lab_Result;
 use OpenTHC\Lab\Lab_Sample;
+
 
 class View extends \OpenTHC\Lab\Controller\Base
 {
