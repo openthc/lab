@@ -102,7 +102,7 @@ function _nice_id($x0, $x1=null)
  */
 function _draw_metric($lm)
 {
-	$uom = $lm['metric']['meta']['uom'] ?: $lm['metric']['uom'];
+	$uom = $lm['meta']['uom'] ?: $lm['metric']['meta']['uom'] ?: $lm['metric']['uom'];
 
 ?>
 	<div class="lab-metric-item">
@@ -204,6 +204,7 @@ function _draw_unit_pick()
 function _lab_result_status_nice($x)
 {
 	switch ($x) {
+		case 0:
 		case 100:
 			return 'Pending';
 			break;
