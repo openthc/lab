@@ -111,9 +111,14 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 
 		$Contact = array_merge($Contact0, $Contact1);
 
+		unset($Contact['acl']);
 		unset($Contact['auth_company_id']);
 		unset($Contact['company_id']);
+		unset($Contact['created_at']);
 		unset($Contact['id_int8']);
+		unset($Contact['pin']);
+		unset($Contact['rbe_auth']);
+		unset($Contact['ts_sign_in']);
 
 		$_SESSION['Contact'] = $Contact;
 

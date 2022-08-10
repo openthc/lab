@@ -7,8 +7,6 @@
 
 namespace OpenTHC\Lab\Controller\Auth\oAuth2;
 
-use Edoceo\Radix\Session;
-
 class Back extends \OpenTHC\Controller\Auth\oAuth2
 {
 	/**
@@ -61,8 +59,6 @@ class Back extends \OpenTHC\Controller\Auth\oAuth2
 
 			$dbc_auth = $this->_container->DBC_Auth;
 			$_SESSION['dsn'] = $dbc_auth->fetchOne('SELECT dsn FROM auth_company WHERE id = :c', [ ':c' => $_SESSION['Company']['id'] ]);
-
-			Session::flash('info', sprintf('Signed in as: %s', $_SESSION['Contact']['username']));
 
 		} catch (\Exception $e) {
 
