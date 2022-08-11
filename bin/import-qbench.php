@@ -11,8 +11,13 @@
 
 use Edoceo\Radix\DB\SQL;
 
-use OpenTHC\Lab\Lab_Result;
+use OpenTHC\Product;
+use OpenTHC\Product_Type;
+use OpenTHC\Variety;
+
 use OpenTHC\CRE\Base as CRE_Base;
+
+use OpenTHC\Lab\Lab_Result;
 
 require_once(dirname(dirname(__FILE__)) . '/boot.php');
 require_once(APP_ROOT . '/vendor/openthc/cre-adapter/lib/QBench.php');
@@ -76,12 +81,16 @@ $qbc = new \OpenTHC\CRE\QBench($cfg);
 
 $res = $qbc->auth();
 
+
+// Reload Just One Sample
 if (!empty($opt['sample'])) {
-	// Get Just One
-	echo "Dump One Sample\n";
+	echo "Load One Sample\n";
+	$rec = $qbc->get(sprintf('/api/v1/sample/%s', $opt['sample']));
+	_qbench_sample_import($rec);
 	exit(0);
 }
 
+// List of possible panels
 $lab_panel_list = [];
 $res = $qbc->get('/api/v1/panel');
 foreach ($res['data'] as $x) {
@@ -128,7 +137,7 @@ if (in_array('contact', $opt['object'])) {
 	]);
 }
 if (in_array('b2b', $opt['object'])) {
-	_qbench_pull_b2b($dbc, $qbc);
+	_qbench_b2b_import($dbc, $qbc);
 	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
 		':k1' => 'sync/b2b/timestamp',
 		':v1' => json_encode($dts->format(\DateTimeInterface::RFC3339))
@@ -470,6 +479,14 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		return(1);
 	}
 
+	$dtA = $dtE = null;
+	if ( ! empty($rec['complete_date'])) {
+
+		$dtA = new \DateTime($rec['complete_date']);
+		$dtE = clone $dtA;
+		$dtE->add(new \DateInterval('P365D'));
+
+	}
 
 	// Lab Sample?
 	$ls0 = $dbc->fetchRow('SELECT id FROM lab_sample WHERE id = :g1', [
@@ -500,10 +517,11 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			, 'name' => ( $lab_assay_list[ $rec['@assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) )
 			, 'stat' => $rec['@stat']
 			, 'uom' => 'g'
-			, 'finished_at' => $rec['complete_date'],
+			, 'created_at' => $rec['date_created'] // No time component
 		];
-		if (empty($lr1['finished_at'])) {
-			unset($lr1['finished_at']);
+		if ( ! empty($dtA)) {
+			$lr1['approved_at'] = $dtA->format(\DateTime::RFC3339);
+			$lr1['expires_at'] = $dtE->format(\DateTime::RFC3339);
 		}
 
 		$dbc->insert('lab_result', $lr1);
@@ -517,6 +535,10 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		$lr0['hash'] = $rec['@hash'];
 		$lr0['name'] = ( $lab_assay_list[ $rec['@assay_id'] ]['title'] ?: sprintf('QBench Result %s', $rec['id']) );
 		$lr0['stat'] = $rec['@stat'];
+		if ( ! empty($dtA)) {
+			$lr0['approved_at'] = $dtA->format(\DateTime::RFC3339);
+			$lr0['expires_at'] = $dtE->format(\DateTime::RFC3339);
+		}
 		$lr0['meta'] = json_encode($rec);
 		$lr0->save('Lab/Result Updated via Import');
 
@@ -693,11 +715,14 @@ function _qbench_pull_sample($dbc, $qbc)
 		foreach ($res['data'] as $rec) {
 
 			// Compare to Sync Time
-			$dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
-			if ($dt1 < $dt0) {
-				echo "TIMEOUT\n";
-				return(0);
-			}
+			// $dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
+			// if ($dt1 < $dt0) {
+			// 	echo "TIMEOUT\n";
+			// 	return(0);
+			// }
+
+			// _qbench_sample_import($dbc, $qbc, $rec);
+
 
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 			$rec['@order_id'] = sprintf('qbench:%s', $rec['order_id']);
@@ -718,18 +743,19 @@ function _qbench_pull_sample($dbc, $qbc)
 			$lab_sample = $dbc->fetchRow('SELECT id, hash FROM lab_sample WHERE id = :i0 OR name = :i0', [
 				':i0' => $rec['@id']
 			]);
-			if ( ! empty($lab_sample['id']) && ($rec['@hash'] == $lab_sample['hash'])) {
-				$hit++;
-				echo '.';
-				continue;
-			}
+
+			// if ( ! empty($lab_sample['id']) && ($rec['@hash'] == $lab_sample['hash'])) {
+			// 	$hit++;
+			// 	echo '.';
+			// 	continue;
+			// }
 
 			if (empty($rec['order_id'])) {
 				echo "\nMissing Order ID on Sample {$rec['@id']}\n";
 				continue;
 			}
 
-			$b2b = $dbc->fetchRow('SELECT id, license_id_source FROM b2b_incoming WHERE guid = :g0', [
+			$b2b = $dbc->fetchRow('SELECT id, license_id_source, meta FROM b2b_incoming WHERE guid = :g0', [
 				':g0' => $rec['@order_id']
 			]);
 			if (empty($b2b)) {
@@ -875,6 +901,8 @@ function _qbench_pull_sample($dbc, $qbc)
 				// echo '=B';
 			}
 
+			_qbench_sample_report_import($dbc, $qbc, $rec);
+
 		}
 
 		$idx++;
@@ -885,18 +913,66 @@ function _qbench_pull_sample($dbc, $qbc)
 
 }
 
+/**
+ * Imports the QBench COA Document to our System
+ *
+ * What if the Report doesn't exist?
+ * What if the Report DOES exist and has a COA already?
+ */
+function _qbench_sample_report_import($dbc, $qbc, $rec)
+{
+	// Now Check COA Data/Report Thing (and link to a Report from our system?)
+	// A Sample Report Contains a Data-Set of Which Test Result objects are included in the REPORT
+	// A REPORT is a collection of 1=Sample & 1+Result Object each with 1+Metric Objects
+	// $res = $qbc->get('/api/v1/report/sample/34117/info');
+	$url0 = sprintf('/api/v1/report/sample/%s/info?public=true', $rec['id']);
+	$res1 = $qbc->get($url0);
+	var_dump($res1);
+
+	// Same Response as /info?public
+	// $res = $qbc->get('/api/v1/report/14832');
+	// var_dump($res);
+
+	$url0 = sprintf('/api/v1/report/sample/%s', $rec['id']);
+	$res1 = $qbc->get($url0);
+	var_dump($res1);
+
+	exit;
+
+	// var_dump($res1);
+	// if ( ! empty($res1['url'])) {
+	// 	$coa_req = _curl_init($res1['url']);
+	// 	$coa_res = curl_exec($coa_req);
+	// 	$coa_inf = curl_getinfo($coa_req);
+	// 	if (200 == $coa_inf['http_code']) {
+	// 		var_dump($coa_inf);
+	// 		if ('application/pdf' == $coa_inf['content_type']) {
+	// 			$pdf = $coa_res;
+	// 			// Save this document to *newest* Lab Report
+	// 			$lab_report_chk = $dbc->fetchRow('SELECT * FROM lab_report WHERE lab_sample_id = :ls0 ORDER BY id DESC', [
+	// 				':ls0' => $lab_sample['id']
+	// 			]);
+	// 			if ( ! empty($lab_report_chk['id'])) {
+	// 				// Attach?
+	// 			}
+	// 		}
+	// 		// die("\n HAS COA\n");
+	// 	}
+	// }
+}
+
 // Get Orders
-function _qbench_pull_b2b($dbc, $qbc)
+function _qbench_b2b_import($dbc, $qbc)
 {
 	$dt0 = new DateTime('2000-01-01');
 	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/b2b/timestamp'");
 	$chk = json_decode($chk, true);
 	if ( ! empty($chk)) {
 		$dt0 = new DateTime($chk);
-		$dt0->sub(new DateInterval('P7D'));
+		$dt0->sub(new DateInterval('P14D'));
 	}
 
-	printf("_qbench_pull_b2b(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
+	printf("_qbench_b2b_import(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
 
 	$hit = 0;
 	$idx = 1;
@@ -924,9 +1000,17 @@ function _qbench_pull_b2b($dbc, $qbc)
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 			$rec['@hash'] = CRE_Base::recHash($rec);
 
-			$chk = $dbc->fetchRow('SELECT id, hash, stat FROM b2b_incoming WHERE guid = :x1', [
+			echo "b2b: {$rec['@id']}\n";
+			$chk = $dbc->fetchRow('SELECT id, hash, stat, license_id_source FROM b2b_incoming WHERE guid = :x1', [
 				':x1' => $rec['@id']
 			]);
+
+			if ( ! empty($rec['WCIA_JSON_OrderInput'])) {
+				$rec['@source'] = _qbench_b2b_import_wcia($rec['WCIA_JSON_OrderInput']);
+				// clear hash to reload
+				$chk['hash'] = null;
+			}
+
 			if ( ! empty($chk['id']) && ($rec['@hash'] == $chk['hash'])) {
 				$hit++;
 				echo '.';
@@ -975,7 +1059,7 @@ function _qbench_pull_b2b($dbc, $qbc)
 				]);
 				if (empty($l1['id'])) {
 
-					printf("Cannot Find License: qbench:%s in %s\n", $rec['customer_account_id'], $rec['@id']);
+					printf("CREATE License: qbench:%s in %s\n", $rec['customer_account_id'], $rec['@id']);
 
 					$l1 = [
 						'id' => _ulid(),
@@ -986,10 +1070,6 @@ function _qbench_pull_b2b($dbc, $qbc)
 						'hash' => '-'
 					];
 					$dbc->insert('license', $l1);
-				// } else {
-					// $l1 = [
-					// 	'id' => '018NY6XC00L1CENSE000000000',
-					// ];
 				}
 
 				$b2b0['license_id_source'] = $l1['id'];
@@ -998,6 +1078,8 @@ function _qbench_pull_b2b($dbc, $qbc)
 
 			} else {
 
+				$b2b0 = array_merge($b2b0, $chk);
+
 				$update = [];
 				$update['hash'] = $rec['@hash'];
 				$update['stat'] = $b2b0['stat'];
@@ -1005,11 +1087,19 @@ function _qbench_pull_b2b($dbc, $qbc)
 				$update['updated_at'] = date(\DateTime::RFC3339, $rec['last_updated']);
 
 				$filter = [];
-				$filter['id'] = $rec['@id'];
+				$filter['id'] = $b2b0['@id'];
 
 				$dbc->update('b2b_incoming', $update, $filter);
 				echo '^';
 
+			}
+
+			// Importing WCIA Source Data
+			if ( ! empty($rec['@source'])) {
+				$src = $rec['@source'];
+				foreach ($src['inventory_transfer_items'] as $b2b_item) {
+					_qbench_b2b_import_wcia_item($dbc, $b2b0, $b2b_item);
+				}
 			}
 
 		}
@@ -1017,7 +1107,121 @@ function _qbench_pull_b2b($dbc, $qbc)
 		$idx++;
 
 	} while ($idx <= $max);
-	// } while (($idx < $max) && ($hit < 100));
+
+}
+
+/**
+ *
+ */
+function _qbench_b2b_import_wcia(string $url) : ?array
+{
+	// @todo use \OpenTHC\CRE\WCIA::get()
+
+	$req = _curl_init($url);
+	$res = curl_exec($req);
+	$inf = curl_getinfo($req);
+
+	$ret = json_decode($res, true);
+
+	if ('WCIA Transfer Schema' == $ret['document_name']) {
+		$ret['@context'] = 'https://cannabisintegratorsalliance.com/v2021/b2b';
+		$ret['@source'] = $url;
+	}
+
+	return $ret;
+
+}
+
+function _qbench_b2b_import_wcia_item($dbc, $b2b, $b2b_item)
+{
+	$product_guid = $b2b_item['product']['id'] ?? $b2b_item['product_sku'];
+	$product_name = $b2b_item['product']['name'] ?: $b2b_item['product_name'] ?: $b2b_item['inventory_name'];
+	$variety_name = $b2b_item['variety']['name'] ?: $b2b_item['variety_name'] ?: $b2b_item['strain_name'];
+
+	$P = new Product($dbc);
+	if (empty($P['id'])) {
+		$P->loadBy('guid', $product_guid);
+	}
+	if (empty($P['id'])) {
+		$P->loadBy('name', $product_name);
+	}
+	if (empty($P['id'])) {
+
+		$t0 = $b2b_item['inventory_category'];
+		$t1 = $b2b_item['inventory_type'];
+
+		$PT = new Product_Type($dbc, \OpenTHC\CRE\WCIA::product_type_map_id($t0, $t1) );
+
+		$P = new Product($dbc);
+		$P['license_id'] = $_SESSION['License']['id'];
+		$P['guid'] = ($product_guid ?: substr(_ulid(), 0, 16) );
+		$P['name'] = $product_name;
+		$P['stub'] = _text_stub($P['name']);
+
+		$P['product_type_id'] = $PT['id'];
+		$P['package_type'] = $PT['mode'];
+		$P['package_unit_qom'] = floatval($b2b_item['unit_weight']);
+		$P['package_unit_uom'] = $PT['unit'];
+		if ('each' == $PT['mode']) {
+			// $P['package_pack_qom'] = 'g';
+			// $P['package_pack_uom'] = 'g';
+		}
+
+		$P->save('QBench/Import/Product/Create');
+
+	}
+
+	$V = new Variety($dbc); // $b2b_item['meta']['variety']['id'] ?? $_POST['variety'][$idx]);
+	// $V->loadBy('name', $variety_name);
+	$V->loadBy([
+		'name' => $variety_name,
+		'license_id' => $_SESSION['License']['id']
+	]);
+	if (empty($V['id'])) {
+		$V = new Variety($dbc);
+		$V['license_id'] = $_SESSION['License']['id'];
+		$V['guid'] = $b2b_item['variety']['id'] ?? _ulid();
+		$V['name'] = $variety_name;
+		$V->save('QBench/Import/Variety/Create');
+	}
+
+	// Find in Inventory
+	$inv0 = $dbc->fetchRow('SELECT * FROM inventory WHERE guid = :g0', [
+		':g0' => $b2b_item['inventory_id']
+	]);
+	if (empty($inv0['id'])) {
+		// CREATE
+		$lot = [
+			'guid' => $b2b_item['inventory_id'], //  $rec['ExtInvID'] ?: $rec['lot_number'] ?: $rec['custom_formatted_id'] ?: $rec['@id'],
+			'license_id' => $_SESSION['License']['id'],
+			'license_id_source' => $b2b['license_id_source'],
+			'product_id' => $P['id'],
+			'variety_id' => $V['id'],
+			'section_id' => '018NY6XC00SECT10N000000000',
+			'qty' => $b2b_item['qty'],
+			'qty_initial' => $b2b_item['qty'],
+			'stat' => 200
+		];
+
+		$dbc->insert('inventory', $lot);
+
+	} else {
+		// UPDATE
+		$lot = [
+			'guid' => $b2b_item['inventory_id'], //  $rec['ExtInvID'] ?: $rec['lot_number'] ?: $rec['custom_formatted_id'] ?: $rec['@id'],
+			'license_id' => $_SESSION['License']['id'],
+			'license_id_source' => $b2b['license_id_source'],
+			'product_id' => $P['id'], // '018NY6XC00PR0DUCT000000000',
+			'variety_id' => $V['id'], // '018NY6XC00VAR1ETY000000000',
+			'section_id' => '018NY6XC00SECT10N000000000',
+			'qty' => $b2b_item['qty'],
+			'qty_initial' => $b2b_item['qty'],
+			'stat' => 200
+		];
+
+		$dbc->update('inventory', $lot, [ 'id' => $inv0['id'] ]);
+
+	}
 
 }
 
