@@ -17,6 +17,14 @@ $wcia = [
 		'source_id' => $data['Lot']['guid'],
 	],
 	'labresult_id' => $data['Lab_Result']['guid'],
+	'result' => [
+		'@note' => 'Experimental Field by OpenTHC',
+		'id' => $data['Lab_Result']['guid'],
+		'status' => 'pass',
+		'created_at' => $data['Lab_Result']['created_at'],
+		'approved_at' => $data['Lab_Result']['approved_at'],
+		'expires_at' => $data['Lab_Result']['expires_at'],
+	],
 	'status' => 'pass',
 	'coa' => sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $data['Lab_Result']['id']),
 	'metric_list' => [
