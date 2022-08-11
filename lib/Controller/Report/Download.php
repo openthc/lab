@@ -70,6 +70,8 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 			'guid' => $data['Lab_Sample']['name'],
 			'name' => $Lab_Report['name'],
 			'created_at' => $Lab_Report['created_at'],
+			'approved_at' => $Lab_Report['approved_at'],
+			'expires_at' => $Lab_Report['expires_at'],
 		];
 
 
@@ -116,13 +118,18 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 			':i0' => $data['Lab_Sample']['lot_id']
 		]);
 
+		$dt0 = new \DateTime($data['Lab_Result']['approved_at']);
+
+		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="labtest_%s_%s.csv"'
+			, $data['License_Laboratory']['code']
+			, $dt0->format('YmdHis')
+		));
+		$RES = $RES->withHeader('content-transfer-encoding', 'binary');
+		$RES = $RES->withHeader('content-type', 'text/plain; charset=utf-8');
+
 		ob_start();
 		require_once(APP_ROOT . '/view/pub/csv-ccrs.php');
 		$csv_output = ob_get_clean();
-
-		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="Lab_Report_%s_CCRS.csv"', $data['Lab_Result']['id']));
-		$RES = $RES->withHeader('content-transfer-encoding', 'binary');
-		$RES = $RES->withHeader('content-type', 'text/plain; charset=utf-8');
 
 		return $RES->write($csv_output);
 

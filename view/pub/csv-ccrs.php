@@ -21,11 +21,9 @@ use OpenTHC\CRE\CCRS;
 $csv_config = [];
 $csv_config['lab_name'] = $data['License_Laboratory']['name'] ?: $_SESSION['Company']['name'];
 
-header('content-type: text/plain; charset=utf-8');
-header(sprintf('content-disposition: filename="Lab_Report_%s_CCRS.csv"' , $data['Lab_Result']['id']));
-
+$dt0 = new DateTime($data['Lab_Result']['approved_at']);
 // @todo Fix this Date to use the Source Value
-$dt0 = new DateTime($data['Lab_Result']['created_at']);
+// $dt0 = new DateTime($data['Lab_Result']['created_at']);
 
 // Here's the Metric IDs we want to capture and the CCRS Names
 $out_metric_list = [];
