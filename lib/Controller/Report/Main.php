@@ -16,8 +16,8 @@ class Main extends \OpenTHC\Lab\Controller\Base
 	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
-
 		$data = $this->loadSiteData();
+		$data = $this->loadSearchPageData($data);
 		$data['Page'] = [ 'title' => 'Lab Reports' ];
 		$data['report_list'] = $this->get_report_list();
 
@@ -35,7 +35,7 @@ class Main extends \OpenTHC\Lab\Controller\Base
 		$sql_limit  = 100;
 		$sql_offset = 0;
 
-		if (!empty($_GET['p'])) {
+		if ( ! empty($_GET['p'])) {
 			$p = intval($_GET['p']) - 1;
 			if ('ALL' == $_GET['p']) $p = 0;
 			$sql_offset = $p * $sql_limit;
