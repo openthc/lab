@@ -8,6 +8,9 @@
 use OpenTHC\Lab\Lab_Result;
 use OpenTHC\Lab\UOM;
 
+$dtC = new \DateTime($data['Lab_Result']['created_at']); //, new \DateTimezone($_SESSION['tz']));
+$dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
+
 ?>
 
 <div class="container">
@@ -23,6 +26,19 @@ use OpenTHC\Lab\UOM;
 				, $data['Lab_Sample']['id']
 				, ($data['Lab_Sample']['name'] ?: $data['Lab_Sample']['id'])
 			);
+		}
+		?>
+		<p>Created: <?= $dtC->format('Y-m-d H:i e') ?>
+		<?php
+		if ( ! empty($data['Lab_Result']['approved_at'])) {
+			$dtA = new \DateTime($data['Lab_Result']['approved_at']);
+			$dtA->setTimezone(new \DateTimezone($_SESSION['tz']));
+			printf('Approved: %s', $dtA->format('Y-m-d H:i e'));
+		}
+		if ( ! empty($data['Lab_Result']['expires_at'])) {
+			$dtE = new \DateTime($data['Lab_Result']['expires_at']);
+			$dtE->setTimezone(new \DateTimezone($_SESSION['tz']));
+			printf('Expires: %s', $dtE->format('Y-m-d H:i e'));
 		}
 		?>
 	</div>

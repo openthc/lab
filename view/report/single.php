@@ -57,20 +57,21 @@ use OpenTHC\Lab\UOM;
 						<?php
 						$link = sprintf('/report/%s/download?f=pdf', $data['Lab_Report']['id']);
 						?>
-						<a class="btn btn-sm" href="<?= $link ?>">COA (PDF) <i class="fas fa-print"></i></a>
+						<a class="btn btn-sm" href="<?= $link ?>" title="Open the Generated COA">COA (PDF) <i class="fas fa-print"></i></a>
 						<div class="btn-group btn-group-sm">
-							<a class="btn" download href="<?= $link ?>"><i class="fas fa-download"></i></a>
-							<button class="btn btn-clipcopy" data-clipboard-text="<?= $link ?>" type="button" ><i class="fa-regular fa-clipboard"></i></button>
+							<a class="btn" download href="<?= $link ?>" title="Download the Generated COA"><i class="fas fa-download"></i></a>
+							<button class="btn btn-clipcopy" data-clipboard-text="<?= $link ?>" title="Copy Link to the Generated COA" type="button" ><i class="fa-regular fa-clipboard"></i></button>
 						</div>
 					</li>
 					<li class="dropdown-item d-flex justify-content-between">
 						<?php
 						$link = sprintf('/report/%s/download?f=csv%%2Bccrs', $data['Lab_Report']['id']);
+						$link_pub = sprintf('https://%s/pub/%s/ccrs.csv', $_SERVER['SERVER_NAME'], $data['Lab_Report']['id']);
 						?>
-						<a class="btn btn-sm" href="<?= $link ?>">CSV/CCRS <i class="fas fa-file-csv"></i></a>
+						<a class="btn btn-sm" href="<?= $link ?>" title="View the CCRS style CSV File">CSV/CCRS <i class="fas fa-file-csv"></i></a>
 						<div class="btn-group btn-group-sm">
-							<a class="btn" download href="<?= $link ?>"><i class="fas fa-download"></i></a>
-							<button class="btn btn-clipcopy" data-clipboard-text="<?= $link ?>" type="button" ><i class="fa-regular fa-clipboard"></i></button>
+							<a class="btn" download href="<?= $link ?>" title="Download the CCRS style CSV File"><i class="fas fa-download"></i></a>
+							<button class="btn btn-clipcopy" data-clipboard-text="<?= $link_pub ?>"  title="Copy Link to Public CCRS style CSV File" type="button" ><i class="fa-regular fa-clipboard"></i></button>
 						</div>
 					</li>
 					<li class="dropdown-item d-flex justify-content-between">
