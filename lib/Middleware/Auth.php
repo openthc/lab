@@ -1,6 +1,8 @@
 <?php
 /**
  * Authentication Middleware
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace OpenTHC\Lab\Middleware;
@@ -13,14 +15,17 @@ class Auth extends \OpenTHC\Middleware\Base
 	public function __invoke($REQ, $RES, $NMW)
 	{
 		// If we have a valid session, use that
-		if (!empty($_SESSION['Contact']['id'])) {
+		if ( ! empty($_SESSION['Company']['id'])
+			&& ! empty($_SESSION['Contact']['id'])
+			&& ! empty($_SESSION['License']['id'])
+			) {
 			return $NMW($REQ, $RES);
 		}
 
 		$auth = trim($_SERVER['HTTP_AUTHORIZATION']);
 
 		$chk = preg_match('/^basic (.+)$/i', $auth, $m) ? $m[1] : null;
-		if (!empty($chk)) {
+		if ( ! empty($chk)) {
 			$RES = $this->_basic($REQ, $RES, $chk);
 			if (200 == $RES->getStatusCode()) {
 				return $NMW($REQ, $RES);
@@ -28,17 +33,22 @@ class Auth extends \OpenTHC\Middleware\Base
 		}
 
 		$chk = preg_match('/^bearer (.+)$/i', $auth, $m) ? $m[1] : null;
-		if (!empty($chk)) {
+		if ( ! empty($chk)) {
 			$RES = $this->_bearer($REQ, $RES, $chk);
 			if (200 == $RES->getStatusCode()) {
 				return $NMW($REQ, $RES);
 			}
 		}
 
-		// return $RES->withJSON(array(
-		// 	'data' => [],
-		// 	'meta' => [ 'detail' => '' ],
-		// ), 403);
+		$type_want = strtok($_SERVER['HTTP_ACCEPT'], ',');
+		if ('text/html' == $type_want) {
+			_exit_html_warn('Access Denied [AMA-042]', 403);
+		}
+
+		return $RES->withJSON(array(
+			'data' => [],
+			'meta' => [ 'detail' => 'Access Denied [AMA-042]' ],
+		), 403);
 
 		return $RES;
 
@@ -125,6 +135,7 @@ class Auth extends \OpenTHC\Middleware\Base
 			if ('lab' == $data['scope']) {
 				return $RES;
 			}
+
 			// $Company = new Company($dbc, $res['company_id']);
 			// $Contact = new Contact($dbc, $res['uid']);
 
