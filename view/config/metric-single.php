@@ -87,5 +87,9 @@
 	</div>
 </div>
 
+<div class="form-actions">
+	<button class="btn btn-primary" name="a" type="submit" value="lab-metric-single-update"><i class="fa-solid fa-save"></i> Save</button>
+</div>
+
 </div>
 </form>
