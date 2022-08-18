@@ -572,13 +572,6 @@ function _qbench_pull_result_import($dbc, $rec) : int
 				exit(0);
 			}
 
-			// if ('018NY6XC00LMR9PB7SNBP97DAS' == $metric_key_ulid) {
-			// 	echo "It's 018NY6XC00LMR9PB7SNBP97DAS!!\n";
-			// 	var_dump($metric_val);
-			// 	echo "\n";
-			// 	exit(0);
-			// }
-
 			$lrm0 = $dbc->fetchRow('SELECT id FROM lab_result_metric WHERE lab_result_id = :lr0 AND lab_metric_id = :lm0', [
 				':lr0' => $lr0['id']
 				, ':lm0' => $metric_key_ulid
@@ -652,7 +645,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 					echo $e->getMessage();
 					var_dump($lrm1);
 					echo "\n####\n";
-					exit(0);
+					// exit(0);
 				}
 
 			}
@@ -1277,7 +1270,7 @@ function _qbench_map_metric($k)
 		, 'acetone' => '018NY6XC00LM9HW5DZGD5KR55G'
 		, 'acetonitrile' => '018NY6XC00STNQ0SR3G2XBMAYJ'
 		, 'aerobic' => '018NY6XC00LMFPY3XH8NNXM9TH'
-		, 'aflatoxin_pf' => '018NY6XC00LMR9PB7SNBP97DAS' // ?
+		// , 'aflatoxin_pf' => '018NY6XC00LMR9PB7SNBP97DAS' // ?
 		, 'aldicarb_sulfone' => '018NY6XC00KRBFY2AHKHRXN58B'
 		, 'aldicarb' => '018NY6XC00LME4KJM6Y8XP8WGA'
 		, 'aminocarb' => '018NY6XC00X9FKBQTRMMT9CWYB'
