@@ -352,6 +352,7 @@ SQL;
 					// Success
 					break;
 				default:
+					var_dump($res);
 					throw new \Exception('Unable to (re)-publish to Lab Portal');
 			}
 
@@ -370,6 +371,13 @@ SQL;
 			// $_POST['result_id'] = $LR['id'];
 			// return $x->_commit($REQ, $RES, $ARG);
 
+			$dtA = new \DateTime();
+			$dtE = clone $dtA;
+			$dtE->add(new \DateInterval('P365D'));
+
+			$LR['approved_at'] = $dtA->format(\DateTimeInterface::RFC3339);
+			$LR['expires_at'] = $dtE->format(\DateTimeInterface::RFC3339);
+			$LR['stat'] = Lab_Result::STAT_LOCK;
 			$LR->setFlag(Lab_Result::FLAG_LOCK);
 			$LR->save('Lab Result Committed by User');
 

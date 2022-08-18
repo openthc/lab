@@ -9,12 +9,16 @@ use OpenTHC\Lab\Lab_Result;
 use OpenTHC\Lab\Lab_Report;
 use OpenTHC\Lab\UOM;
 
+
+$dtC = new \DateTime($data['Lab_Report']['created_at']); //, new \DateTimezone($_SESSION['tz']));
+$dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
+
 ?>
 
 <div class="container">
 <div class="d-flex flex-row flex-wrap justify-content-between mt-2">
 
-	<div>
+	<div class="report-header">
 		<h1><?= $data['Lab_Report']['name'] ?></h1>
 		<h2>Sample: <?php
 		if (empty($data['Lab_Sample']['id'])) {
@@ -25,7 +29,20 @@ use OpenTHC\Lab\UOM;
 				, ($data['Lab_Sample']['name'] ?: $data['Lab_Sample']['id'])
 			);
 		}
-		?>
+		?></h2>
+		<p>Created: <?= $dtC->format('Y-m-d H:i e') ?>
+		<?php
+		if ( ! empty($data['Lab_Report']['approved_at'])) {
+			$dtA = new \DateTime($data['Lab_Report']['approved_at']);
+			$dtA->setTimezone(new \DateTimezone($_SESSION['tz']));
+			printf('Approved: %s', $dtA->format('Y-m-d H:i e'));
+		}
+		if ( ! empty($data['Lab_Report']['expires_at'])) {
+			$dtE = new \DateTime($data['Lab_Report']['expires_at']);
+			$dtE->setTimezone(new \DateTimezone($_SESSION['tz']));
+			printf('Expires: %s', $dtE->format('Y-m-d H:i e'));
+		}
+		?></p>
 	</div>
 
 	<div>

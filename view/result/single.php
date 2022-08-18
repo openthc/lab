@@ -16,7 +16,7 @@ $dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
 <div class="container">
 <div class="d-flex flex-row flex-wrap justify-content-between mt-2">
 
-	<div>
+	<div class="report-header">
 		<h1>Result: <?= $data['Lab_Result']['guid'] ?></h1>
 		<h2>Sample: <?php
 		if (empty($data['Lab_Sample']['id'])) {
@@ -27,7 +27,7 @@ $dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
 				, ($data['Lab_Sample']['name'] ?: $data['Lab_Sample']['id'])
 			);
 		}
-		?>
+		?></h2>
 		<p>Created: <?= $dtC->format('Y-m-d H:i e') ?>
 		<?php
 		if ( ! empty($data['Lab_Result']['approved_at'])) {
@@ -40,7 +40,7 @@ $dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
 			$dtE->setTimezone(new \DateTimezone($_SESSION['tz']));
 			printf('Expires: %s', $dtE->format('Y-m-d H:i e'));
 		}
-		?>
+		?></p>
 	</div>
 
 	<div>

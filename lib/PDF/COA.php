@@ -89,9 +89,27 @@ class COA extends \OpenTHC\Lab\PDF\Base
 
 		$y += self::FS_12;
 		$this->setXY($x, $y);
+
+		// Received
+		// Reported
+		// Expires
+
 		$dt = new \DateTime($this->_data['Lab_Result']['created_at']);
+		$dt->setTimezone(new \DateTimezone($_SESSION['tz']));
+		$this->cell(3.25, self::FS_12, sprintf('Reported: %s', $dt->format('m/d/Y')), 0, 0, 'C');
+
+		$y += self::FS_12;
+		$this->setXY($x, $y);
+		$dtE = new \DateTime($this->_data['Lab_Result']['expires_at']);
+		$dtE->setTimezone(new \DateTimezone($_SESSION['tz']));
+		$this->cell(3.25, self::FS_12, sprintf('Expires: %s', $dtE->format('m/d/Y')), 0, 0, 'C');
+
+		// $dt = new \DateTime($this->_data['Lab_Result']['created_at']);
 		// $dt->setTimezone(new DateTimezone($_SESSION['tz']));
-		$this->cell(3.25, self::FS_12, sprintf('Date: %s', $dt->format('m/d/Y')), 0, 0, 'C');
+
+		// $this->cell(3.25, self::FS_12, sprintf('Date Reported: %s', $dt->format('m/d/Y')), 0, 0, 'C');
+
+
 		// $y += self::FS_12;
 
 		$y += self::FS_12;
