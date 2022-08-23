@@ -69,7 +69,7 @@ foreach ($data['result_list'] as $s) {
 			<a class="btn btn-sm btn-outline-secondary" href="<?= sprintf('/result/%s/update', $s['id']) ?>"><i class="fas fa-edit"></i></a>
 			<?php
 			// if (100 == $s['stat']) {
-				echo '<button class="btn btn-sm btn-outline-secondary" type="button"><i class="fa-solid fa-flag-checkered"></i></button>';
+				// echo '<button class="btn btn-sm btn-outline-secondary" type="button"><i class="fa-solid fa-flag-checkered"></i></button>';
 			// }
 			?>
 			<!-- <a class="btn btn-sm btn-outline-secondary"
@@ -92,8 +92,8 @@ foreach ($data['result_list'] as $s) {
  -->
 <div class="ms-2">
 		<div class="btn-group">
-			<a class="btn btn-outline-secondary" href="?<?= http_build_query(array_merge($_GET, [ 'p' => $data['result_page']['older'] ])) ?>"><i class="fas fa-arrow-left"></i></a>
-			<a class="btn btn-outline-secondary" href="?<?= http_build_query(array_merge($_GET, [ 'p' => $data['result_page']['newer'] ])) ?>"><i class="fas fa-arrow-right"></i></a>
+			<a class="btn btn-outline-secondary" href="?<?= http_build_query(array_merge($_GET, [ 'p' => $data['search_page']['older'] ])) ?>"><i class="fas fa-arrow-left"></i></a>
+			<a class="btn btn-outline-secondary" href="?<?= http_build_query(array_merge($_GET, [ 'p' => $data['search_page']['newer'] ])) ?>"><i class="fas fa-arrow-right"></i></a>
 		</div>
 </div>
 
