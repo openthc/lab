@@ -399,13 +399,15 @@ function _qbench_pull_result($dbc, $qbc)
 		foreach ($res['data'] as $rec) {
 
 			// Compare to Sync Time
-			// $dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
-			// if ($dt1 < $dt0) {
-			// 	echo "TIMEOUT\n";
-			// 	return(0);
-			// }
+			$dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
+			if ($dt1 < $dt0) {
+				echo "TIMEOUT\n";
+				return(0);
+			}
+
 			$x = _qbench_pull_result_import($dbc, $rec);
 			$hit += $x;
+
 		}
 
 		$idx++;
@@ -474,7 +476,6 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		':g1' => $rec['@lab_result_id']
 	]);
 	if ( ! empty($lr0['id']) && ($lr0['hash'] == $rec['@hash'])) {
-		// echo "HIT: {$rec['@lab_result_id']}\n";
 		echo '.';
 		return(1);
 	}
@@ -708,14 +709,11 @@ function _qbench_pull_sample($dbc, $qbc)
 		foreach ($res['data'] as $rec) {
 
 			// Compare to Sync Time
-			// $dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
-			// if ($dt1 < $dt0) {
-			// 	echo "TIMEOUT\n";
-			// 	return(0);
-			// }
-
-			// _qbench_sample_import($dbc, $qbc, $rec);
-
+			$dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
+			if ($dt1 < $dt0) {
+				echo "TIMEOUT\n";
+				return(0);
+			}
 
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 			$rec['@order_id'] = sprintf('qbench:%s', $rec['order_id']);
@@ -737,11 +735,11 @@ function _qbench_pull_sample($dbc, $qbc)
 				':i0' => $rec['@id']
 			]);
 
-			// if ( ! empty($lab_sample['id']) && ($rec['@hash'] == $lab_sample['hash'])) {
-			// 	$hit++;
-			// 	echo '.';
-			// 	continue;
-			// }
+			if ( ! empty($lab_sample['id']) && ($rec['@hash'] == $lab_sample['hash'])) {
+				$hit++;
+				echo '.';
+				continue;
+			}
 
 			if (empty($rec['order_id'])) {
 				echo "\nMissing Order ID on Sample {$rec['@id']}\n";
@@ -894,7 +892,7 @@ function _qbench_pull_sample($dbc, $qbc)
 				// echo '=B';
 			}
 
-			_qbench_sample_report_import($dbc, $qbc, $rec);
+			// _qbench_sample_report_import($dbc, $qbc, $rec);
 
 		}
 
