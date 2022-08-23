@@ -33,12 +33,12 @@ $dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
 		if ( ! empty($data['Lab_Result']['approved_at'])) {
 			$dtA = new \DateTime($data['Lab_Result']['approved_at']);
 			$dtA->setTimezone(new \DateTimezone($_SESSION['tz']));
-			printf('Approved: %s', $dtA->format('Y-m-d H:i e'));
+			printf('<br>Approved: %s', $dtA->format('Y-m-d H:i e'));
 		}
 		if ( ! empty($data['Lab_Result']['expires_at'])) {
 			$dtE = new \DateTime($data['Lab_Result']['expires_at']);
 			$dtE->setTimezone(new \DateTimezone($_SESSION['tz']));
-			printf('Expires: %s', $dtE->format('Y-m-d H:i e'));
+			printf('<br>Expires: %s', $dtE->format('Y-m-d H:i e'));
 		}
 		?></p>
 	</div>
@@ -79,18 +79,24 @@ $dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
 				<!-- </div> -->
 			</div>
 
-			<div class="btn-group">
-				<?php
-				if ($data['Lab_Result']['flag'] & Lab_Result::FLAG_PUBLIC) {
-					echo '<button class="btn btn-outline-success" name="a" title="Lab Report Published, click to re-publish &amp; view" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
-				} else {
-					echo '<button class="btn btn-warning" name="a" title="Lab Report NOT Published" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
-				}
-				?>
-				<!-- <a class="btn btn-outline-secondary" href="mailto:?<?= $data['share_mail_link'] ?>"><i class="fas fa-envelope-open-text"></i></a> -->
-			</div>
-
 			<?php
+			// Only non-Laboratories can share Result, Lab must move it forward to a Report
+			if ('Laboratory' != $_SESSION['License']['type']) {
+			?>
+				<div class="btn-group">
+					<?php
+					if ($data['Lab_Result']['flag'] & Lab_Result::FLAG_PUBLIC) {
+						echo '<button class="btn btn-outline-success" name="a" title="Lab Report Published, click to re-publish &amp; view" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
+					} else {
+						echo '<button class="btn btn-warning" name="a" title="Lab Report NOT Published" type="submit" value="lab-result-share"><i class="fas fa-share-alt"></i> Share</button>';
+					}
+					?>
+					<!-- <a class="btn btn-outline-secondary" href="mailto:?<?= $data['share_mail_link'] ?>"><i class="fas fa-envelope-open-text"></i></a> -->
+				</div>
+			<?php
+			}
+
+			// COA File for Result
 			if ($data['Lab_Result']['coa_file']) {
 			?>
 				<div class="btn-group">
