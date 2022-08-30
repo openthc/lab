@@ -217,11 +217,13 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$this->cell(3.25, self::FS_12, sprintf('Variety: %s', $this->_data['Variety']['name']));
 		$y += self::FS_12;
 
+		// $txt = sprintf('Product: %s [%s]'
+		// 	, $this->_data['Product']['name']
+		// 	, $this->_data['Product_Type']['name']
+		// );
+		$txt = sprintf('Product: %s', $this->_data['Product']['name']);
 		$this->setXY($x, $y);
-		$this->cell(3.25, self::FS_12, sprintf('Product: %s [%s]'
-			, $this->_data['Product']['name']
-			, $this->_data['Product_Type']['name']
-		));
+		$this->cell(3.25, self::FS_12, $txt);
 		$y += self::FS_12;
 
 		// $this->setXY($x, $y);
