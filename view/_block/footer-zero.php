@@ -1,3 +1,11 @@
+<?php
+/**
+ *
+ */
+
+// require_once(APP_ROOT . '/vendor/openthc/common/view/footer-app.php');
+
+?>
 <div class="main-foot">
 <footer>
 
@@ -29,7 +37,7 @@
 </div>
 
 <div class="foot-copy-info">
-	<p style="color: #f0f0f0; margin:0; padding:0; text-align:center;">All materials &copy; OpenTHC 2014-2021</p>
+	<p style="color: #f0f0f0; margin:0; padding:0; text-align:center;">All materials &copy; OpenTHC 2014-2022</p>
 </div>
 
 </footer>

@@ -79,14 +79,6 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 	</div>
 </div>
 
-<!-- <p>Source ID: <code>{{ Lab_Sample.global_original_id }}</code>
-	if Lab_Sample.meta.external_id or Lab_Sample.meta.legacy_id {
-		{{ Lab_Sample.meta.external_id ? ("External ID: <code>" ~ Lab_Sample.meta.external_id ~ "</code>")|raw }}
-		{{ Lab_Sample.meta.legacy_id ? ("Legacy ID: <code>" ~ Lab_Sample.meta.legacy_id ~ "</code>")|raw }}
-	}
-	from <strong>{{ License_Source.name }}</strong> [{{ License_Source.code }}]
-</p> -->
-
 <div class="row">
 	<div class="col-md-6">
 		<div class="mb-2">
