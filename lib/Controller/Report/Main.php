@@ -7,7 +7,8 @@
 
 namespace OpenTHC\Lab\Controller\Report;
 
-use Edoceo\Radix\Session;
+use OpenTHC\Lab\Lab_Report;
+use OpenTHC\Lab\UI\Pager;
 
 class Main extends \OpenTHC\Lab\Controller\Base
 {
@@ -52,7 +53,8 @@ class Main extends \OpenTHC\Lab\Controller\Base
 		JOIN license ON lab_report.license_id_client = license.id
 		WHERE {WHERE}
 		ORDER BY {ORDER_BY}
-		LIMIT 100
+		OFFSET $sql_offset
+		LIMIT $sql_limit
 		SQL;
 
 		$sql_filter = [];
