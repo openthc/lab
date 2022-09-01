@@ -14,7 +14,15 @@ if ('hide' == $data['menu0']) {
 <nav class="navbar navbar-expand-md navbar-dark bg-dark sticky-top">
 <div class="container-fluid">
 
-<a class="navbar-brand" href="/dashboard"><?= $data['menu']['home_html'] ?></a>
+<?php
+if ( ! empty($_SESSION['OpenTHC']['app']['base'])) {
+	printf('<a class="btn btn-sm" href="%s/dashboard"><img alt="OpenTHC Icon" src="https://cdn.openthc.com/img/icon/icon-w-32.png"></a>'
+		, $_SESSION['OpenTHC']['app']['base']
+	);
+} else {
+	printf('<a class="navbar-brand" href="/dashboard">%s</a>', $data['menu']['home_html']);
+}
+?>
 
 <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#menu-zero" aria-expanded="false" aria-controls="menu-zero">
 	<span class="navbar-toggler-icon"></span>
@@ -32,6 +40,7 @@ if (!empty($data['menu']['main']) && is_array($data['menu']['main'])) {
 }
 
 // Search Option
+$data['menu']['show_search'] = false;
 if ($data['menu']['show_search']) {
 ?>
 	<form action="/search" autocomplete="x" class="me-auto" role="search">
