@@ -258,6 +258,8 @@ class View extends \OpenTHC\Lab\Controller\Base
 		$lr1['lab_sample_id'] = $Lab_Sample['id'];
 		// $lr1['contact_id'] = $_SESSION['Contact']['id'];
 		$lr1['license_id'] = $_SESSION['License']['id'];
+		$lr1['approved_at'] = $LR0['approved_at'];
+		$lr1['expires_at'] = $LR0['expires_at'];
 		$lr1['license_id_source'] = $_SESSION['License']['id'];
 		$lr1['license_id_client'] = $Lab_Sample['license_id_source'];
 		$lr1['name'] = sprintf('Lab Report for Sample %s', $Lab_Sample['name']);
@@ -269,6 +271,9 @@ class View extends \OpenTHC\Lab\Controller\Base
 		]);
 
 		$dbc->insert('lab_report', $lr1);
+
+		// If QBench Source (or other external source)
+		// _qbench_sample_report_import($dbc, $qbc, $rec);
 
 		return $RES->withRedirect(sprintf('/report/%s', $lr1['id']));
 
