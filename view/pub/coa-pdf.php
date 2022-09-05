@@ -17,16 +17,32 @@ $pdf->setFont('freesans');
 
 $pdf->addPage();
 
+$pdf->setX(0.5);
+$pdf->setY(2.75);
 
 // General Header Block
-$x = 0.5;
-$y = 2.75;
+$mt_show = _want_metric_type(
+	$data['Product_Type']['id'],
+	$data['lab_metric_type_list']['018NY6XC00LMT0BY5GND653C0C']['meta']['product-type-matrix']
+);
 
-$pdf->setXY($x, $y);
-$pdf->draw_metric_table_2_col_a_then_d('General', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0BY5GND653C0C']['metric_list']);
+if ($mt_show) {
 
+	$x = 0.5;
+	$y = 2.75;
+
+	$pdf->setXY($x, $y);
+	$pdf->draw_metric_table_2_col_a_then_d('General', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0BY5GND653C0C']['metric_list']);
+
+}
 
 // Cannabinoids
+$mt_show = _want_metric_type(
+	$data['Product_Type']['id'],
+	$data['lab_metric_type_list']['018NY6XC00LMT0HRHFRZGY72C7']['meta']['product-type-matrix']
+);
+if ($mt_show) {
+
 $x = 0.5;
 $y = $pdf->getY() + COA::FS_14;
 $pdf->setXY($x, $y);
@@ -44,7 +60,16 @@ $metric_list = $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0HRHFRZGY72
 // $pdf->draw_metric_table_2_col_a_then_d('Cannabinoids', $metric_listA, $metric_listB);
 $pdf->draw_metric_table_2_col_a_then_d('Cannabinoids', $metric_list);
 
+}
+
+
 // Terpenes
+$mt_show = _want_metric_type(
+	$data['Product_Type']['id'],
+	$data['lab_metric_type_list']['018NY6XC00LMT07DPNKHQV2GRS']['meta']['product-type-matrix']
+);
+if ($mt_show) {
+
 $x = 0.50;
 $y = $pdf->getY(); // 1.75;
 $pdf->setXY($x, $y);
@@ -59,8 +84,16 @@ if ($metric_list_count > 0) {
 	$pdf->draw_metric_table_2_col_a_then_d('Terpenes', $metric_list);
 }
 
+}
+
 
 // Metals
+$mt_show = _want_metric_type(
+	$data['Product_Type']['id'],
+	$data['lab_metric_type_list']['018NY6XC00LMT0V6XE7P0BHBCR']['meta']['product-type-matrix']
+);
+if ($mt_show) {
+
 if ( ! empty($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR']['metric_list'])) {
 	$x = 0.5;
 	$y = $pdf->getY() + COA::FS_14;
@@ -68,21 +101,45 @@ if ( ! empty($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR
 	$pdf->draw_metric_table_2_col_a_then_d('Metals', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR']['metric_list']);
 }
 
+}
+
 // Microbes
+$mt_show = _want_metric_type(
+	$data['Product_Type']['id'],
+	$data['lab_metric_type_list']['018NY6XC00LMT0B7NMK7RGYAMN']['meta']['product-type-matrix']
+);
+if ($mt_show) {
+
 $x = 0.5;
 $y = $pdf->getY() + COA::FS_14;
 $pdf->setXY($x, $y);
 $pdf->draw_metric_table_2_col_a_then_d('Microbes', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0B7NMK7RGYAMN']['metric_list']);
 
+}
+
 
 // Mycotoxins
+$mt_show = _want_metric_type(
+	$data['Product_Type']['id'],
+	$data['lab_metric_type_list']['018NY6XC00LMT0GDBPF0V9B71Z']['meta']['product-type-matrix']
+);
+if ($mt_show) {
+
 $x = 0.50;
 $y = $pdf->getY() + COA::FS_14;
 $pdf->setXY($x, $y);
 $pdf->draw_metric_table_2_col_a_then_d('Mycotoxins', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0GDBPF0V9B71Z']['metric_list']);
 
+}
+
 
 // Solvents
+$mt_show = _want_metric_type(
+	$data['Product_Type']['id'],
+	$data['lab_metric_type_list']['018NY6XC00LMT0AQAMJEDSD0NW']['meta']['product-type-matrix']
+);
+if ($mt_show) {
+
 if ( ! empty($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW']['metric_list'])) {
 	$x = 0.50;
 	$y = $pdf->getY();
@@ -91,7 +148,15 @@ if ( ! empty($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW
 	$pdf->draw_metric_table_2_col_a_then_d('Solvents', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW']['metric_list']);
 }
 
+}
+
 // Pesticides
+$mt_show = _want_metric_type(
+	$data['Product_Type']['id'],
+	$data['lab_metric_type_list']['018NY6XC00LMT09ZG05C2NE7KX']['meta']['product-type-matrix']
+);
+if ($mt_show) {
+
 $x = 0.50;
 $y = $pdf->getY();
 $y += COA::FS_14;
@@ -107,6 +172,8 @@ $pdf->draw_metric_table_2_col_a_then_d('Pesticides', $metric_list);
 // $pdf->setXY($x, $y);
 // $pdf->draw_metric_table($metric_listA);
 
+}
+
 // $x = 4.25;
 // $pdf->setXY($x, $y);
 // $pdf->draw_metric_table($metric_listB);
@@ -114,3 +181,26 @@ $pdf->draw_metric_table_2_col_a_then_d('Pesticides', $metric_list);
 // More disclaimer text
 
 $pdf->output(sprintf('coa-%s.pdf', $data['Lab_Result']['guid']), 'I');
+
+
+function _want_metric_type($pt_want, $pt_matrix)
+{
+	// $mt_show = false;
+	// $pt_want = $data['Product_Type']['id'];
+	// $pt_matrix = $data['lab_metric_type_list']['018NY6XC00LMT0BY5GND653C0C']['meta']['product-type-matrix'];
+	if (empty($pt_matrix)) {
+		return true;
+	} else {
+		// Lookup Something?
+		foreach ($pt_matrix as $pt_ulid => $pt_show) {
+			if ($pt_ulid == $pt_want) {
+				if ($pt_show) {
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+
+}

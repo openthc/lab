@@ -4,12 +4,24 @@
 
 	<div class="config-card">
 	<div class="card">
+		<h4 class="card-header">Metric Types</h4>
+		<div class="card-body">
+			<p class="card-text">Use the <a href="/config/metric/type">Metric Types</a> page to configure which metrics for which sample types.</p>
+		</div>
+		<div class="card-footer">
+			<a href="/config/metric/type" class="btn btn-primary">Configure Metric Types</a>
+		</div>
+	</div>
+	</div>
+
+	<div class="config-card">
+	<div class="card">
 		<h4 class="card-header">Metrics</h4>
 		<div class="card-body">
 			<p class="card-text">Use the <a href="/config/metric">Metrics</a> page to configure which metrics for which sample types.</p>
 		</div>
 		<div class="card-footer">
-			<a href="/config/metric" class="btn btn-primary">Review Metrics</a>
+			<a href="/config/metric" class="btn btn-primary">Configure Metrics</a>
 		</div>
 	</div>
 	</div>
@@ -33,7 +45,7 @@
 				<p class="card-text">Certificate of Analysis Templates allow full control of output formatting</p>
 			</div>
 			<div class="card-footer">
-				<a href="/config/intake" class="btn btn-primary">Configure</a>
+				<a href="/config/intake" class="btn btn-primary">Configure Intake Portal</a>
 			</div>
 		</div>
 	</div>
@@ -45,7 +57,7 @@
 				<p class="card-text">Customize the Sample ID Generator</p>
 			</div>
 			<div class="card-footer">
-				<a href="/config/sample" class="btn btn-primary">Configure</a>
+				<a href="/config/sample" class="btn btn-primary">Configure Sample IDs</a>
 			</div>
 		</div>
 	</div>

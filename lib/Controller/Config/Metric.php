@@ -7,6 +7,8 @@
 
 namespace OpenTHC\Lab\Controller\Config;
 
+use Edoceo\Radix\Session;
+
 use OpenTHC\Lab\Lab_Metric;
 
 class Metric extends \OpenTHC\Lab\Controller\Base
@@ -102,6 +104,73 @@ class Metric extends \OpenTHC\Lab\Controller\Base
 		$data['Product_Type_list'] = $dbc->fetchMix($sql);
 
 		return $RES->write( $this->render('config/metric-single.php', $data) );
+
+	}
+
+	/**
+	 * Evaluate Type Lists
+	 */
+	function type($REQ, $RES, $ARG)
+	{
+		$dbc = $this->_container->DBC_User;
+
+		$data = $this->loadSiteData();
+		$data['Page'] = [ 'title' => 'Config :: Metric :: Types' ];
+
+		$sql = 'SELECT id, name, meta FROM lab_metric_type ORDER BY sort, name';
+		$data['Metric_Type_list'] = $dbc->fetchAll($sql);
+
+
+		$sql = 'SELECT id, name FROM product_type WHERE stat = 200 ORDER BY name';
+		$data['Product_Type_list'] = $dbc->fetchMix($sql);
+
+		return $RES->write( $this->render('config/metric-type-list.php', $data) );
+
+	}
+
+	/**
+	 * Evaluate Type Lists
+	 */
+	function type_post($REQ, $RES, $ARG)
+	{
+		$dbc = $this->_container->DBC_User;
+
+		// $sql = 'SELECT id, name FROM lab_metric_type WHERE stat = 200';
+		$sql = 'SELECT id, name FROM lab_metric_type';
+		$metric_type_list = $dbc->fetchAll($sql);
+
+		$sql = 'SELECT id, name FROM product_type WHERE stat = 200';
+		$product_type_list = $dbc->fetchAll($sql);
+
+		// ob_start();
+		foreach ($metric_type_list as $mt) {
+
+			$matrix = [];
+
+			foreach ($product_type_list as $pt) {
+
+				$k = sprintf('mt%s-pt%s', $mt['id'], $pt['id']);
+				$v = intval($_POST[$k]);
+
+				if ($v) {
+					$matrix[$pt['id']] = $v;
+				}
+
+			}
+
+			$sql = "UPDATE lab_metric_type SET meta = jsonb_set(meta, '{\"product-type-matrix\"}', :pm1) WHERE id = :lm0";
+			$arg = [
+				':lm0' => $mt['id'],
+				':pm1' => json_encode($matrix)
+			];
+			$x = $dbc->query($sql, $arg);
+
+		}
+		// $output = ob_get_clean();
+
+		Session::flash('info', 'Metric Type and Product Type matrix saved');
+
+		return $RES->withRedirect('/config/metric/type');
 
 	}
 
