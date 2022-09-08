@@ -22,6 +22,9 @@ $csv_config = [];
 $csv_config['lab_name'] = $data['License_Laboratory']['name'] ?: $_SESSION['Company']['name'];
 
 $dt0 = new DateTime($data['Lab_Result']['approved_at']);
+$dtA = clone $dt0;
+
+// $dtA = new \DateTime($data['Lab_Sample']['approved_at']);
 // @todo Fix this Date to use the Source Value
 // $dt0 = new DateTime($data['Lab_Result']['created_at']);
 
@@ -152,7 +155,7 @@ foreach ($out_metric_list as $mk0 => $mn0) {
 		$data['License_Laboratory']['code'], // Code of the Laboratory
 		'PASS',
 		$mn0, // trim(sprintf('%s %s', $lrm['name'], $lrm['uom'])),
-		$dt0->format('Y-m-d'), // Test Date
+		$dtA->format('Y-m-d'), // Test Date
 		_ccrs_uom_fix($lrm['qom']),
 		$lrm['id'],
 		$csv_config['lab_name'],

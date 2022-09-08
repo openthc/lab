@@ -10,7 +10,6 @@ use OpenTHC\Lab\UOM;
 $lab_result_metric = $data['Lab_Result_Metric_list'];
 $lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
 
-
 ?>
 
 <style>
@@ -154,6 +153,7 @@ function _draw_metric_info_table($metric_list, $lab_result_metric)
 	// $lrm = $data['Lab_Result_Metric_list'][$mk0];
 
 	if (empty($metric_list)) {
+		return '<!-- Empty Metric List [VPH-156]-->';
 		return '<div class="alert alert-info">No Data</div>';
 	}
 
@@ -171,21 +171,36 @@ function _draw_metric_info_table($metric_list, $lab_result_metric)
 	foreach ($metric_list as $lm) {
 
 		$lrm = $lab_result_metric[ $lm['id'] ];
+		if (is_string($lrm['meta'])) {
+			$lrm['meta'] = json_decode($lrm['meta'], true);
+		}
+
+		// Skip Metrics with Result Not Defined & Bad Status
+		if (empty($lrm)) {
+			if (308 == $lm['stat']) {
+				continue;
+			}
+		}
 
 		// Not sure if this is right
-		if ( ! empty($lrm['metric'])) {
-			$lrm = $lrm['metric'];
+		// if ( ! empty($lrm['metric'])) {
+		// 	$lrm = $lrm['metric'];
+		// }
+
+		if ((0 == strlen($lrm['qom'])) && (0 == strlen($lrm['uom']))) {
+			continue;
 		}
 
 		$out[] = [
-			'lab_metric_id' => $lrm['id'],
-			'name' => $lrm['name'],
+			'lab_metric_id' => $lm['id'],
+			'name' => ($lm['name'] ?: $lrm['lab_metric_name']),
 			'qom' => $lrm['qom'],
-			'uom' => $lrm['uom'],
+			'uom' => ($lrm['meta']['uom'] ?: $lrm['uom'] ?: $lm['meta']['uom'])
 		];
 	}
 
 	if (empty($out)) {
+		return '<!-- Empty Output List [VPH-207] -->';
 		return '<div class="alert alert-info">No Data</div>';
 	}
 
@@ -198,6 +213,9 @@ function _draw_metric_info_table($metric_list, $lab_result_metric)
 			foreach ($out as $k => $v) {
 				printf('<tr id="lab-metric-%s">', $v['lab_metric_id']);
 				switch ($v['qom']) {
+					case '-':
+						printf('<td>%s</td><td class="r">-</td>', __h($v['name']));
+						break;
 					case -1:
 						printf('<td>%s</td><td class="r">N/A</td>', __h($v['name']));
 						break;
@@ -223,6 +241,10 @@ function _draw_metric_info_table($metric_list, $lab_result_metric)
 								break;
 							case 'pct':
 								printf('<td>%s</td><td class="r">%0.3f %s</td>', __h($v['name']), $v['qom'], UOM::nice($v['uom']));
+								break;
+							case 'ppb':
+							case 'ppm':
+								printf('<td>%s</td><td class="r">%d %s</td>', __h($v['name']), $v['qom'], UOM::nice($v['uom']));
 								break;
 							default:
 								printf('<td>%s</td><td class="r">%0.3f %s</td>', __h($v['name']), $v['qom'], UOM::nice($v['uom']));
