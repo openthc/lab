@@ -87,30 +87,6 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$this->setFont('freesans', '', 12);
 		$this->cell(3.5, self::FS_12, $this->_data['Lab_Result']['guid'], 0, 0, 'C');
 
-		$y += self::FS_12;
-		$this->setXY($x, $y);
-
-		// Received
-		// Reported
-		// Expires
-
-		$dt = new \DateTime($this->_data['Lab_Result']['created_at']);
-		$dt->setTimezone(new \DateTimezone($_SESSION['tz']));
-		$this->cell(3.25, self::FS_12, sprintf('Reported: %s', $dt->format('m/d/Y')), 0, 0, 'C');
-
-		$y += self::FS_12;
-		$this->setXY($x, $y);
-		$dtE = new \DateTime($this->_data['Lab_Result']['expires_at']);
-		$dtE->setTimezone(new \DateTimezone($_SESSION['tz']));
-		$this->cell(3.25, self::FS_12, sprintf('Expires: %s', $dtE->format('m/d/Y')), 0, 0, 'C');
-
-		// $dt = new \DateTime($this->_data['Lab_Result']['created_at']);
-		// $dt->setTimezone(new DateTimezone($_SESSION['tz']));
-
-		// $this->cell(3.25, self::FS_12, sprintf('Date Reported: %s', $dt->format('m/d/Y')), 0, 0, 'C');
-
-
-		// $y += self::FS_12;
 
 		$y += self::FS_12;
 		// if ($this->_data['Lab_Report']['stat'] == 200) {
@@ -121,6 +97,28 @@ class COA extends \OpenTHC\Lab\PDF\Base
 			$this->setFont('freesans', '', 12);
 			$this->setTextColor(0x00, 0x00, 0x00);
 		// }
+
+		// Received
+		// Reported
+		// Expires
+
+		$y += (16 / 72);
+		$this->setXY($x, $y);
+		$this->setFont('freesans', '', 10);
+		$dt = new \DateTime($this->_data['Lab_Result']['approved_at']);
+		$dt->setTimezone(new \DateTimezone($_SESSION['tz']));
+		$this->cell(1.75, self::FS_10, sprintf('Approved: %s', $dt->format('m/d/Y')), 0, 0, 'C');
+
+		// $y += self::FS_10;
+		$this->setXY(4.25, $y);
+		$dtE = new \DateTime($this->_data['Lab_Result']['expires_at']);
+		$dtE->setTimezone(new \DateTimezone($_SESSION['tz']));
+		$this->cell(1.75, self::FS_10, sprintf('Expires: %s', $dtE->format('m/d/Y')), 0, 0, 'C');
+
+		// $dt = new \DateTime($this->_data['Lab_Result']['created_at']);
+		// $dt->setTimezone(new DateTimezone($_SESSION['tz']));
+
+		// $this->cell(3.25, self::FS_12, sprintf('Date Reported: %s', $dt->format('m/d/Y')), 0, 0, 'C');
 
 		// Laboratory Address
 		$this->setFont('freesans', '', 10);
@@ -230,11 +228,14 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		// $this->cell(3.25, self::FS_12, sprintf('Product Type: %s'));
 		// $y += self::FS_12;
 
-		$this->setXY($x, $y);
-		$this->cell(3.25, self::FS_12, sprintf('Quantity: %s %s'
+		// @todo Format Quantity Better?
+		$txt = sprintf('Quantity: %s %s'
 			, $this->_data['Lab_Sample']['qty']
 			, $this->_data['Lab_Sample']['uom']
-		));
+		);
+
+		$this->setXY($x, $y);
+		$this->cell(3.25, self::FS_12, $txt);
 		$y += self::FS_12;
 
 		$this->setXY(0.50, 3.75);
