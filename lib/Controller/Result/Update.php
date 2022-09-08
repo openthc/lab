@@ -69,6 +69,9 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 
 				$dbc_user->query('BEGIN');
 
+				// v1 lab_result_inventory
+				$dbc_user->query('DELETE FROM lab_result_inventory WHERE lab_result_id = :lr0', $arg);
+				// v0 inventory_lab_result
 				$dbc_user->query('DELETE FROM inventory_lab_result WHERE lab_result_id = :lr0', $arg);
 				$dbc_user->query('DELETE FROM lab_result_metric WHERE lab_result_id = :lr0', $arg);
 				$dbc_user->query('DELETE FROM lab_result WHERE id = :lr0', $arg);

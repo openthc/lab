@@ -209,14 +209,21 @@ class Create extends \OpenTHC\Lab\Controller\Base
 		// $LS->save('Lab_Sample/Create by User');
 
 		// Link
-		// @todo Column Rename from lot_id => inventory_id
+		// v1 lab_result_inventory
+		$sql = 'INSERT INTO lab_result_inventory (inventory_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		$res = $dbc->query($sql, [
+			':i0' => $Sample['lot_id'],
+			':lr0' => $LR['id']
+		]);
+
+		// v0 inventory_lab_result
 		$sql = 'INSERT INTO inventory_lab_result (lot_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
 		$res = $dbc->query($sql, [
 			':i0' => $Sample['lot_id'],
 			':lr0' => $LR['id']
 		]);
 
-		// Update Inventory Lot?
+
 		// $IL = $Sample['lot_id'];
 		// $IL->delFlag();
 		// $IL->setFlag();
@@ -234,8 +241,14 @@ class Create extends \OpenTHC\Lab\Controller\Base
 		}
 
 		// Link
-		// @todo Column Rename from lot_id => inventory_id
-		// $sql = 'INSERT INTO inventory_lab_result (inventory_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		// v1 lab_result_inventory
+		$sql = 'INSERT INTO lab_result_inventory (inventory_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		$res = $dbc->query($sql, [
+			':i0' => $Sample['lot_id'],
+			':lr0' => $LR['id']
+		]);
+
+		// v0 inventory_lab_result
 		$sql = 'INSERT INTO inventory_lab_result (lot_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
 		$res = $dbc->query($sql, [
 			':i0' => $Sample['lot_id'],
@@ -245,6 +258,7 @@ class Create extends \OpenTHC\Lab\Controller\Base
 		$sql = 'UPDATE inventory SET flag = flag | :f1, qa_cbd = :c1, qa_thc = :t1 WHERE id = :i0';
 		$arg = [
 			':i0' => $Sample['lot_id'],
+			':lr1' => $LR['id'], // v1 inventory.lab_result_id
 			':f1' => 0x00000400, // Inventory::FLAG_QA_PASS,
 			':c1' => $cbd,
 			':t1' => $thc,

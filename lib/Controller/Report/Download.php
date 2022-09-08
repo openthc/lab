@@ -124,6 +124,14 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 			, $data['License_Laboratory']['code']
 			, $dt0->format('YmdHis')
 		));
+
+		$RES = $RES->withHeader('content-disposition', sprintf('inline; filename="labtest_%s_%s_%s.csv"'
+			, $data['License_Laboratory']['code']
+			, $dt0->format('YmdHis')
+			, $data['Lab_Sample']['name']
+		));
+
+
 		$RES = $RES->withHeader('content-transfer-encoding', 'binary');
 		$RES = $RES->withHeader('content-type', 'text/plain; charset=utf-8');
 

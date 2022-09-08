@@ -21,11 +21,6 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 	{
 		$this->type_want = $this->_get_type_want($ARG);
 
-		// Map extension out from URL
-		if (preg_match('/^(.+)\.(html|json|pdf|png|txt)$/', $ARG['id'], $m)) {
-			$ARG['id'] = $m[1];
-		}
-
 		$dbc_main = $this->_container->DBC_Main;
 
 		// Get Result
@@ -70,6 +65,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		if (preg_match('/^0[0-9A-Z]{25}$/', $chk)) { // v2018
 			// OK, do Nothing
 		} else {
+			throw new \Exception('@deprecated lab-result-metric-list [LCP-073]');
 			// @todo see if anyone still has this?
 			// v2022-WCIA
 			// It's a Nested List, Un Flatten, it's Grouped
@@ -88,6 +84,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		}
 
 		// Load COA File
+		// Should be Pointing to the Lab Portal when LR has Public Flags Public
 		// @todo this should already be set
 		$coa_file = $LR->getCOAFile();
 		if ( ! empty($coa_file) && is_file($coa_file) && is_readable($coa_file)) {
@@ -150,6 +147,11 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			break;
 
 		case 'application/pdf':
+
+			// @see https://stackoverflow.com/questions/50570900/js-fetch-not-getting-headers-on-response
+			// @see https://stackoverflow.com/questions/43344819/reading-response-headers-with-fetch-api
+			header('access-control-allow-origin: *');
+			header('access-control-expose-headers: content-disposition');
 
 			switch ($data['@context']) {
 				case 'http://openthc.org/lab/2021':

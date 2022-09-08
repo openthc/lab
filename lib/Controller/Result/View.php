@@ -70,17 +70,6 @@ class View extends \OpenTHC\Lab\Controller\Base
 		// 	$data['Lab_Result']['coa_file1'] = $coa_file1;
 		// }
 
-
-		// Load Inventory Items
-		$sql = <<<SQL
-		SELECT inventory.id
-		  , inventory.guid
-		FROM inventory
-		JOIN inventory_lab_result ON inventory_lab_result.lot_id = inventory.id
-		WHERE inventory_lab_result.lab_result_id = :lr0
-		SQL;
-		$data['Inventory_list'] = $dbc->fetchAll($sql, [ ':lr0' => $data['Lab_Result']['id'] ]);
-
 		$data['Result_Metric_Group_list'] = $Lab_Result->getMetrics_Grouped();
 
 		// if (!empty($LR['license_id_lab'])) {
@@ -217,7 +206,7 @@ SQL;
 			'Lab_Sample' => $Lab_Sample,
 			'Lab_Result' => $Lab_Result,
 			'Lab_Result_Metric_list' => $lab_result_metric_list,
-			'Lab_Metric_Type_list' => $Lab_Metric->getTypes(),
+			'Lab_Metric_Type_list' => $Lab_Metric->getTypeList(),
 			'Product' => $Product,
 			'Product_Type' => $ProductType,
 			'Variety' => $Variety,
@@ -377,7 +366,6 @@ SQL;
 
 			$LR['approved_at'] = $dtA->format(\DateTimeInterface::RFC3339);
 			$LR['expires_at'] = $dtE->format(\DateTimeInterface::RFC3339);
-			$LR['stat'] = Lab_Result::STAT_LOCK;
 			$LR->setFlag(Lab_Result::FLAG_LOCK);
 			$LR->save('Lab Result Committed by User');
 
