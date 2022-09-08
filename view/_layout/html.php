@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="https://cdn.openthc.com/bootstrap/5.1.3/bootstrap.min.css" integrity="sha256-YvdLHPgkqJ8DVUxjjnGVlMMJtNimJ6dYkowFFvp4kKs=" crossorigin="anonymous" referrerpolicy="no-referrer">
-<link rel="stylesheet" href="https://cdn.openthc.com/css/www/0.0.2/www.css">
+<link rel="stylesheet" href="https://cdn.openthc.com/css/www/0.0.3/www.css">
 <style>
 .form-control::placeholder {
 	font-style: italic;
@@ -217,7 +217,7 @@ if ( ! empty($x)) {
 	$x = str_replace('<div class="info">', '<div class="alert alert-info alert-dismissible" role="alert">', $x);
 	$x = str_replace('<div class="warn">', '<div class="alert alert-warning alert-dismissible" role="alert">', $x);
 	$x = str_replace('<div class="fail">', '<div class="alert alert-danger alert-dismissible" role="alert">', $x);
-	$x = str_replace('</div>', '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>', $x);
+	$x = str_replace('</div>', '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>', $x);
 
 	if ( ! empty($x)) {
 		// var_dump($x);
