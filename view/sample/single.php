@@ -5,6 +5,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+use OpenTHC\Lab\Lab_Report;
+use OpenTHC\Lab\Lab_Result;
+
 ?>
 
 <form autocomplete="off" enctype="multipart/form-data" method="post">
@@ -153,6 +156,8 @@ if ( ! empty($data['Lab_Result_list'])) {
 	<?php
 	foreach ($data['Lab_Result_list'] as $lr) {
 
+		$lr = new Lab_Result(null, $lr);
+
 		$dtC = new \DateTime($lr['created_at'], new \DateTimezone($_SESSION['tz']));
 
 		echo '<tr>';
@@ -160,6 +165,25 @@ if ( ! empty($data['Lab_Result_list'])) {
 		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['guid']) );
 		printf('<td><a href="/result/%s">%s</a></td>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
 		printf('<td title="%s">%s</td>', $lr['created_at'], $dtC->format('m/d/y'));
+
+		if (empty($lr['approved_at'])) {
+			echo '<td>Not Approved</td>';
+		} else {
+			$dtA = new \DateTime($lr['approved_at'], new \DateTimezone($_SESSION['tz']));
+			printf('<td title="%s">%s</td>', $lr['approved_at'], $dtA->format('m/d/y'));
+		}
+
+		if (empty($lr['expires_at'])) {
+			echo '<td>n/a</td>';
+		} else {
+			$dtE = new \DateTime($lr['expires_at'], new \DateTimezone($_SESSION['tz']));
+			printf('<td title="%s">%s</td>', $lr['expires_at'], $dtE->format('m/d/y'));
+		}
+
+		// printf('<td>%d</td>', $lr['stat']);
+		printf('<td>%s</td>', $lr->getStat());
+		// printf('<td>%08x</td>', $lr['flag']);
+
 		echo '</tr>';
 	}
 	?>
@@ -182,14 +206,39 @@ if ( ! empty($data['Lab_Report_list'])) {
 	<?php
 	foreach ($data['Lab_Report_list'] as $lr) {
 
-		$dt = new \DateTime($lr['created_at']);
+		$lr = new Lab_Report(null, $lr);
+
+		$dtC = new \DateTime($lr['created_at']);
 
 		echo '<tr>';
 		printf('<td><a href="/report/%s"><code>%s</code></a></td>', $lr['id'], substr($lr['id'], -6) );
-		printf('<td>%s</td>', $dt->format('Y-m-d'));
+		// printf('<td>%s</td>', $dt->format('Y-m-d'));
 		printf('<td><a href="/report/%s">%s</a></td>', $lr['id'], __h($lr['name']) );
+
+		printf('<td title="%s">%s</td>', $lr['created_at'], $dtC->format('m/d/y'));
+
+		if (empty($lr['approved_at'])) {
+			echo '<td>Not Approved</td>';
+		} else {
+			$dtA = new \DateTime($lr['approved_at'], new \DateTimezone($_SESSION['tz']));
+			printf('<td title="%s">%s</td>', $lr['approved_at'], $dtA->format('m/d/y'));
+		}
+
+		if (empty($lr['expires_at'])) {
+			echo '<td>n/a</td>';
+		} else {
+			$dtE = new \DateTime($lr['expires_at'], new \DateTimezone($_SESSION['tz']));
+			printf('<td title="%s">%s</td>', $lr['expires_at'], $dtE->format('m/d/y'));
+		}
+
 		// printf('<td><a href="/report/%s">%s</a></td>', $lr['id'], __h($lr['name'] ?: $lr['guid'] ?: $lr['id']) );
 		// printf('<td class="r"><input name="lab-report[]" type="checkbox" value="%s"></td>', $lr['id']);
+		// printf('<td>%d</td>', $lr['stat']);
+		printf('<td>%s</td>', $lr->getStat());
+		printf('<td>%08x</td>', $lr['flag']);
+		printf('<td>%s</td>', $lr->getFlag('s'));
+
+
 		echo '</tr>';
 	}
 	echo '</table>';
