@@ -31,4 +31,34 @@ class Lab_Report extends \OpenTHC\SQL\Record
 
 	protected $_table = 'lab_report';
 
+	/**
+	 * Get Status as HTML or Text
+	 */
+	function getStat($f='html')
+	{
+		$ret = $this->_data['stat'];
+
+		switch ($this->_data['stat']) {
+			case self::STAT_WAIT:
+				$ret = 'Working';
+				break;
+			case self::STAT_PASS:
+				$ret = '<span class="text-success">Passed</span>';
+				break;
+			case self::STAT_PART:
+				$ret = '<span class="text-warning">Partial</span>';
+				break;
+			case self::STAT_FAIL:
+				$ret = '<span class="text-danger">Failed</span>';
+				break;
+		}
+
+		if ('text' == $f) {
+			$ret = strip_tags($ret);
+		}
+
+		return $ret;
+	}
+
+
 }
