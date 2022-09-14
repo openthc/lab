@@ -49,6 +49,8 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		// $data['Lab_Result']['thc'] = sprintf('%0.2f', $data['Lab_Result']['thc']);
 		// $data['Lab_Result']['cbd'] = sprintf('%0.2f', $data['Lab_Result']['cbd']);
 		// $data['Lab_Result']['sum'] = sprintf('%0.2f', $data['Lab_Result']['sum']);
+		$data['Lab_Result']['approved_at'] = $meta['Lab_Report']['approved_at'];
+		$data['Lab_Result']['expires_at'] = $meta['Lab_Report']['expires_at'];
 
 		// Patch Sample
 		if (is_string($data['Lab_Sample']['meta'])) {
@@ -65,7 +67,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		if (preg_match('/^0[0-9A-Z]{25}$/', $chk)) { // v2018
 			// OK, do Nothing
 		} else {
-			throw new \Exception('@deprecated lab-result-metric-list [LCP-073]');
+			// throw new \Exception('@deprecated lab-result-metric-list [LCP-073]');
 			// @todo see if anyone still has this?
 			// v2022-WCIA
 			// It's a Nested List, Un Flatten, it's Grouped
