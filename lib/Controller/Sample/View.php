@@ -252,6 +252,9 @@ class View extends \OpenTHC\Lab\Controller\Base
 			}
 		}
 
+		// @idea Make sure all the selected RESULT objects are LOCK flag?
+
+
 		// Create a Lab Report
 		$lr1 = [];
 		$lr1['id'] = _ulid();
@@ -272,8 +275,11 @@ class View extends \OpenTHC\Lab\Controller\Base
 
 		$dbc->insert('lab_report', $lr1);
 
-		// If QBench Source (or other external source)
-		// _qbench_sample_report_import($dbc, $qbc, $rec);
+		$dbc->insert('lab_report_inventory', [
+			'lab_report_id' => $lr1['id'],
+			'inventory_id' => $Lab_Sample['inventory_id'],
+			'stat' => 200,
+		]);
 
 		return $RES->withRedirect(sprintf('/report/%s', $lr1['id']));
 
