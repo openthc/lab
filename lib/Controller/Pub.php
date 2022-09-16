@@ -68,8 +68,8 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			// OK, do Nothing
 		} else {
 			// throw new \Exception('@deprecated lab-result-metric-list [LCP-073]');
-			// @todo see if anyone still has this?
-			// v2022-WCIA
+			// @todo see if anyone still has this v2022-WCIA style
+			// Yes, many folk still have this in their MAIN.lab_result dataset /djb 2022-259
 			// It's a Nested List, Un Flatten, it's Grouped
 			$lab_result_metric = [];
 			foreach ($data['Lab_Result_Metric_list'] as $lab_group_name => $lab_group_data) {
