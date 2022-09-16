@@ -55,10 +55,10 @@ $lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
 				data-bs-toggle="dropdown"
 				type="button"></button>
 			<ul class="dropdown-menu dropdown-menu-end">
-				<li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.txt">TXT</a></li>
-				<li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.json">JSON</a></li>
-				<li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>/wcia.json">WCIA</a></li>
-				<li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>/ccrs.txt">CCRS</a></li>
+				<!-- <li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.txt">TXT</a></li> -->
+				<!-- <li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.json">JSON</a></li> -->
+				<li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>/wcia.json">WCIA Data Link (JSON)</a></li>
+				<li><a class="dropdown-item" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>/ccrs.txt">CCRS (CSV)</a></li>
 			</ul>
 		</div>
 	</div>
@@ -72,7 +72,7 @@ $lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
 		</label>
 		<div class="input-group">
 			<?php
-			if ($data['Lab_Result']['coa_file']) {
+			if (is_file($data['Lab_Result']['coa_file'])) {
 			?>
 				<a class="btn btn-block btn-outline-primary v33" href="https://<?= $data['Site']['hostname'] ?>/pub/<?= $data['Lab_Result']['id'] ?>.pdf" target="_blank"><i class="fas fa-print"></i> Print COA</a>
 			<?php
