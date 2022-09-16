@@ -226,6 +226,7 @@ class View extends \OpenTHC\Lab\Controller\Base
 	function _createReport($RES, $Lab_Sample)
 	{
 		$dbc = $this->_container->DBC_User;
+		$dbc->query('BEGIN');
 
 		// Collect All the Metrics
 		$lab_metric_list = [];
@@ -277,9 +278,12 @@ class View extends \OpenTHC\Lab\Controller\Base
 
 		$dbc->insert('lab_report_inventory', [
 			'lab_report_id' => $lr1['id'],
-			'inventory_id' => $Lab_Sample['inventory_id'],
+			'inventory_id' => $Lab_Sample['lot_id'], // v0 lot_id
+			// 'inventory_id' => $Lab_Sample['inventory_id'], // v1 inventory_id
 			'stat' => 200,
 		]);
+
+		$dbc->query('COMMIT');
 
 		return $RES->withRedirect(sprintf('/report/%s', $lr1['id']));
 
