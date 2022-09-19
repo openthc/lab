@@ -31,6 +31,9 @@ $app = new \OpenTHC\App($cfg);
 
 // Container
 $con = $app->getContainer();
+unset($con['errorHandler']);
+unset($con['phpErrorHandler']);
+
 $con['DBC_Auth'] = function() {
 	$cfg = \OpenTHC\Config::get('database/auth');
 	$dsn = sprintf('pgsql:application_name=openthc-lab;host=%s;dbname=%s', $cfg['hostname'], $cfg['database']);

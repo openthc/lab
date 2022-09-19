@@ -22,7 +22,7 @@
 
 define('APP_ROOT', __DIR__);
 define('APP_SALT', sha1('$PUT_YOUR_SECRET_VALUE_HERE'));
-define('APP_BUILD', '420.22.140');
+define('APP_BUILD', '420.22.240');
 
 openlog('openthc-lab', LOG_ODELAY|LOG_PID, LOG_LOCAL0);
 
@@ -33,6 +33,8 @@ require_once(APP_ROOT . '/vendor/autoload.php');
 if ( ! \OpenTHC\Config::init(APP_ROOT) ) {
 	_exit_html_fail('<h1>Invalid Application Configuration [ALB-035]</h1>', 500);
 }
+
+_error_handler_init();
 
 /**
  * Database Connection Getter
