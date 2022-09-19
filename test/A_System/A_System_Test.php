@@ -14,6 +14,30 @@ class A_System_Test extends \OpenTHC\Lab\Test\Base
 	}
 
 	/**
+	 * Tests on the root-level coa directory
+	 */
+	function test_coa()
+	{
+		// coa Path
+		$coa = sprintf('%s/coa', APP_ROOT);
+		$this->assertTrue(is_dir($coa), 'coa is missing');
+		$coa_stat = stat($coa);
+		var_dump([$coa_stat]);
+
+		$o = posix_getpwuid($coa_stat[4]);
+		$this->assertIsArray($o);
+		$this->assertEquals('www-data', $o['name']);
+
+		$g = posix_getgrgid($coa_stat[5]);
+		$this->assertIsArray($g);
+		$this->assertEquals('www-data', $g['name']);
+
+		$m = ($coa_stat[2] & 0x0fff);
+		$this->assertEquals($m, 0755); // Perms in OCTAL
+
+	}
+
+	/**
 	 *
 	 */
 	function test_var()

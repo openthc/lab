@@ -339,13 +339,12 @@ SQL;
 				case 200:
 				case 201:
 					// Success
+					Session::flash('info', 'COA Uploaded and Lab Result Published');
 					break;
 				default:
 					var_dump($res);
-					throw new \Exception('Unable to (re)-publish to Lab Portal');
+					Session::flash('warn', sprintf('Unable to (re)-publish to Lab Portal (%s) [CRV-345]', $res['code']));
 			}
-
-			Session::flash('info', 'COA Uploaded and Lab Result Published');
 
 			return $RES->withRedirect(sprintf('/result/%s', $LR['id']));
 
