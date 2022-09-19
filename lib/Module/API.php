@@ -75,5 +75,13 @@ class API extends \OpenTHC\Module\Base
 
 		});
 
+		// Publish a Result or Report
+		$a->post('/v2018/pub', 'OpenTHC\Lab\Controller\API\Pub');
+
+		// Update Result Metrics
+		$a->post('/v2018/result/{id}/upload', 'OpenTHC\Lab\Controller\API\Result\Update:upload');
+
+		$a->post('/v2022/pub', 'OpenTHC\Lab\Controller\API\v2022\Pub');
+
 	}
 }
