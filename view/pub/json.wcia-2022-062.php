@@ -12,8 +12,12 @@ $lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
 $wcia = [
 	'document_name' => 'WCIA Lab Result Schema',
 	'document_schema_version' => '2.0.0',
+	'document_origin' => sprintf('https://%s/pub/%s/wcia.json', $_SERVER['SERVER_NAME'], $data['Lab_Result']['id']),
+	'lab_name' => null, // Company.name
+	'lab_ubi_license' => null, // Company.guid
+	'lab_ccrs_license' => null, // License.guid
 	'sample' => [
-		'id' => $data['Lab_Sample']['name'],
+		'id' => $data['Lot']['guid'], // $data['Lab_Sample']['name'],
 		'source_id' => $data['Lot']['guid'],
 	],
 	'labresult_id' => $data['Lab_Result']['guid'],
@@ -27,6 +31,9 @@ $wcia = [
 	],
 	'status' => 'pass',
 	'coa' => sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $data['Lab_Result']['id']),
+	'coa_release_date' => $data['Lab_Result']['approved_at'],
+	'coa_amended_date' => null,
+	'coa_expire_date' => $data['Lab_Result']['expires_at'],
 	'metric_list' => [
 		// '018NY6XC00LMT0HRHFRZGY72C7' => [
 		// 	'test_id' => '018NY6XC00LMT0HRHFRZGY72C7',
