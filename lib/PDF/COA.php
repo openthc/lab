@@ -466,6 +466,34 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$x = 0.50;
 		$y = $this->getY();
 
+		// Eval Metric List
+		$output = false;
+
+		$idx = 0;
+		$max = count($metric_list);
+		if (0 == $max) {
+			return(false);
+		}
+
+		$metric_list_key_list = array_keys($metric_list);
+		for ($idx=0; $idx<$max; $idx+=2) {
+
+			$keyA = $metric_list_key_list[$idx];
+			$keyB = $metric_list_key_list[$idx + 1];
+
+			$lrmA = $this->_data['Lab_Result_Metric_list'][ $keyA ];
+			$lrmB = $this->_data['Lab_Result_Metric_list'][ $keyB ];
+
+			if ( ( ! empty($lrmA['qom'])) || ( ! empty($lrmB['qom']))) {
+				$output = true;
+				break;
+			}
+		}
+
+		if ( ! $output) {
+			return(false);
+		}
+
 		// Section Header
 		$this->draw_metric_table_header($x, $y, $metric_name);
 
