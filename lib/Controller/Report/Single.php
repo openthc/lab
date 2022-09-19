@@ -121,6 +121,8 @@ class Single extends \OpenTHC\Lab\Controller\Base
 
 		$subC = new \OpenTHC\Lab\Controller\Report\Download($this->_container);
 
+		$this->_import_external_system($dbc_user, $Lab_Report, $data['Lab_Sample']);
+
 		// Generate the COA/PDF
 		$res1 = $RES->withBody(new \Slim\Http\Body(fopen('php://temp', 'r+')));
 		$res1 = $subC->pdf($res1, $ARG, $data);
@@ -219,6 +221,39 @@ class Single extends \OpenTHC\Lab\Controller\Base
 	}
 
 	/**
+	 * If QBench Source (or other external source)
+	 */
+	function _import_external_system($dbc_user, $Lab_Report, $Lab_Sample)
+	{
+		$cfg = $dbc_user->fetchOne("SELECT val FROM base_option WHERE key = 'qbench-auth'");
+		if ( ! empty($cfg)) {
+
+			// It's a COA from QBench
+			// $coa = \OpenTHC\CRE\QBench::get_report();
+
+			$ls0_meta = json_decode($Lab_Sample['meta'], true);
+			$coa_data = $this->_qbench_sample_report_fetch($dbc_user, $ls0_meta);
+			if ( ! empty($coa_data)) {
+				$sql = 'INSERT INTO lab_report_file (id, lab_report_id, name, size, type, body) VALUES (ulid_create(), :lr0, :n1, :s1, :t1, :b1)';
+				$cmd = $dbc_user->prepare($sql, null);
+				$cmd->bindParam(':lr0', $Lab_Report['id']);
+				$cmd->bindParam(':n1', $coa_data['name']);
+				$cmd->bindParam(':s1', $coa_data['size']);
+				$cmd->bindParam(':t1', $coa_data['type']);
+				$cmd->bindParam(':b1', $coa_data['body'], \PDO::PARAM_LOB);
+				$cmd->execute();
+
+				Session::flash('info', 'COA File was attached from QBench');
+
+			}
+
+		}
+
+	}
+
+
+
+	/**
 	 *
 	 */
 	function _load_data($dbc_user, $Lab_Report)
@@ -290,6 +325,114 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		// $data['Lab_Result_Metric_Type_list'] = $Lab_Result->getMetricListGrouped();
 
 		return $data;
+	}
+
+	/**
+	 * Imports the QBench COA Document to our System
+	 *
+	 * What if the Report doesn't exist?
+	 * What if the Report DOES exist and has a COA already?
+	 */
+	// function _qbench_sample_report_import($dbc, $qbc, $rec)
+	function _qbench_sample_report_fetch($dbc, $rec) : ?array
+	{
+		// Flag in QBench
+		if (empty($rec['has_report'])) {
+			echo "NO REPORT\n";
+			return(null);
+		}
+
+		// Now Check COA Data/Report Thing (and link to a Report from our system?)
+		// A Sample Report Contains a Data-Set of Which Test Result objects are included in the REPORT
+		// A REPORT is a collection of 1=Sample & 1+Result Object each with 1+Metric Objects
+		// $res = $qbc->get('/api/v1/report/sample/34117/info');
+
+		// echo "Report Info:\n";
+		// $url0 = sprintf('/api/v1/report/sample/%s/info?emailed=true&public=true', $rec['id']);
+		// $res0 = $qbc->get($url0);
+		// var_dump($res0);
+		// if ( ! empty($res0['error'])) {
+		// 	echo "PUBLIC-0";
+
+		// 	// exit;
+		// } elseif ( ! empty($res0['id'])) {
+
+		// 	var_dump($rec);
+		// 	var_dump($res0);
+		// 	echo "PUBLIC-1";
+		// 	exit;
+		// }
+
+		// echo "\n";
+
+		// return(0);
+
+		// var_dump($res1);
+		// return(0);
+		// }
+
+
+		// Same Response as /info?public
+		// $res = $qbc->get('/api/v1/report/14832');
+		// var_dump($res);
+
+		$cfg = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'qbench-auth'");
+		$cfg = json_decode($cfg, true);
+		if (empty($cfg)) {
+			throw new \Exception('Invalid QBench Configuration [LAB-278]');
+		}
+
+		$qbc = new \OpenTHC\CRE\QBench($cfg);
+		$qbc->auth();
+
+		// echo "Report File:\n";
+		$url1 = sprintf('/api/v1/report/sample/%s', $rec['id']);
+		$res1 = $qbc->get($url1);
+		if ( ! empty($res1['error'])) {
+			var_dump($res1);
+		}
+
+		if ( ! empty($res1['url'])) {
+
+			$url2 = $res1['url'];
+			$res2 = \Edoceo\Radix\Net\HTTP::get($url2);
+			$url2_info = parse_url($url2);
+
+			if (200 == $res2['info']['http_code']) {
+				if ('application/pdf' == $res2['info']['content_type']) {
+					return [
+						'body' => $res2['body'],
+						'name' => basename($url2_info['path']),
+						'size' => strlen($res2['body']),
+						'type' => $res2['info']['content_type'],
+					];
+				}
+			}
+
+		}
+
+		// if ( ! empty($res1['url'])) {
+		// 	$coa_req = _curl_init($res1['url']);
+		// 	$coa_res = curl_exec($coa_req);
+		// 	$coa_inf = curl_getinfo($coa_req);
+		// 	if (200 == $coa_inf['http_code']) {
+		// 		var_dump($coa_inf);
+		// 		if ('application/pdf' == $coa_inf['content_type']) {
+		// 			$pdf = $coa_res;
+		// 			// Save this document to *newest* Lab Report
+		// 			$lab_report_chk = $dbc->fetchRow('SELECT * FROM lab_report WHERE lab_sample_id = :ls0 ORDER BY id DESC', [
+		// 				':ls0' => $lab_sample['id']
+		// 			]);
+		// 			if ( ! empty($lab_report_chk['id'])) {
+		// 				// Attach?
+		// 			}
+		// 		}
+		// 		// die("\n HAS COA\n");
+		// 	}
+		// }
+
+		return(null);
+
 	}
 
 }
