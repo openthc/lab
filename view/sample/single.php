@@ -108,7 +108,7 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 	<div class="col">
 		<div class="mb-2">
 			<label>Notes:</label>
-			<textarea class="form-control" name="lab-sample-note"><?= __h($data['Sample']['note']) ?></textarea>
+			<textarea class="form-control" name="lab-sample-note"><?= __h($data['Lab_Sample']['note']) ?></textarea>
 		</div>
 	</div>
 </div>

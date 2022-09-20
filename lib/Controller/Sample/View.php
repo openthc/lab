@@ -111,6 +111,10 @@ class View extends \OpenTHC\Lab\Controller\Base
 			$data['Lab_Sample']['img_link'] = sprintf('/sample/%s.%s', $Lab_Sample['id'], $ext);
 		}
 
+		$data['Lab_Sample']['note'] = $dbc->fetchOne('SELECT note FROM object_note WHERE link = :link ORDER BY created_at DESC LIMIT 1', [
+			':link' => sprintf('lab_sample:%s', $Lab_Sample['id']),
+		]);
+
 		return $RES->write( $this->render('sample/single.php', $data) );
 
 	}
@@ -463,6 +467,9 @@ class View extends \OpenTHC\Lab\Controller\Base
 			}
 
 		}
+
+		$note = trim($_POST['lab-sample-note']);
+		$Lab_Sample->addNote($note);
 
 		return $RES->withRedirect(sprintf('/sample/%s', $Lab_Sample['id']));
 
