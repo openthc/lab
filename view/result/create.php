@@ -57,6 +57,45 @@ $unit_pick_html = _draw_unit_pick();
 			</div>
 		</div>
 	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div class="mb-2">
+				<div class="input-group">
+					<div class="input-group-text">Machine Data:</div>
+					<input class="form-control" name="machine-file" type="file">
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="mb-2">
+				<div class="input-group">
+					<div class="input-group-text">Upstream COA:</div>
+					<input class="form-control" name="file" type="file">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="mb-2">
+		<div class="input-group">
+			<div class="input-group-text">Status:</div>
+			<select class="form-control" name="lab-result-stat">
+				<option value="100">In Progress</option>
+				<option value="200">Passed</option>
+				<option value="400">Failed</option>
+			</select>
+		</div>
+	</div>
+
+	<div class="mb-2">
+		<div class="input-group">
+			<div class="input-group-text">Note:</div>
+			<textarea class="form-control" id="lab-result-terp-note" name="terp-note"><?= __h($data['Lab_Result']['note']) ?></textarea>
+			<button class="btn btn-outline-secondary btn-terp-note-auto" type="button"><i class="fas fa-magic"></i> Auto</button>
+		</div>
+	</div>
+
 </section>
 
 <?php
@@ -107,7 +146,8 @@ foreach ($data['lab_metric_section_list'] as $lms) {
 <div class="form-actions">
 	<input name="sample_id" type="hidden" value="<?= $data['Lab_Sample']['id'] ?>">
 	<button class="btn btn-primary" name="a" value="lab-result-save"><i class="fas fa-save"></i> Save</button>
-	<button class="btn btn-outline-danger" name="a" value="lab-result-delete"><i class="fas fa-save"></i> Delete</button>
+	<button class="btn btn-primary" name="a" value="lab-result-save-and-commit"><i class="fas fa-save"></i> Save &amp; Commit</button>
+	<!-- <button class="btn btn-outline-danger" name="a" value="lab-result-delete"><i class="fas fa-save"></i> Delete</button> -->
 </div>
 
 </div>
