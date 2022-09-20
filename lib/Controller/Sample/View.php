@@ -27,7 +27,7 @@ class View extends \OpenTHC\Lab\Controller\Base
 
 		$Lab_Sample = new Lab_Sample($dbc, $ARG['id']);
 		if (empty($Lab_Sample['id'])) {
-			_exit_html_fail('Invalid Lab Sample [CSV-026]', 400);
+			_exit_html_fail('Lab Sample not found [CSV-026]', 404);
 		}
 
 		switch ($_POST['a']) {
