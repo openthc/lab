@@ -33,35 +33,48 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			return $RES->write( $this->render('result/404.php', $data) );
 		}
 
-		$meta = json_decode($LR['meta'], true);
-
 		$data = $this->loadSiteData();
 		$data['menu0'] = 'hide';
 
+		// Load Database Data
+		$meta = json_decode($LR['meta'], true);
+		switch ($meta['@context']) {
+			case 'http://openthc.org/lab/2022':
+				// My Published Way
+				$meta['Lab_Result'] = $meta['lab_result'];
+				$meta['Lab_Sample'] = $meta['lab_sample'];
+				$meta['Product'] = $meta['product'];
+				$meta['Product_Type'] = $met['product_type'];
+				break;
+			default:
+
+				// Patch Result
+				if (is_string($meta['Lab_Result']['meta'])) {
+					$meta['Lab_Result']['meta'] = json_decode($meta['Lab_Result']['meta'], true);
+				}
+				// $meta['Lab_Result']['id'] = $LR['id'];
+				$meta['Lab_Result']['id_nice'] = _nice_id($meta['Lab_Result']['id'], $meta['Lab_Result']['guid']);
+				// $meta['Lab_Result']['thc'] = sprintf('%0.2f', $meta['Lab_Result']['thc']);
+				// $meta['Lab_Result']['cbd'] = sprintf('%0.2f', $meta['Lab_Result']['cbd']);
+				// $meta['Lab_Result']['sum'] = sprintf('%0.2f', $meta['Lab_Result']['sum']);
+				$meta['Lab_Result']['approved_at'] = $meta['Lab_Report']['approved_at'];
+				$meta['Lab_Result']['expires_at'] = $meta['Lab_Report']['expires_at'];
+
+				// Patch Sample
+				if (is_string($meta['Lab_Sample']['meta'])) {
+					$meta['Lab_Sample']['meta'] = json_decode($meta['Lab_Sample']['meta'], true);
+				}
+				$meta['Lab_Sample']['id_nice'] = _nice_id($meta['Lab_Sample']['id'], $meta['Lab_Sample']['guid']);
+
+				// Which Type v2015, v2018, v2021-WCIA
+				if (empty($meta['Lab_Result_Metric_list'])) {
+					$meta['Lab_Result_Metric_list'] = [];
+				}
+
+		}
+
 		$data = array_merge($data, $meta);
 
-		// Patch Result
-		if (is_string($data['Lab_Result']['meta'])) {
-			$data['Lab_Result']['meta'] = json_decode($data['Lab_Result']['meta'], true);
-		}
-		// $data['Lab_Result']['id'] = $LR['id'];
-		$data['Lab_Result']['id_nice'] = _nice_id($data['Lab_Result']['id'], $data['Lab_Result']['guid']);
-		// $data['Lab_Result']['thc'] = sprintf('%0.2f', $data['Lab_Result']['thc']);
-		// $data['Lab_Result']['cbd'] = sprintf('%0.2f', $data['Lab_Result']['cbd']);
-		// $data['Lab_Result']['sum'] = sprintf('%0.2f', $data['Lab_Result']['sum']);
-		$data['Lab_Result']['approved_at'] = $meta['Lab_Report']['approved_at'];
-		$data['Lab_Result']['expires_at'] = $meta['Lab_Report']['expires_at'];
-
-		// Patch Sample
-		if (is_string($data['Lab_Sample']['meta'])) {
-			$data['Lab_Sample']['meta'] = json_decode($data['Lab_Sample']['meta'], true);
-		}
-		$data['Lab_Sample']['id_nice'] = _nice_id($data['Lab_Sample']['id'], $data['Lab_Sample']['guid']);
-
-		// Which Type v2015, v2018, v2021-WCIA
-		if (empty($data['Lab_Result_Metric_list'])) {
-			$data['Lab_Result_Metric_list'] = [];
-		}
 		$key_list = array_keys($data['Lab_Result_Metric_list']);
 		$chk = $key_list[0];
 		if (preg_match('/^0[0-9A-Z]{25}$/', $chk)) { // v2018
@@ -89,10 +102,10 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		// Should be Pointing to the Lab Portal when LR has Public Flags Public
 		// @todo this should already be set
 		$coa_file = $LR->getCOAFile();
-		if ( ! empty($coa_file) && is_file($coa_file) && is_readable($coa_file)) {
-			$meta['Lab_Result']['coa_file'] = $coa_file;
+		if ( ! empty($coa_file) && is_file($coa_file) && is_readable($coa_file) && filesize($coa_file) > 0) {
+			$data['Lab_Result']['coa_file'] = $coa_file;
 		} else {
-			$meta['Lab_Result']['coa_file'] = null;
+			$data['Lab_Result']['coa_file'] = null;
 		}
 
 		if (empty($data['License_Source']['id'])) {
@@ -154,8 +167,10 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			// @see https://stackoverflow.com/questions/43344819/reading-response-headers-with-fetch-api
 			header('access-control-allow-origin: *');
 			header('access-control-expose-headers: content-disposition');
+			header('access-control-max-age: 600');
 
 			switch ($data['@context']) {
+				case 'http://openthc.org/lab/2022':
 				case 'http://openthc.org/lab/2021':
 
 					if ( ! empty($_GET['v']) && ('2022-065' == $_GET['v'])) {
@@ -164,14 +179,14 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 						exit(0);
 					}
 
-					if ( ! empty($meta['Lab_Result']['coa_file'])
-						&& is_file($meta['Lab_Result']['coa_file'])) {
+					if ( ! empty($data['Lab_Result']['coa_file'])
+						&& is_file($data['Lab_Result']['coa_file'])) {
 
-						header(sprintf('content-disposition: inline; filename="%s-COA.pdf"', $meta['Lab_Result']['guid']));
+						header(sprintf('content-disposition: inline; filename="%s-COA.pdf"', $data['Lab_Result']['guid']));
 						header('content-transfer-encoding: binary');
 						header('content-type: application/pdf');
 
-						readfile($meta['Lab_Result']['coa_file']);
+						readfile($data['Lab_Result']['coa_file']);
 
 						exit(0);
 
@@ -236,6 +251,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		}
 
 		switch ($data['@context']) {
+			case 'http://openthc.org/lab/2022':
 			case 'http://openthc.org/lab/2021':
 				return $RES->write( $this->render('pub/html-2022-062.php', $data) );
 				break;

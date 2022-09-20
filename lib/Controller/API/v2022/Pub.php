@@ -20,8 +20,6 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 	{
 		session_write_close();
 
-		$ret = [];
-
 		$data = $this->parseJSON();
 
 		// Basic Inputs
@@ -57,6 +55,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		$lr0_meta['@version'] = '2022.256';
 
 		$ret_code = 200;
+		$ret_data = [];
 
 		$Lab_Result1 = new Lab_Result($dbc_main, $data['lab_result']['id']);
 		if (empty($Lab_Result1['id'])) {
@@ -70,41 +69,43 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		$Lab_Result1['name'] = $data['lab_result']['guid'];
 		$Lab_Result1['meta'] = json_encode($lr0_meta);
 		$Lab_Result1->save();
+		$ret_data['pub'] = sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $Lab_Result1['id']);
 
-		$sql = <<<SQL
-		INSERT INTO lab_result_file (id, lab_result_id, size, type, body)
-		VALUES (ulid_create(), :lr0, :s1, :t1, :b1)
-		SQL;
-
+		// Attachment
 		$coa_file = [];
 		$coa_file['body'] = __base64_decode_url($data['lab_result_file']['body']);
 		$coa_file['name'] = $data['lab_result_file']['name'];
 		$coa_file['size'] = strlen($data['lab_result_file']['body']);
 		$coa_file['type'] = $data['lab_result_file']['type'];
 
-		$cmd = $dbc_main->prepare($sql, null);
-		$cmd->bindParam(':lr0', $Lab_Result1['id']);
-		$cmd->bindParam(':s1', $coa_data['size']);
-		$cmd->bindParam(':t1', $coa_data['type']);
-		$cmd->bindParam(':b1', $coa_data['body'], \PDO::PARAM_LOB);
-		$cmd->execute();
+		if ($coa_file['size']) {
 
-		$coa_file = $Lab_Result1->getCOAFile();
-		$coa_path = dirname($coa_file);
-		if ( ! is_dir($coa_path)) {
-			mkdir($coa_path, 0755, true);
+			$sql = <<<SQL
+			INSERT INTO lab_result_file (id, lab_result_id, size, type, body)
+			VALUES (ulid_create(), :lr0, :s1, :t1, :b1)
+			SQL;
+
+			$cmd = $dbc_main->prepare($sql, null);
+			$cmd->bindParam(':lr0', $Lab_Result1['id']);
+			$cmd->bindParam(':s1', $coa_data['size']);
+			$cmd->bindParam(':t1', $coa_data['type']);
+			$cmd->bindParam(':b1', $coa_data['body'], \PDO::PARAM_LOB);
+			$cmd->execute();
+
+			$coa_file = $Lab_Result1->getCOAFile();
+			$coa_path = dirname($coa_file);
+			if ( ! is_dir($coa_path)) {
+				mkdir($coa_path, 0755, true);
+			}
+			file_put_contents($coa_file, $coa_data['body']);
+
+			$ret_data['coa'] = sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $Lab_Result1['id']);
 		}
-		file_put_contents($coa_file, $coa_data['body']);
 
 		return $RES->withJSON([
-			'data' => [
-				'pub' => sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
-				'coa' => sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
-			],
+			'data' => $ret_data,
 			'meta' => [ ]
 		], $ret_code);
-
-		// Get Result
 
 		// $ret['data'] = [
 		// 	'pub' => sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
