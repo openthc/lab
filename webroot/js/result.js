@@ -15,7 +15,7 @@
 		}
 	});
 
-	$('.lab-metric-uom-bulk').on('click', function() {
+	$('.lab-metric-uom-bulk').on('change', function() {
 		var wrap = $(this).closest('section');
 		var sel = this.value;
 		wrap.find('.lab-metric-uom').val(sel);
