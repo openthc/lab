@@ -56,7 +56,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		$lr0_meta['@context'] = 'http://openthc.org/lab/2022';
 		$lr0_meta['@version'] = '2022.256';
 
-		$ret_code = 400;
+		$ret_code = 200;
 
 		$Lab_Result1 = new Lab_Result($dbc_main, $data['lab_result']['id']);
 		if (empty($Lab_Result1['id'])) {
@@ -64,9 +64,9 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		}
 		$Lab_Result1['id'] = $data['lab_result']['id'];
 		$Lab_Result1['license_id'] = $data['license']['id'];
-		$Lab_Result1['flag'] = $data['lab_result']['flag'];
-		$Lab_Result1['stat'] = $data['lab_result']['stat'];
-		$Lab_Result1['type'] = $data['product_type']['name'];
+		$Lab_Result1['flag'] = intval($data['lab_result']['flag']);
+		$Lab_Result1['stat'] = intval($data['lab_result']['stat']);
+		$Lab_Result1['type'] = ($data['product_type']['name'] ?: '-orphan-');
 		$Lab_Result1['name'] = $data['lab_result']['guid'];
 		$Lab_Result1['meta'] = json_encode($lr0_meta);
 		$Lab_Result1->save();
@@ -89,13 +89,20 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		$cmd->bindParam(':b1', $coa_data['body'], \PDO::PARAM_LOB);
 		$cmd->execute();
 
+		$coa_file = $Lab_Result1->getCOAFile();
+		$coa_path = dirname($coa_file);
+		if ( ! is_dir($coa_path)) {
+			mkdir($coa_path, 0755, true);
+		}
+		file_put_contents($coa_file, $coa_data['body']);
+
 		return $RES->withJSON([
 			'data' => [
 				'pub' => sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
 				'coa' => sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
 			],
 			'meta' => [ ]
-		], 201);
+		], $ret_code);
 
 		// Get Result
 
