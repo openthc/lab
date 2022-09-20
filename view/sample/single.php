@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+use OpenTHC\Lab\Lab_Sample;
 use OpenTHC\Lab\Lab_Report;
 use OpenTHC\Lab\Lab_Result;
 
@@ -129,10 +130,10 @@ if ( ! empty($data['Lab_Sample']['img_link'])) {
 <div class="form-actions">
 	<?php
 	switch ($data['Lab_Sample']['stat']) {
-		case 100:
+		case Lab_Sample::STAT_OPEN:
 			echo '<button class="btn btn-primary" name="a" type="submit" value="accept-sample"><i class="fas fa-sync"></i> Accept</button>';
 			break;
-		case 200:
+		case Lab_Sample::STAT_LIVE:
 			printf('<a class="btn btn-primary" href="/result/create?sample_id=%s"><i class="fas fa-plus"></i> Add Results</a>', $data['Lab_Sample']['id']);
 			break;
 	}

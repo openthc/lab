@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+use OpenTHC\Lab\Lab_Sample
+
 ?>
 
 <div class="d-flex justify-content-between">
@@ -61,20 +63,25 @@ foreach ($data['sample_list'] as $s) {
 		<td class="r">
 		<?php
 		switch ($s['stat']) {
-		case 100:
+		case Lab_Sample::STAT_OPEN:
 			echo '<button class="btn btn-sm btn-primary"><i class="far fa-check-square"></i> Accept</button>';
 			// <a title="Add Results" class="btn btn-sm btn-outline-primary" href="/result/create?sample_id="><i class="fas fa-flask"></i> Add Result</i></a>
 			break;
-		case 200:
+		case Lab_Sample::STAT_LIVE:
 			printf('<a title="Add Results" class="btn btn-sm btn-primary" href="/result/create?sample_id=%s"><i class="fas fa-flask"></i> Add Result</i></a>', $s['id']);
 			break;
-		case 300:
-		case 302:
+		// case 300:
+		case Lab_Sample::STAT_DONE:
+			echo '<button class="btn btn-outline-secondary"><i class="fas fa-flag-checkered"></i></button>';
 			// View Most Recent Lab Result
 			// Share?
 			// printf('<a title="Add Results" class="btn btn-sm btn-primary" href="/result/create?sample_id=%s"><i class="fas fa-flask"></i> Add Result</i></a>', $s['id']);
 			break;
-		case 400:
+		case Lab_Sample::STAT_VOID:
+			echo '<button class="btn btn-outline-secondary"><i class="fas fa-ban"></i></button>';
+			break;
+		default:
+			printf('<button class="btn btn-outline-secondary">%d</button>', $s['stat']);
 			break;
 		}
 		?>
