@@ -5,7 +5,7 @@
  $(function() {
 
 	// QOM Handy Picker of All
-	$('.lab-metric-qom-bulk').on('click', function() {
+	$('.lab-metric-qom-bulk').on('change', function() {
 		var wrap = $(this).closest('section');
 		var sel = this.value;
 		if ('OK' == sel) {
