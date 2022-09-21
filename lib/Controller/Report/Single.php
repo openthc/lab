@@ -65,6 +65,32 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		}
 
 		switch ($_POST['a']) {
+			case 'coa-upload':
+				// Save to lab_report_file
+				$coa_data = [
+					'name' => $_FILES['file']['name'],
+					'type' => $_FILES['file']['type'],
+					'body' => file_get_contents($_FILES['file']['tmp_name']),
+					'size' => $_FILES['file']['size'],
+				];
+
+				if ($coa_data['size']) {
+
+					$sql = <<<SQL
+					INSERT INTO lab_report_file (id, lab_report_id, size, type, body, name)
+					VALUES (ulid_create(), :lr0, :s1, :t1, :b1, :n1)
+					SQL;
+
+					$cmd = $dbc_user->prepare($sql, null);
+					$cmd->bindParam(':lr0', $Lab_Report['id']);
+					$cmd->bindParam(':s1', $coa_data['size']);
+					$cmd->bindParam(':t1', $coa_data['type']);
+					$cmd->bindParam(':b1', $coa_data['body'], \PDO::PARAM_LOB);
+					$cmd->bindParam(':n1', $coa_data['name']);
+					$cmd->execute();
+				}
+
+				break;
 			case 'lab-report-commit';
 				$RES = $this->_commit($RES, $dbc_user, $Lab_Report);
 				break;
