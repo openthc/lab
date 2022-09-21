@@ -130,6 +130,31 @@ use OpenTHC\Lab\UOM;
 <?= $this->block('potency-summary.php') ?>
 </div>
 
+<?php
+if ( ! empty($data['Lab_Report_File_list'])) {
+?>
+	<section id="lab-report-file-list">
+	<?php
+	echo '<table class="table table-sm">';
+	foreach ($data['Lab_Report_File_list'] as $f) {
+		echo '<tr>';
+		printf('<td><a href="?a=lab-report-file-download&id=%s">%s</a></td>', $f['id'], __h($f['name']));
+		printf('<td>%s</td>', __h($f['type']));
+		printf('<td class="r">%d</td>', __h($f['size']));
+		echo '<td class="r">';
+		echo '<div class="btn-group btn-group-sm">';
+		printf('<a class="btn btn-outline-secondary" download href="?a=lab-report-file-download&id=%s"><i class="fas fa-download"></i></a>', $f['id']);
+		echo '</div>';
+		echo '</td>';
+	echo '</tr>';
+	}
+	echo '</table>';
+	?>
+	</section>
+<?php
+}
+?>
+
 <div>
 <?php
 $Result_Metric_By_Type_list = [];
