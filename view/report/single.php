@@ -9,29 +9,6 @@ use OpenTHC\Lab\Lab_Result;
 use OpenTHC\Lab\Lab_Report;
 use OpenTHC\Lab\UOM;
 
-
-$dtC = new \DateTime($data['Lab_Report']['created_at']); //, new \DateTimezone($_SESSION['tz']));
-$dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
-
-$dtC_hint = '';
-$dtC_html = $dtC->format('Y-m-d H:i T');
-
-// Approved
-$dtA_hint = $dtA_html = 'No Approval Set';
-if ( ! empty($data['Lab_Report']['approved_at'])) {
-	$dtA = new \DateTime($data['Lab_Report']['approved_at']);
-	$dtA->setTimezone(new \DateTimezone($_SESSION['tz']));
-	$dtA_html = $dtA->format('Y-m-d H:i T');
-}
-
-// Expires
-$dtE_hint = $dtE_html = 'No Expiration Set';
-if ( ! empty($data['Lab_Report']['expires_at'])) {
-	$dtE = new \DateTime($data['Lab_Report']['expires_at']);
-	$dtE->setTimezone(new \DateTimezone($_SESSION['tz']));
-	$dtE_html = $dtE->format('Y-m-d H:i T');
-}
-
 ?>
 
 <div class="container">
@@ -142,27 +119,7 @@ if ( ! empty($data['Lab_Report']['expires_at'])) {
 
 </div>
 
-<div class="row">
-	<div class="col-md-4">
-		<div class="input-group">
-			<div class="input-group-text">Created</div>
-			<div class="form-control"><?= $dtC_html ?></div>
-		</div>
-	</div>
-	<div class="col-md-4">
-		<div class="input-group">
-			<div class="input-group-text">Approved</div>
-			<div class="form-control"><?= $dtA_html ?></div>
-		</div>
-	</div>
-	<div class="col-md-4">
-		<div class="input-group">
-			<div class="input-group-text">Expires</div>
-			<div class="form-control"><?= $dtE_html ?></div>
-		</div>
-	</div>
-</div>
-
+<?= $this->block('lab-result-date-row.php') ?>
 
 <div class="mb-2">
 <?= $this->block('product-summary.php') ?>
