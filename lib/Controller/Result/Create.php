@@ -133,7 +133,7 @@ class Create extends \OpenTHC\Lab\Controller\Base
 		$LR['guid'] = substr($LR['id'], 0, 16);
 		$LR['license_id'] = $_SESSION['License']['id'];
 		$LR['lab_sample_id'] = $Sample['id'];
-		// $LR['stat'] = STAT_WAIT;
+		$LR['stat'] = $_POST['lab-result-stat'];
 		$LR['flag'] = 0;
 		// $LR['type'] = 'unknown';
 		// $LR['name'] = sprintf('Lab Result for Sample Lot: %s', $Sample['id']);

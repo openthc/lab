@@ -57,8 +57,12 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 				// $meta['Lab_Result']['thc'] = sprintf('%0.2f', $meta['Lab_Result']['thc']);
 				// $meta['Lab_Result']['cbd'] = sprintf('%0.2f', $meta['Lab_Result']['cbd']);
 				// $meta['Lab_Result']['sum'] = sprintf('%0.2f', $meta['Lab_Result']['sum']);
-				$meta['Lab_Result']['approved_at'] = $meta['Lab_Report']['approved_at'];
-				$meta['Lab_Result']['expires_at'] = $meta['Lab_Report']['expires_at'];
+				if (empty($meta['Lab_Result']['approved_at'])) {
+					$meta['Lab_Result']['approved_at'] = $meta['Lab_Report']['approved_at'];
+				}
+				if (empty($meta['Lab_Result']['expires_at'])) {
+					$meta['Lab_Result']['expires_at'] = $meta['Lab_Report']['expires_at'];
+				}
 
 				// Patch Sample
 				if (is_string($meta['Lab_Sample']['meta'])) {

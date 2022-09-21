@@ -37,7 +37,7 @@ $lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
 
 <div class="container mt-4" id="pub-html-2022-062">
 
-<h1>Result: <?= __h($data['Lab_Result']['guid']) ?></h1>
+<h1>Result: <?= __h($data['Lab_Report']['name'] ?: $data['Lab_Result']['guid']) ?></h1>
 <div class="d-flex flex-wrap justify-content-between">
 	<div>
 		<h2>Sample: <?= __h($data['Lab_Sample']['name'] ?: $data['Lab_Sample']['guid'] ?: '-orphan-') ?></h2>

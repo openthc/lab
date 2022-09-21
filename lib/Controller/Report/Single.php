@@ -57,17 +57,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				$data = $this->_load_data($dbc_user, $Lab_Report);
 
 				// Alias the data into this field
-				$data['Lab_Result'] = [
-					'id' => $Lab_Report['id'],
-					'guid' => $data['Lab_Sample']['name'],
-					'name' => $Lab_Report['name'],
-					'created_at' => $Lab_Report['created_at'],
-				];
-
-				// $dir_base = sprintf('%s/var/%s', APP_ROOT, $Lab_Report['id']);
-				// if ( ! is_dir($dir_base)) {
-				// 	mkdir($dir_base, 0755, true);
-				// }
+				$data['Lab_Result'] = $data['Lab_Report'];
 
 				// Create Lab Report in Main/Public Database
 				$data['@context'] = 'http://openthc.org/lab/2021';
@@ -112,12 +102,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$data = $this->_load_data($dbc_user, $Lab_Report);
 
 		// Alias the data into this field
-		$data['Lab_Result'] = [
-			'id' => $Lab_Report['id'],
-			'guid' => $data['Lab_Sample']['name'],
-			'name' => $Lab_Report['name'],
-			'created_at' => $Lab_Report['created_at'],
-		];
+		$data['Lab_Result'] = $data['Lab_Report'];
 
 		$subC = new \OpenTHC\Lab\Controller\Report\Download($this->_container);
 
@@ -199,7 +184,14 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		// $res = $lab_self->post('/api/v2018/report/publish', $arg);
 
 		// Log a Commit?
+		$dtA = new \DateTime();
+		$dtE = clone $dtA;
+		$dtE->add(new \DateInterval('P365D'));
+
+		$Lab_Report['approved_at'] = $dtA->format(\DateTimeInterface::RFC3339);
+		$Lab_Report['expires_at'] = $dtE->format(\DateTimeInterface::RFC3339);
 		$Lab_Report['stat'] = 200;
+		$Lab_Report->setFlag(Lab_Report::FLAG_LOCK);
 		$Lab_Report->save('Lab Report Committed by User');
 
 		return $RES;

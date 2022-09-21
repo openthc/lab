@@ -270,7 +270,7 @@ class View extends \OpenTHC\Lab\Controller\Base
 		$lr1['expires_at'] = $LR0['expires_at'];
 		$lr1['license_id_source'] = $_SESSION['License']['id'];
 		$lr1['license_id_client'] = $Lab_Sample['license_id_source'];
-		$lr1['name'] = sprintf('Lab Report for Sample %s', $Lab_Sample['name']);
+		$lr1['name'] = sprintf('%s-LR', $Lab_Sample['name']);
 		$lr1['meta'] = json_encode([
 			'lab_report_list' => $_POST['lab-result'], // @deprecated
 			'lab_result_list' => $_POST['lab-result'],
