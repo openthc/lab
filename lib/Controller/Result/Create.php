@@ -96,6 +96,7 @@ class Create extends \OpenTHC\Lab\Controller\Base
 			// return $x->_commit($REQ, $RES, $ARG);
 		case 'save':
 		case 'lab-result-save':
+		case 'lab-result-save-and-commit':
 			return $this->_save($REQ, $RES, $ARG);
 		default:
 			return $RES->withStatus(400);
@@ -138,6 +139,9 @@ class Create extends \OpenTHC\Lab\Controller\Base
 		// $LR['name'] = sprintf('Lab Result for Sample Lot: %s', $Sample['id']);
 		$LR['uom'] = 'g';
 		$LR['hash'] = $LR->getHash();
+		if ('lab-result-save-and-commit' == $_POST['a']) {
+			$LR->setFlag(Lab_Result::FLAG_LOCK);
+		}
 		$LR->save('Lab_Result/Create');
 
 		// Save Metrics

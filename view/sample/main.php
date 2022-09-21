@@ -65,20 +65,16 @@ foreach ($data['sample_list'] as $s) {
 		switch ($s['stat']) {
 		case Lab_Sample::STAT_OPEN:
 			echo '<button class="btn btn-sm btn-primary"><i class="far fa-check-square"></i> Accept</button>';
-			// <a title="Add Results" class="btn btn-sm btn-outline-primary" href="/result/create?sample_id="><i class="fas fa-flask"></i> Add Result</i></a>
 			break;
 		case Lab_Sample::STAT_LIVE:
 			printf('<a title="Add Results" class="btn btn-sm btn-primary" href="/result/create?sample_id=%s"><i class="fas fa-flask"></i> Add Result</i></a>', $s['id']);
 			break;
-		// case 300:
 		case Lab_Sample::STAT_DONE:
-			echo '<button class="btn btn-outline-secondary"><i class="fas fa-flag-checkered"></i></button>';
+			echo '<button class="btn btn-outline-secondary disabled"><i class="fas fa-flag-checkered"></i></button>';
 			// View Most Recent Lab Result
-			// Share?
-			// printf('<a title="Add Results" class="btn btn-sm btn-primary" href="/result/create?sample_id=%s"><i class="fas fa-flask"></i> Add Result</i></a>', $s['id']);
 			break;
 		case Lab_Sample::STAT_VOID:
-			echo '<button class="btn btn-outline-secondary"><i class="fas fa-ban"></i></button>';
+			echo '<button class="btn btn-outline-secondary disabled"><i class="fas fa-ban"></i></button>';
 			break;
 		default:
 			printf('<button class="btn btn-outline-secondary">%d</button>', $s['stat']);
