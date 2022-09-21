@@ -38,9 +38,24 @@ $lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
 <div class="container mt-4" id="pub-html-2022-062">
 
 <h1>Result: <?= __h($data['Lab_Result']['guid']) ?></h1>
-<h2>Sample: <?= __h($data['Lab_Sample']['name'] ?: $data['Lab_Sample']['guid'] ?: '-orphan-') ?></h2>
+<div class="d-flex flex-wrap justify-content-between">
+	<div>
+		<h2>Sample: <?= __h($data['Lab_Sample']['name'] ?: $data['Lab_Sample']['guid'] ?: '-orphan-') ?></h2>
+	</div>
+	<div>
+		<?php
+		if ( ! empty($data['Lot']['id'])) {
+			printf('<h3>Source Lot: %s</h3>', __h($data['Lot']['guid']));
+		}
+		?>
+	</div>
+</div>
 
 <?= $this->block('product-summary.php') ?>
+
+<?= $this->block('lab-result-date-row.php', [
+	'Lab_Report' => $data['Lab_Result']
+]) ?>
 
 <div class="row">
 <div class="col-md-8">
@@ -93,45 +108,22 @@ $lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
 
 <div class="d-flex flex-row flex-wrap" style="margin-bottom: 1rem;">
 
-	<div class="metric-section">
-		<h3>General</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0BY5GND653C0C']['metric_list'], $lab_result_metric); ?>
-	</div>
+	<?= _draw_metric_info_table('General', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0BY5GND653C0C']['metric_list'], $lab_result_metric); ?>
 
-	<div class="metric-section">
-		<h3>Cannabinoid Profile</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0HRHFRZGY72C7']['metric_list'], $lab_result_metric); ?>
-	</div>
+	<?= _draw_metric_info_table('Cannabinoids', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0HRHFRZGY72C7']['metric_list'], $lab_result_metric); ?>
 
-	<div class="metric-section">
-		<h3>Terpene Profile</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT07DPNKHQV2GRS']['metric_list'], $lab_result_metric); ?>
-	</div>
+	<?= _draw_metric_info_table('Terpenes', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT07DPNKHQV2GRS']['metric_list'], $lab_result_metric); ?>
 
-	<div class="metric-section">
-		<h3>Pesticides</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT09ZG05C2NE7KX']['metric_list'], $lab_result_metric); ?>
-	</div>
+	<?= _draw_metric_info_table('Pesticides', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT09ZG05C2NE7KX']['metric_list'], $lab_result_metric); ?>
 
-	<div class="metric-section">
-		<h3>Metals</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR']['metric_list'], $lab_result_metric); ?>
-	</div>
+	<?= _draw_metric_info_table('Metals', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0V6XE7P0BHBCR']['metric_list'], $lab_result_metric); ?>
 
-	<div class="metric-section">
-		<h3>Microbes</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0B7NMK7RGYAMN']['metric_list'], $lab_result_metric); ?>
-	</div>
+	<?= _draw_metric_info_table('Microbes', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0B7NMK7RGYAMN']['metric_list'], $lab_result_metric); ?>
 
-	<div class="metric-section">
-		<h3>Mycotoxin</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0GDBPF0V9B71Z']['metric_list'], $lab_result_metric); ?>
-	</div>
+	<?= _draw_metric_info_table('Mycotoxin', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0GDBPF0V9B71Z']['metric_list'], $lab_result_metric); ?>
 
-	<div class="metric-section">
-		<h3>Solvents</h3>
-		<?= _draw_metric_info_table($data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW']['metric_list'], $lab_result_metric); ?>
-	</div>
+	<?= _draw_metric_info_table('Solvents', $data['Lab_Result_Section_Metric_list']['018NY6XC00LMT0AQAMJEDSD0NW']['metric_list'], $lab_result_metric); ?>
+
 
 </div>
 
@@ -148,7 +140,7 @@ $lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
 /**
  *
  */
-function _draw_metric_info_table($metric_list, $lab_result_metric)
+function _draw_metric_info_table($metric_type_name, $metric_list, $lab_result_metric)
 {
 	// $lrm = $data['Lab_Result_Metric_list'][$mk0];
 
@@ -193,7 +185,7 @@ function _draw_metric_info_table($metric_list, $lab_result_metric)
 
 		$out[] = [
 			'lab_metric_id' => $lm['id'],
-			'name' => ($lm['name'] ?: $lrm['lab_metric_name']),
+			'name' => ($lrm['name'] ?: $lrm['lab_metric_name'] ?: $lm['name']),
 			'qom' => $lrm['qom'],
 			'uom' => ($lrm['meta']['uom'] ?: $lrm['uom'] ?: $lm['meta']['uom'])
 		];
@@ -207,6 +199,9 @@ function _draw_metric_info_table($metric_list, $lab_result_metric)
 
 	ob_start();
 ?>
+	<div class="metric-section">
+	<h3><?= $metric_type_name ?></h3>
+
 	<table class="table table-sm">
 		<tbody>
 			<?php
@@ -256,6 +251,7 @@ function _draw_metric_info_table($metric_list, $lab_result_metric)
 			?>
 		</tbody>
 	</table>
+	</div>
 
 	<?php
 
