@@ -65,15 +65,7 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		$data = $this->_load_data($dbc_user, $Lab_Report);
 
 		// Alias the data into this field
-		$data['Lab_Result'] = [
-			'id' => $Lab_Report['id'],
-			'guid' => $data['Lab_Sample']['name'],
-			'name' => $Lab_Report['name'],
-			'created_at' => $Lab_Report['created_at'],
-			'approved_at' => $Lab_Report['approved_at'],
-			'expires_at' => $Lab_Report['expires_at'],
-		];
-
+		$data['Lab_Result'] = $data['Lab_Report'];
 
 		switch ($_GET['f']) {
 			case 'csv':
