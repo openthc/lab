@@ -28,19 +28,6 @@ $dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
 			);
 		}
 		?></h2>
-		<p>Created: <?= $dtC->format('Y-m-d H:i e') ?>
-		<?php
-		if ( ! empty($data['Lab_Result']['approved_at'])) {
-			$dtA = new \DateTime($data['Lab_Result']['approved_at']);
-			$dtA->setTimezone(new \DateTimezone($_SESSION['tz']));
-			printf('<br>Approved: %s', $dtA->format('Y-m-d H:i e'));
-		}
-		if ( ! empty($data['Lab_Result']['expires_at'])) {
-			$dtE = new \DateTime($data['Lab_Result']['expires_at']);
-			$dtE->setTimezone(new \DateTimezone($_SESSION['tz']));
-			printf('<br>Expires: %s', $dtE->format('Y-m-d H:i e'));
-		}
-		?></p>
 	</div>
 
 	<div>
@@ -118,6 +105,10 @@ $dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
 		</form>
 	</div>
 
+</div>
+
+<div class="mb-2">
+<?= $this->block('lab-result-date-row.php') ?>
 </div>
 
 <div class="mb-2">

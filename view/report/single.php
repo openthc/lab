@@ -119,7 +119,9 @@ use OpenTHC\Lab\UOM;
 
 </div>
 
+<div class="mb-2">
 <?= $this->block('lab-result-date-row.php') ?>
+</div>
 
 <div class="mb-2">
 <?= $this->block('product-summary.php') ?>
@@ -131,22 +133,34 @@ use OpenTHC\Lab\UOM;
 </div>
 
 <?php
-if ( ! empty($data['Lab_Report_File_list'])) {
+if ( ! empty($data['lab_report_file_list'])) {
 ?>
 	<section id="lab-report-file-list">
 	<?php
 	echo '<table class="table table-sm">';
-	foreach ($data['Lab_Report_File_list'] as $f) {
-		echo '<tr>';
-		printf('<td><a href="?a=lab-report-file-download&id=%s">%s</a></td>', $f['id'], __h($f['name']));
+	foreach ($data['lab_report_file_list'] as $f) {
+?>
+		<tr>
+		<td><?= sprintf('<a href="?a=lab-report-file-download&id=%s">%s</a>', $f['id'], __h($f['name'])) ?></td>
+<?php
 		printf('<td>%s</td>', __h($f['type']));
 		printf('<td class="r">%d</td>', __h($f['size']));
-		echo '<td class="r">';
-		echo '<div class="btn-group btn-group-sm">';
-		printf('<a class="btn btn-outline-secondary" download href="?a=lab-report-file-download&id=%s"><i class="fas fa-download"></i></a>', $f['id']);
-		echo '</div>';
-		echo '</td>';
-	echo '</tr>';
+		printf('<td class="r">%d</td>', __h($f['stat']));
+		printf('<td class="r">%08x</td>', __h($f['flag']));
+?>
+		<td class="r">
+		<div class="btn-group btn-group-sm">
+			<a class="btn btn-outline-secondary" download href="?a=lab-report-file-download&id=<?= $f['id'] ?>"><i class="fas fa-download"></i></a>
+			<!-- <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+			<ul class="dropdown-menu dropdown-menu-end">
+				<li><a class="dropdown-item" href="#">Action</a></li>
+				<li><a class="dropdown-item" href="#">Another action</a></li>
+				<li><a class="dropdown-item" href="#">Something else here</a></li>
+			</ul> -->
+		</div>
+		</td>
+		</tr>
+<?php
 	}
 	echo '</table>';
 	?>
