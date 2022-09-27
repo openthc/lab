@@ -221,6 +221,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			// And clear some parameters (or else it would loop)
 			unset($_GET['of']);
 			unset($_GET['f']);
+			$_GET['e'] = 'lcp-224';
 			$url = sprintf('/pub/%s.html?%s', $ARG['id'], http_build_query($_GET));
 			$url = rtrim($url, '?');
 

@@ -37,6 +37,14 @@ $lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
 
 <div class="container mt-4" id="pub-html-2022-062">
 
+<?php
+switch ($_GET['e']) {
+	case 'lcp-224':
+		echo '<div class="alert alert-warning">The Requested PDF Document is not available, this web-version is all that is published</div>';
+		break;
+}
+?>
+
 <h1>Result: <?= __h($data['Lab_Report']['name'] ?: $data['Lab_Result']['guid']) ?></h1>
 <div class="d-flex flex-wrap justify-content-between">
 	<div>
