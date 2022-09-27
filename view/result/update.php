@@ -117,14 +117,14 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) { // @todo metric
 			<div>
 				<h2><?= __h($lms['name']) ?></h2>
 			</div>
-			<?php
-			if ('General' != $lms['name']) {
-			?>
-				<div><?= $stat_pick_html ?></div>
-				<div><?= $unit_pick_html ?></div>
-			<?php
-			}
-			?>
+			<div><?= $stat_pick_html ?></div>
+			<div><?= $unit_pick_html ?></div>
+			<div>
+				<div class="input-group">
+					<div class="input-group-text">Status:</div>
+					<?= sprintf($status_html, sprintf('lab-metric-type-%s-stat', $lms['id'])) ?>
+				</div>
+			</div>
 		</div>
 
 		<div class="lab-metric-grid" id="lab-metric-type-<?= $lms['id'] ?>">

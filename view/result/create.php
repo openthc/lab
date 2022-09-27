@@ -8,6 +8,13 @@
 $stat_pick_html = _draw_stat_pick();
 $unit_pick_html = _draw_unit_pick();
 
+$status_html = <<<HTML
+<select class="form-control" name="%s">
+	<option value="100">In Progress</option>
+	<option value="200">Passed</option>
+	<option value="400">Failed</option>
+</select>
+HTML;
 
 ?>
 
@@ -80,11 +87,7 @@ $unit_pick_html = _draw_unit_pick();
 	<div class="mb-2">
 		<div class="input-group">
 			<div class="input-group-text">Status:</div>
-			<select class="form-control" name="lab-result-stat">
-				<option value="100">In Progress</option>
-				<option value="200">Passed</option>
-				<option value="400">Failed</option>
-			</select>
+			<?= sprintf($status_html, 'lab-result-stat') ?>
 		</div>
 	</div>
 
@@ -113,14 +116,14 @@ foreach ($data['lab_metric_section_list'] as $lms) {
 			<div>
 				<h2><?= __h($lms['name']) ?></h2>
 			</div>
-			<?php
-			if ('General' != $lms['name']) {
-			?>
-				<div><?= $stat_pick_html ?></div>
-				<div><?= $unit_pick_html ?></div>
-			<?php
-			}
-			?>
+			<div><?= $stat_pick_html ?></div>
+			<div><?= $unit_pick_html ?></div>
+			<div>
+				<div class="input-group">
+					<div class="input-group-text">Status:</div>
+					<?= sprintf($status_html, sprintf('lab-metric-type-%s-stat', $lms['id'])) ?>
+				</div>
+			</div>
 		</div>
 
 		<div class="lab-metric-grid" id="lab-metric-type-<?= $lms['id'] ?>">
