@@ -169,7 +169,7 @@ function _draw_metric_select_pass_fail($lm)
 function _draw_stat_pick()
 {
 	$html = <<<HTML
-	<select class="form-control form-control-sm lab-metric-qom-bulk">
+	<select class="form-control lab-metric-qom-bulk">
 	<option value="OK">OK</option>
 	<option value="N/A">N/A</option>
 	<option value="N/D">N/D</option>
@@ -186,7 +186,9 @@ function _draw_stat_pick()
 function _draw_unit_pick()
 {
 	$html = [];
-	$html[] = '<select class="form-control form-control-sm lab-metric-uom-bulk">';
+	$html[] = '<div class="input-group">';
+	$html[] = '<div class="input-group-text">UOM:</div>';
+	$html[] = '<select class="form-control lab-metric-uom-bulk">';
 	foreach (\OpenTHC\Lab\UOM::$uom_list as $k => $v) {
 		$html[] = sprintf('<option data-uom="%s" value="%s">%s</option>'
 			, $k
@@ -195,6 +197,7 @@ function _draw_unit_pick()
 		);
 	}
 	$html[] = '</select>';
+	$html[] = '</div>';
 
 	return implode('', $html);
 
@@ -208,7 +211,7 @@ function _lab_result_status_nice($x)
 	switch ($x) {
 		case 0:
 		case 100:
-			return 'Pending';
+			return 'In Progress';
 			break;
 		case 1: // @todo update all stat=1 lab_result to stat=200
 		case 200:
