@@ -733,7 +733,7 @@ function _qbench_pull_sample($dbc, $qbc)
 			}
 
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
-			$rec['@lot_guid'] = $rec['ExtInvID'] ?: $rec['lot_number'] ?: $rec['custom_formatted_id'] ?: $rec['@id'];
+			$rec['@lot_guid'] = $rec['ExtInvID'] ?: $rec['custom_formatted_id'] ?: $rec['lot_number'] ?: $rec['@id'];
 			$rec['@order_id'] = sprintf('qbench:%s', $rec['order_id']);
 			$rec['@qty'] = floatval($rec['sample_quantity_received']);
 			if (preg_match('/([0-9\.]+)(a-z)/i', $rec['sample_quantity_received'], $m)) {
@@ -780,9 +780,9 @@ function _qbench_pull_sample($dbc, $qbc)
 				// ':i0' => $rec['@id'],
 				':g0' => $rec['@lot_guid']
 			];
-			$inv = $dbc->fetchRow('SELECT id FROM inventory WHERE id = :g0', $arg);
+			$inv = $dbc->fetchRow('SELECT id FROM inventory WHERE id = :g0', [ ':g0' => $rec['@id'] ]);
 			if (empty($inv['id'])) {
-				$inv = $dbc->fetchRow('SELECT id FROM inventory WHERE guid = :g0', $arg);
+				$inv = $dbc->fetchRow('SELECT id FROM inventory WHERE guid = :g0', [ ':g0' => $rec['@lot_guid'] ]);
 			}
 			if (empty($inv['id'])) {
 
