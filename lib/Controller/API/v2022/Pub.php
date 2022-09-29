@@ -72,34 +72,39 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		$ret_data['pub'] = sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $Lab_Result1['id']);
 
 		// Attachment
-		$coa_file = [];
-		$coa_file['body'] = __base64_decode_url($data['lab_result_file']['body']);
-		$coa_file['name'] = $data['lab_result_file']['name'];
-		$coa_file['size'] = strlen($data['lab_result_file']['body']);
-		$coa_file['type'] = $data['lab_result_file']['type'];
+		if ( ! empty($data['lab_result_file']['body'])) {
 
-		if ($coa_file['size']) {
+			$lrf_data = [];
+			$lrf_data['body'] = __base64_decode_url($data['lab_result_file']['body']);
+			$lrf_data['name'] = $data['lab_result_file']['name'];
+			$lrf_data['size'] = strlen($data['lab_result_file']['body']);
+			$lrf_data['type'] = $data['lab_result_file']['type'];
 
-			$sql = <<<SQL
-			INSERT INTO lab_result_file (id, lab_result_id, size, type, body)
-			VALUES (ulid_create(), :lr0, :s1, :t1, :b1)
-			SQL;
+			if ($lrf_data['size']) {
 
-			$cmd = $dbc_main->prepare($sql, null);
-			$cmd->bindParam(':lr0', $Lab_Result1['id']);
-			$cmd->bindParam(':s1', $coa_data['size']);
-			$cmd->bindParam(':t1', $coa_data['type']);
-			$cmd->bindParam(':b1', $coa_data['body'], \PDO::PARAM_LOB);
-			$cmd->execute();
+				$sql = <<<SQL
+				INSERT INTO lab_result_file (id, lab_result_id, name, size, type, body)
+				VALUES (ulid_create(), :lr0, :n1, :s1, :t1, :b1)
+				SQL;
 
-			$coa_file = $Lab_Result1->getCOAFile();
-			$coa_path = dirname($coa_file);
-			if ( ! is_dir($coa_path)) {
-				mkdir($coa_path, 0755, true);
+				$cmd = $dbc_main->prepare($sql, null);
+				$cmd->bindParam(':lr0', $Lab_Result1['id']);
+				$cmd->bindParam(':n1', $coa_data['name']);
+				$cmd->bindParam(':s1', $coa_data['size']);
+				$cmd->bindParam(':t1', $coa_data['type']);
+				$cmd->bindParam(':b1', $coa_data['body'], \PDO::PARAM_LOB);
+				$cmd->execute();
+
+				$coa_file = $Lab_Result1->getCOAFile();
+				$coa_path = dirname($coa_file);
+				if ( ! is_dir($coa_path)) {
+					mkdir($coa_path, 0755, true);
+				}
+				file_put_contents($coa_file, $lrf_data['body']);
+
+				$ret_data['coa'] = sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $Lab_Result1['id']);
 			}
-			file_put_contents($coa_file, $coa_data['body']);
 
-			$ret_data['coa'] = sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $Lab_Result1['id']);
 		}
 
 		return $RES->withJSON([

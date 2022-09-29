@@ -35,12 +35,12 @@ class Single extends \OpenTHC\Controller\Base
 		}
 
 		$coa_file = $meta['Lab_Result']['coa_file'];
-		if ( ! empty($coa_file) && ! is_file($meta['Lab_Result']['coa_file'])) {
+		if ( ! empty($coa_file) && ! is_file($coa_file)) {
 			$coa_file = null;
 		}
-		if (empty($$coa_file)) {
+		if (empty($coa_file)) {
 			$coa_file = $LR->getCOAFile();
-			if ( ! is_file($meta['Lab_Result']['coa_file'])) {
+			if ( ! is_file($coa_file)) {
 				$coa_file = null;
 			}
 		}

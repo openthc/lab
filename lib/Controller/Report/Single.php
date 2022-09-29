@@ -114,7 +114,11 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				$Lab_Result1['type'] = 'Lab_Report';
 				$Lab_Result1['name'] = $Lab_Report['name'];
 				$Lab_Result1['meta'] = json_encode($data);
+
 				$Lab_Result1->save();
+
+				$coa_file = $Lab_Result1->getCOAFile();
+				$Lab_Result1->importCOA($data['lab_result_file_list']);
 
 				// if (_is_ajax()) {
 				// 	$ret['data'] = [
@@ -301,10 +305,10 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$data['Lab_Report'] = $Lab_Report->toArray();
 		$data['Lab_Report']['meta'] = __json_decode($Lab_Report['meta']);
 
-		$res = $dbc_user->fetchAll('SELECT id, name, size, type FROM lab_report_file WHERE lab_report_id = :lr0', [
+		$res = $dbc_user->fetchAll('SELECT id, flag, stat, name, size, type FROM lab_report_file WHERE lab_report_id = :lr0', [
 			':lr0' => $Lab_Report['id']
 		]);
-		$data['Lab_Report_File_list'] = $res;
+		$data['lab_report_file_list'] = $res;
 
 		$Lab_Sample = new Lab_Sample($dbc_user, $data['Lab_Report']['lab_sample_id']);
 		$data['Lab_Sample'] = $Lab_Sample->toArray();
