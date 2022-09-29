@@ -99,6 +99,9 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				// Move to PUB somehow?
 				$data = $this->_load_data($dbc_user, $Lab_Report);
 
+				$lab_report_file_list = $data['lab_report_file_list'];
+				unset($data['lab_report_file_list']);
+
 				// Alias the data into this field
 				$data['Lab_Result'] = $data['Lab_Report'];
 
@@ -117,8 +120,19 @@ class Single extends \OpenTHC\Lab\Controller\Base
 
 				$Lab_Result1->save();
 
-				$coa_file = $Lab_Result1->getCOAFile();
-				$Lab_Result1->importCOA($data['lab_result_file_list']);
+				$Lab_Report->setFlag(Lab_Report::FLAG_PUBLIC);
+
+				// $coa_file = $Lab_Result1->getCOAFile();
+				// $coa_file = $Lab_Report->getCOA();
+				if ( ! empty($lab_report_file_list)) {
+					$lrf_id = $lab_report_file_list[0]['id'];
+					$lrf = $dbc_user->fetchOne('SELECT body FROM lab_report_file WHERE id = :lrf0', [
+						':lrf0' => $lrf_id
+					]);
+					$lrf_body = stream_get_contents($lrf);
+					$Lab_Result1->importCOA($lrf_body);
+					$Lab_Report->setFlag(Lab_Report::FLAG_PUBLIC_COA);
+				}
 
 				// if (_is_ajax()) {
 				// 	$ret['data'] = [
@@ -129,7 +143,6 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				// 	];
 				// }
 
-				$Lab_Report->setFlag(Lab_Report::FLAG_PUBLIC);
 				$Lab_Report->save('Lab Report Published by User');
 
 				return $RES->withRedirect(sprintf('/pub/%s.html', $Lab_Result1['id']));
