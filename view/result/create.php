@@ -105,9 +105,6 @@ HTML;
 foreach ($data['lab_metric_section_list'] as $lms) {
 
 	$lms_data = $data['Lab_Result_Metric_list'][$lms['stub']];
-	if (empty($lms_data)) {
-		continue;
-	}
 
 ?>
 	<section style="margin-bottom:1rem;">
