@@ -8,9 +8,6 @@
 use OpenTHC\Lab\Lab_Result;
 use OpenTHC\Lab\UOM;
 
-$dtC = new \DateTime($data['Lab_Result']['created_at']); //, new \DateTimezone($_SESSION['tz']));
-$dtC->setTimezone(new \DateTimezone($_SESSION['tz']));
-
 ?>
 
 <div class="container">
@@ -136,7 +133,10 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 ?>
 	<hr>
 	<section>
-		<h3><?= $lms['name'] ?></h3>
+		<div class="d-flex justify-content-between">
+			<div><h3><?= $lms['name'] ?></h3></div>
+			<div>-STATUS-</div>
+		</div>
 		<div class="result-metric-wrap">
 			<?php
 			// Spin too many times but, whatever /djb 20220222

@@ -14,10 +14,17 @@ use OpenTHC\Lab\Lab_Result;
 <form autocomplete="off" enctype="multipart/form-data" method="post">
 <div class="container">
 
-<h1>
-Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
-<?= $data['Lab_Sample']['flag_medical'] ? '<i class="fas fa-medkit"></i>' : null ?>
-</h1>
+<div class="d-flex flex-row flex-wrap justify-content-between mt-2">
+	<div>
+		<h1>Sample :: <?= $data['Lab_Sample']['id_nice'] ?></h1>
+	</div>
+	<div>
+		<h2>Status: <?= $data['Lab_Sample']['stat_html'] ?></h2>
+	</div>
+	<div>
+		<?= $data['Lab_Sample']['flag'] ?>
+	</div>
+</div>
 
 <div class="row">
 	<div class="col-md-6">
@@ -76,7 +83,6 @@ Sample :: <?= $data['Lab_Sample']['id_nice'] ?>
 			<div class="input-group">
 				<input class="form-control product-autocomplete" name="product-name" value="<?= __h($data['Product']['name']) ?>">
 				<input id="product-id" name="product-id" type="hidden" value="<?= $data['Product']['id'] ?>">
-				<div class="input-group-text"><?= ($data['Lab_Sample']['flag_medical'] ? 'Med' : 'Rec') ?></div>
 				<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
 			</div>
 		</div>

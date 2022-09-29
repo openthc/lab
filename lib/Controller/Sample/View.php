@@ -102,6 +102,8 @@ class View extends \OpenTHC\Lab\Controller\Base
 		if (empty($data['Product']['uom'])) {
 			$data['Product']['uom'] = 'g';
 		}
+		$data['Lab_Sample']['stat_html'] = $Lab_Sample->getStatHTML();
+		$data['Lab_Sample']['stat_text'] = strip_tags($data['Lab_Sample']['stat_html']);
 
 		// Sample Image
 		$data['Lab_Sample']['img_list'] = $Lab_Sample->getFiles();

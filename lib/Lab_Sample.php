@@ -107,4 +107,28 @@ class Lab_Sample extends \OpenTHC\SQL\Record
 		return $img_file;
 	}
 
+	/**
+	 *
+	 */
+	function getStatHTML()
+	{
+		switch ($this->_data['stat']) {
+			case 0:
+			case 100:
+				return 'Open';
+				break;
+			case self::STAT_LIVE:
+				return 'Live';
+				break;
+			case self::STAT_DONE:
+				return 'Done';
+				break;
+			case self::STAT_VOID:
+				return '<span class="text-danger">VOID</span>';
+				break;
+		}
+
+		return '-unknown-';
+	}
+
 }
