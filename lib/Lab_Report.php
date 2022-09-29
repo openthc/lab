@@ -32,6 +32,30 @@ class Lab_Report extends \OpenTHC\SQL\Record
 	protected $_table = 'lab_report';
 
 	/**
+	 * COA is a Special Document, PDF
+	 */
+	function getCOA()
+	{
+		$sql = <<<SQL
+		SELECT id, stat, flag, name, size, type
+		FROM lab_report_file
+		WHERE lab_report_id = :lr0
+		  AND type = 'application/pdf'
+		  AND flag & :f1 != 0
+		SQL;
+		$arg = [
+			':lr0' => $this->_data['id'],
+			':f1' => 0x00000001
+		];
+		$res = $this->_dbc->fetchAll($sql, $arg);
+		foreach ($res as $rec) {
+			$ret = $rec;
+		}
+
+		return $ret;
+	}
+
+	/**
 	 * Get Status as HTML or Text
 	 */
 	function getStat($f='html')

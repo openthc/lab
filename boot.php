@@ -169,12 +169,15 @@ function _draw_metric_select_pass_fail($lm)
 function _draw_stat_pick()
 {
 	$html = <<<HTML
+	<div class="input-group">
+	<div class="input-group-text">Result:</div>
 	<select class="form-control lab-metric-qom-bulk">
 	<option value="OK">OK</option>
 	<option value="N/A">N/A</option>
 	<option value="N/D">N/D</option>
 	<option value="N/T">N/T</option>
 	</select>
+	</div>
 	HTML;
 	return $html;
 }
