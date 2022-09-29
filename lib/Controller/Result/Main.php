@@ -45,8 +45,10 @@ class Main extends \OpenTHC\Lab\Controller\Base
 SELECT lab_result.*
   , lab_sample.id AS lab_sample_id
   , lab_sample.name AS lab_sample_guid
+  , inventory.guid AS inventory_guid
 FROM lab_result
 JOIN lab_sample ON lab_result.lab_sample_id = lab_sample.id
+JOIN inventory ON lab_sample.lot_id = inventory.id
 WHERE {WHERE}
 ORDER BY {SORTBY}
 OFFSET $sql_offset
