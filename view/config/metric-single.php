@@ -60,6 +60,10 @@
 	</div>
 </div>
 
+<?php
+if (false) {
+?>
+
 <hr>
 
 <div class="row mt-2">
@@ -86,6 +90,9 @@
 
 	</div>
 </div>
+<?php
+}
+?>
 
 <div class="form-actions">
 	<button class="btn btn-primary" name="a" type="submit" value="lab-metric-single-update"><i class="fa-solid fa-save"></i> Save</button>
