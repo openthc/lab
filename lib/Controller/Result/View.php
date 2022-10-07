@@ -117,6 +117,10 @@ class View extends \OpenTHC\Lab\Controller\Base
 			__exit_text($data);
 		}
 
+		$x = $data['Lab_Result']->getMeta();
+		$data['Lab_Result'] = $data['Lab_Result']->toArray();
+		$data['Lab_Result']['meta'] = $x;
+
 		return $RES->write( $this->render('result/single.php', $data) );
 
 	}
@@ -438,14 +442,8 @@ SQL;
 			$m = json_decode($data['License']['meta'], true);
 			$data['License']['address_full'] = $m['address_full'];
 		}
-		// _exit_text($data);
 
-		// Filter out one for the auto-display
-		// Fold so the NAME is the Key
-		// $data['Lab_Metric_Type_list'] = array_filter($data['Lab_Metric_Type_list'], function($v, $k) {
-		// 	return ('General' != $v['name']);
-		// }, ARRAY_FILTER_USE_BOTH);
-
+		// Refactor Metric Type List
 		$metric_type_list = [];
 		foreach ($data['Lab_Metric_Type_list'] as $i => $mt) {
 			$metric_type_list[ $mt['stub'] ] = $mt;

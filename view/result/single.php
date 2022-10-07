@@ -130,12 +130,25 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 		// var_dump($lms);
 	}
 
+	$status = '-STATUS-';
+	switch ($data['Lab_Result']['meta']['lab_metric_type_list'][ $lms['id'] ]['stat']) {
+		case 100:
+			$status = 'In Progress';
+			break;
+		case 200:
+			$status = '<span class="text-success">Passed</span>';
+			break;
+		case 300:
+			$status = '<span class="text-danger">Failed</span>';
+			break;
+	}
+
 ?>
 	<hr>
 	<section>
 		<div class="d-flex justify-content-between">
 			<div><h3><?= $lms['name'] ?></h3></div>
-			<div>-STATUS-</div>
+			<div><?= $status ?></div>
 		</div>
 		<div class="result-metric-wrap">
 			<?php

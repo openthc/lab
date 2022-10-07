@@ -101,6 +101,21 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 
 				$dbc_user->query('BEGIN');
 
+				$lr0_meta = $LR->getMeta();
+
+				// Section Statuses
+				foreach ($_POST as $k => $v) {
+					if (preg_match('/lab\-metric\-type\-(\w+)\-stat$/', $k, $m)) {
+						$lmt_id = $m[1];
+						$lr0_meta['lab_metric_type_list'][ $lmt_id ] = [
+							'id' => $lmt_id,
+							'name' => '',
+							'stat' => $v,
+						];
+					}
+				}
+
+				// Metric Values
 				foreach ($res_lab_metric as $m) {
 
 					// $lrm = new Lab_Result_Metric($dbc_user, [
@@ -167,14 +182,18 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 				$LR['thc'] = floatval(max($thc_list));
 				$LR['note'] = trim($_POST['terp-note']);
 				$LR['stat'] = $_POST['lab-result-stat'];
+				$LR['meta'] = json_encode($lr0_meta);
 
+				// File Upload?
 				if ( ! empty($_FILES['file'])) {
 					if (0 == $_FILES['file']['error']) {
 						$LR->setCOAFile($_FILES['file']['tmp_name']);
 					}
 				}
 
+				// And LOCK?
 				if ('lab-result-commit' == $_POST['a']) {
+					// Should LOCK promote status to DONE/PASS/FAIL?
 					$LR->setFlag(Lab_Result::FLAG_LOCK);
 				}
 

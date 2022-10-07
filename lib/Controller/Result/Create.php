@@ -138,6 +138,23 @@ class Create extends \OpenTHC\Lab\Controller\Base
 		// $LR['type'] = 'unknown';
 		// $LR['name'] = sprintf('Lab Result for Sample Lot: %s', $Sample['id']);
 		$LR['uom'] = 'g';
+		$lr_meta = [
+			'@context' => 'https://openthc.org/v2018/post',
+			'@version' => '',
+			'@source' => $_POST,
+			'lab_metric_type_list' => [],
+		];
+		foreach ($_POST as $k => $v) {
+			if (preg_match('/lab\-metric\-type\-(\w+)\-stat$/', $k, $m)) {
+				$lmt_id = $m[1];
+				$lr_meta['lab_metric_type_list'][ $lmt_id ] = [
+					'id' => $lmt_id,
+					'name' => '',
+					'stat' => $v,
+				];
+			}
+		}
+		$LR['meta'] = json_encode($lr_meta);
 		$LR['hash'] = $LR->getHash();
 		if ('lab-result-save-and-commit' == $_POST['a']) {
 			$LR->setFlag(Lab_Result::FLAG_LOCK);

@@ -8,6 +8,31 @@
 $stat_pick_html = _draw_stat_pick();
 $unit_pick_html = _draw_unit_pick();
 
+/**
+ *
+ */
+function _lab_metric_section_status($name, $stat)
+{
+	$stat_list = [
+		'100' => 'In Progress',
+		'200' => 'Passed',
+		'300' => 'Failed'
+	];
+
+	$html = [];
+	$html[] = sprintf('<select class="form-control" name="%s">', $name);
+
+	foreach ($stat_list as $v => $n) {
+		$pick = ($v == $stat ? ' selected' : '');
+		$html[] = sprintf('<option%s value="%s">%s</option>', $pick, $v, $n);
+	}
+
+	$html[] = '</select>';
+
+	return implode('', $html);
+
+}
+
 ?>
 
 <h1><a href="/result">Result</a> :: <?= $data['Lab_Result']['guid'] ?> :: Update</h1>
@@ -122,7 +147,11 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) { // @todo metric
 			<div>
 				<div class="input-group">
 					<div class="input-group-text">Status:</div>
-					<?= sprintf($status_html, sprintf('lab-metric-type-%s-stat', $lms['id'])) ?>
+					<?php
+					$x = $data['Lab_Result']['meta']['lab_metric_type_list'][ $lms['id'] ];
+					// var_dump($data['Lab_Result']['meta']['lab_metric_type_list']);
+					echo _lab_metric_section_status(sprintf('lab-metric-type-%s-stat', $lms['id']), $x);
+					?>
 				</div>
 			</div>
 		</div>
