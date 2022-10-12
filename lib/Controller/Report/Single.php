@@ -94,6 +94,10 @@ class Single extends \OpenTHC\Lab\Controller\Base
 			case 'lab-report-commit';
 				$RES = $this->_commit($RES, $dbc_user, $Lab_Report);
 				break;
+			case 'lab-report-delete':
+				$RES = $this->_delete($RES, $dbc_user, $Lab_Report);
+				return $RES;
+				break;
 			case 'lab-report-share':
 
 				// Move to PUB somehow?
@@ -274,6 +278,30 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$cmd->bindParam(':t1', $type);
 		$cmd->bindParam(':b1', $body, \PDO::PARAM_LOB);
 		return $cmd->execute();
+	}
+
+	/**
+	 * Delete this Lab Report
+	 */
+	function _delete($RES, $dbc_user, $Lab_Report)
+	{
+		$arg = [
+			':lr0' => $Lab_Report['id']
+		];
+
+		$sql = 'DELETE FROM lab_report_inventory WHERE lab_report_id = :lr0';
+		$dbc_user->query($sql, $arg);
+
+		$sql = 'DELETE FROM lab_report_file WHERE lab_report_id = :lr0';
+		$dbc_user->query($sql, $arg);
+
+		$sql = 'DELETE FROM lab_report WHERE id = :lr0';
+		$dbc_user->query($sql, $arg);
+
+		Session::flash('info', 'Lab Report Deleted');
+
+		return $RES->withRedirect(sprintf('/sample/%s', $Lab_Report['lab_sample_id']));
+
 	}
 
 	/**

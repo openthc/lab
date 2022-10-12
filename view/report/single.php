@@ -50,7 +50,8 @@ use OpenTHC\Lab\UOM;
 						break;
 				}
 				?>
-				<button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button>
+				<button class="btn btn-danger" name="a" value="lab-report-delete"><i class="fa-solid fa-trash"></i> DELETE</button>
+				<button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button>
 				<!-- <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button> -->
 				<ul class="dropdown-menu dropdown-menu-lg-end">
 					<li class="dropdown-item d-flex justify-content-between">

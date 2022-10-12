@@ -85,7 +85,7 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$this->setXY($x, $y);
 		// $this->cell(3.5, self::FS_12, $this->_data['Lab_Sample']['name'], 0, 0, 'C');
 		$this->setFont('freesans', '', 12);
-		$this->cell(3.5, self::FS_12, $this->_data['Lab_Result']['guid'], 0, 0, 'C');
+		$this->cell(3.5, self::FS_12, $this->_data['Lab_Result']['guid'] ?: $this->_data['Lab_Report']['name'], 0, 0, 'C');
 
 
 		$y += self::FS_12;
@@ -189,8 +189,8 @@ class COA extends \OpenTHC\Lab\PDF\Base
 			$y = 1.50;
 			$w = 1;
 			$h = 1;
-			$this->rect($x, $y, $w, $h);
-			$this->image($img_file, $x, $y, 1, 1, $type='', $link='', $align='', $resize=true, $dpi=300, $palign='', $ismask=false, $imgmask=false, $border=0, $fitbox='RT');
+			// $this->rect($x, $y, $w, $h);
+			$this->image($img_file, $x, $y, $w, $h, $type='', $link='', $align='', $resize=true, $dpi=300, $palign='', $ismask=false, $imgmask=false, $border=1, $fitbox='CM');
 			// $this->setXY($x, $y);
 			// $this->cell(1, self::FS_12, 'SAMP');
 		}
@@ -208,7 +208,10 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$this->setFont('freesans', '', 12);
 
 		$this->setXY($x, $y);
-		$this->cell(3.25, self::FS_12, sprintf('Sample: %s', $this->_data['Lab_Sample']['name']));
+		$this->cell(3.25, self::FS_12, sprintf('Sample: %s / Source Lot: %s'
+			, $this->_data['Lab_Sample']['name']
+			, $this->_data['Lot']['guid']
+		));
 		$y += self::FS_12;
 
 		$this->setXY($x, $y);
@@ -461,7 +464,7 @@ class COA extends \OpenTHC\Lab\PDF\Base
 	/**
 	 * Draw the Two Column Metrics, Alphabetically, Across then Down
 	 */
-	function draw_metric_table_2_col_a_then_d($metric_name, $metric_list)
+	function draw_metric_table_2_col_a_then_d($metric_name, $metric_list) : bool
 	{
 		$x = 0.50;
 		$y = $this->getY();
@@ -569,6 +572,7 @@ class COA extends \OpenTHC\Lab\PDF\Base
 
 		}
 
+		return(true);
 	}
 
 }
