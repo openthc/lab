@@ -27,7 +27,7 @@ $opt = getopt('', [
 	'company:',
 	'license:',
 	'object:',
-	'sample:',
+	'object-id:',
 	'page:',
 ]);
 if (empty($opt['company'])) {
@@ -40,6 +40,9 @@ if (empty($opt['object'])) {
 	$opt['object'] = explode(',', 'license,contact,b2b,sample,result');
 } else {
 	$opt['object'] = explode(',', $opt['object']);
+}
+if ( ! empty($opt['object-id'])) {
+	$_ENV['object-id'] = $opt['object-id'];
 }
 if (empty($opt['page'])) {
 	$opt['page'] = 1;
@@ -82,14 +85,6 @@ $qbc = new \OpenTHC\CRE\QBench($cfg);
 $res = $qbc->auth();
 
 
-// Reload Just One Sample
-if (!empty($opt['sample'])) {
-	echo "Load One Sample\n";
-	$rec = $qbc->get(sprintf('/api/v1/sample/%s', $opt['sample']));
-	_qbench_sample_import($rec);
-	exit(0);
-}
-
 // List of possible panels
 $lab_panel_list = [];
 $res = $qbc->get('/api/v1/panel');
@@ -114,10 +109,7 @@ foreach ($res['data'] as $x) {
 	$x['@id'] = sprintf('qbench:%d', $x['id']);
 	// var_dump($x);
 }
-// exit(0);
 
-// printf("Loaded %d Panel and %d Assay\n", count($lab_panel_list), count($lab_assay_list));
-// exit;
 
 $dts = new DateTime();
 
@@ -372,6 +364,25 @@ function _qbench_pull_contact($dbc, $qbc)
  */
 function _qbench_pull_result($dbc, $qbc)
 {
+	// Fetch Specific One
+	if ( ! empty($_ENV['object-id'])) {
+
+		$oid = $_ENV['object-id'];
+
+		// Update Object Hash in Database to '-' so it will re-pull
+		$dbc->query("UPDATE lab_result SET hash = '-' WHERE id = :lr0", [ ':lr0' => $oid ]);
+		// DELETE lab_result_metric for this lab_result so it's clean for import
+		$dbc->query("DELETE FROM lab_result_metric WHERE lab_result_id = :lr0", [ ':lr0' => $oid ]);
+
+		$oid = str_replace('qbench:', '', $oid);
+		$rec = $qbc->get(sprintf('/api/v1/test/%s', $oid));
+
+		$x = _qbench_pull_result_import($dbc, $rec);
+
+		return $x;
+	}
+
+
 	$dt0 = new DateTime('2000-01-01');
 	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/lab_result/timestamp'");
 	$chk = json_decode($chk, true);
@@ -570,7 +581,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 	]);
 
 
-	// What is this?
+	// QBench puts lab_result_metric data into a worksheet
 	if ( ! empty($rec['worksheet_data'])) {
 
 		foreach ($rec['worksheet_data'] as $metric_key => $metric_val) {
@@ -583,6 +594,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			// So, if there is an ND in the ${NAME}_mg_l field then use that, not the ZERO value in %
 			$metric_key_ulid = _qbench_map_metric($metric_key);
 			if ('018NY6XC00LM00000000000000' == $metric_key_ulid) {
+				// echo "SKIP: $metric_key\n";
 				continue;
 			}
 			if (empty($metric_key_ulid)) {
@@ -733,7 +745,7 @@ function _qbench_pull_sample($dbc, $qbc)
 			}
 
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
-			$rec['@lot_guid'] = $rec['ExtInvID'] ?: $rec['custom_formatted_id'] ?: $rec['lot_number'] ?: $rec['@id'];
+			$rec['@lot_guid'] = $rec['ExtInvID'] ?: $rec['lot_number'] ?: $rec['custom_formatted_id'] ?: $rec['@id'];
 			$rec['@order_id'] = sprintf('qbench:%s', $rec['order_id']);
 			$rec['@qty'] = floatval($rec['sample_quantity_received']);
 			if (preg_match('/([0-9\.]+)(a-z)/i', $rec['sample_quantity_received'], $m)) {
