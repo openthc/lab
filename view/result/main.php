@@ -64,7 +64,7 @@ foreach ($data['result_list'] as $s) {
 		<td><?= __h($s['name']) ?></td>
 		<td class="r"><?= $s['status_html'] ?></td>
 		<td class="r">
-			<form action="" method="post">
+			<form action="" autocomplete="off" method="post">
 			<div class="btn-group btn-group-sm">
 			<a class="btn btn-sm btn-outline-secondary" href="<?= sprintf('/result/%s/update', $s['id']) ?>"><i class="fas fa-edit"></i></a>
 			<?php

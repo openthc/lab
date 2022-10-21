@@ -43,7 +43,7 @@ if (!empty($data['menu']['main']) && is_array($data['menu']['main'])) {
 $data['menu']['show_search'] = false;
 if ($data['menu']['show_search']) {
 ?>
-	<form action="/search" autocomplete="x" class="me-auto" role="search">
+	<form action="/search" autocomplete="off" class="me-auto" role="search">
 	<div class="input-group">
 		<input autocomplete="off" class="form-control" name="q" placeholder="Search..." type="text">
 		<button class="btn btn-outline-success my-2 my-sm-0" type="submit"><i class="fas fa-search"></i></button>

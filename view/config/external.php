@@ -1,4 +1,4 @@
-<form method="post">
+<form autocomplete="off" method="post">
 <div class="container">
 
 	<h2>QBench</h2>

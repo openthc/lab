@@ -7,7 +7,7 @@
 
 ?>
 
-<form enctype="multipart/form-data" method="post">
+<form autocomplete="off" enctype="multipart/form-data" method="post">
 <div class="modal" id="modal-coa-upload" role="dialog" tabindex="-1">
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">

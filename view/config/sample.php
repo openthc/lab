@@ -49,7 +49,7 @@ pre.color-invert {
 		<p>You can use a custom sequence for creating Lab Sample and Result IDs</p>
 	</div>
 
-	<form method="post">
+	<form autocomplete="off" method="post">
 	<div class="input-group">
 		<div class="input-group-text" style="width: 6em;">Format:</div>
 		<input class="form-control" id="lab-sample-seq-format" name="lab-sample-seq-format" value="<?= __h($data['seq_format']) ?>">
@@ -81,7 +81,7 @@ pre.color-invert {
 
 
 	<h2>Current Sequence Information</h2>
-	<form method="post">
+	<form autocomplete="off" method="post">
 	<div class="mb-2">
 		<?= _input_group("seq-g-min"
 			, $data['seq']['g']

@@ -13,7 +13,7 @@ use OpenTHC\Lab\UOM;
 <p>Use the form below to select all the product types that apply for a given Metric Type group.</p>
 
 
-<form method="post">
+<form autocomplete="off" method="post">
 <?php
 foreach ($data['Metric_Type_list'] as $mt) {
 

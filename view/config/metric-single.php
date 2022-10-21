@@ -7,7 +7,7 @@
 
 ?>
 
-<form method="post">
+<form autocomplete="off" method="post">
 <div class="container mt-2">
 
 <h1><a href="/config">Config</a> :: <a href="/config/metric">Metric</a> :: Update</h1>

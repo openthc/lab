@@ -58,7 +58,7 @@ foreach ($data['report_list'] as $s) {
 		<td><?= $s['type_nice'] ?></td>
 		<td class="r"><?= $s['status_html'] ?></td>
 		<td class="r">
-			<form action="/report/<?= $s['id'] ?>" method="post">
+			<form action="/report/<?= $s['id'] ?>" autocomplete="off" method="post">
 			<div class="btn-group btn-group-sm">
 			<?php
 			if ($s['flag'] & Lab_Report::FLAG_PUBLIC) {

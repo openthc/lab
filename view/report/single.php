@@ -33,7 +33,7 @@ use OpenTHC\Lab\UOM;
 	</div>
 
 	<div class="r">
-		<form method="post">
+		<form autocomplete="off" method="post">
 
 			<div class="btn-group">
 				<?php

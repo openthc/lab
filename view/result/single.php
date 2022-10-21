@@ -32,7 +32,7 @@ use OpenTHC\Lab\UOM;
 	</div>
 
 	<div class="r">
-		<form method="post">
+		<form autocomplete="off" method="post">
 
 			<div class="btn-group">
 				<?php
@@ -225,7 +225,7 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 </div>
 
 <!--
-<form method="post">
+<form autocomplete="off" method="post">
 <div class="form-actions">
 	<button class="btn btn-outline-secondary" name="a" type="submit" value="sync"><i class="fas fa-sync"></i> Sync</button>
 	<button class="btn btn-outline-primary" name="a" type="submit" value="save"><i class="fas fa-save"></i> Modify</button>

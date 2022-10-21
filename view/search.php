@@ -1,5 +1,5 @@
 
-<form action="/search" method="get">
+<form action="/search" autocomplete="off" method="get">
 <div class="container mt-2">
 <div class="input-group">
 	<input class="form-control" name="q" placeholder="Search Name, Company, License, City, etc" type="text" value="">
