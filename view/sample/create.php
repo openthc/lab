@@ -64,17 +64,15 @@ if (empty($data['Lab_Sample']['name'])) {
 			<div class="input-group-text">Product Name:</div>
 			<input name="product-name" class="form-control product-autocomplete" value="<?= __h($data['Source_Product']['name']) ?>">
 			<input id="product-id" name="product-id" type="hidden" value="<?= __h($data['Source_Product']['id']) ?>">
-			<!-- <div class="input-group-append">
-				<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
-			</div> -->
+			<!--
+			<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
+			-->
 		</div>
 	</div>
 
 	<div class="mb-2">
 		<div class="input-group">
-			<div class="input-group-prepend">
-				<div class="input-group-text">Variety:</div>
-			</div>
+			<div class="input-group-text">Variety:</div>
 			<input name="variety-name" class="form-control variety-autocomplete" value="<?= __h($data['Source_Variety']['name']) ?>">
 			<input id="variety-id" name="variety-id" type="hidden" value="<?= __h($data['Source_Variety']['id']) ?>">
 			<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>

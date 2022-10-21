@@ -71,9 +71,9 @@ use OpenTHC\Lab\Lab_Result;
 			<label>Product Type:</label>
 			<div class="input-group">
 				<input class="form-control" readonly value="<?= __h($data['ProductType']['name']) ?>">
-				<!-- <div class="input-group-append">
+				<!--
 					<button class="btn btn-outline-secondary btn-field-edit" type="button"><i class="fas fa-edit"></i></button>
-				</div> -->
+				-->
 			</div>
 		</div>
 	</div>

@@ -51,13 +51,9 @@ pre.color-invert {
 
 	<form method="post">
 	<div class="input-group">
-		<div class="input-group-prepend">
-			<div class="input-group-text" style="width: 6em;">Format:</div>
-		</div>
+		<div class="input-group-text" style="width: 6em;">Format:</div>
 		<input class="form-control" id="lab-sample-seq-format" name="lab-sample-seq-format" value="<?= __h($data['seq_format']) ?>">
-		<div class="input-group-append">
-			<button class="btn btn-warning" name="a" type="submit" value="update-seq-format"><i class="fas fa-save"></i></button>
-		</div>
+		<button class="btn btn-warning" name="a" type="submit" value="update-seq-format"><i class="fas fa-save"></i></button>
 	</div>
 	</form>
 

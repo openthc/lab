@@ -3,9 +3,7 @@
 <div class="container mt-2">
 <div class="input-group">
 	<input class="form-control" name="q" placeholder="Search Name, Company, License, City, etc" type="text" value="">
-	<span class="input-group-append">
-		<button class="btn btn-primary" type="submit"><i class="fas fa-search"></i> Search</button>
-	</span>
+	<button class="btn btn-primary" type="submit"><i class="fas fa-search"></i> Search</button>
 </div>
 </div>
 </form>

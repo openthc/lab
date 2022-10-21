@@ -151,7 +151,7 @@
 	min-width: 15rem;
 	padding: 0.25rem;
 }
-.lab-metric-item .input-group-prepend .input-group-text {
+.lab-metric-item .input-group .input-group-text {
 	display: block;
 	overflow: hidden;
 	text-align: left;
@@ -159,7 +159,7 @@
 	white-space: nowrap;
 	width: 10em;
 }
-.lab-metric-item .input-group-prepend .input-group-text:hover {
+.lab-metric-item .input-group .input-group-text:hover {
 	min-width: 10em;
 	width: auto;
 }

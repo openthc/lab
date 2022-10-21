@@ -109,9 +109,7 @@ function _draw_metric($lm)
 ?>
 	<div class="lab-metric-item">
 		<div class="input-group">
-			<div class="input-group-prepend">
-				<div class="input-group-text"><?= __h($lm['name']) ?></div>
-			</div>
+			<div class="input-group-text"><?= __h($lm['name']) ?></div>
 			<input
 				autocomplete="off"
 				class="form-control r lab-metric-qom"
@@ -149,9 +147,7 @@ function _draw_metric_select_pass_fail($lm)
 ?>
 	<div class="lab-metric-item">
 		<div class="input-group">
-			<div class="input-group-prepend">
-				<div class="input-group-text"><?= __h($lm['name']) ?></div>
-			</div>
+			<div class="input-group-text"><?= __h($lm['name']) ?></div>
 			<select class="form-control" name="<?= sprintf('lab-metric-%s', $lm['id']) ?>">
 				<option <?= ($sel == '-1' ? 'selected' : null) ?> value="-1">n/a</option>
 				<option <?= ($sel == '0' ? 'selected' : null) ?> value="0">Fail</option>
