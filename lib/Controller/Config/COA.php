@@ -24,6 +24,7 @@ class COA extends \OpenTHC\Lab\Controller\Base
 		$opt_list[] = 'coa/email';
 		$opt_list[] = 'coa/phone';
 		$opt_list[] = 'coa/website';
+		$opt_list[] = 'coa/icon';
 		$opt_list[] = 'coa/footer';
 
 		$dbc = $this->_container->DBC_User;

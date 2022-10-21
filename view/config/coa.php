@@ -67,6 +67,18 @@
 		<div class="input-group-text">Logo/Icon:</div>
 	</div>
 	<input class="form-control" name="coa/icon" type="file">
+	<?php
+	if ( ! empty($data['coa/icon'])) {
+		if (is_file($data['coa/icon'])) {
+			$img = file_get_contents($data['coa/icon']);
+			$img_b64 = base64_encode($img);
+			echo '<div class="input-group-append">';
+			printf('<img alt="Company Icon" src="data:text/plain;base64,%s">', $img_b64);
+			// echo $data['coa/icon'];
+			echo '</div>';
+		}
+	}
+	?>
 </div>
 
 
