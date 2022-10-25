@@ -17,6 +17,7 @@ class Sample extends \OpenTHC\Lab\Controller\Base
 		$dbc = $this->_container->DBC_User;
 
 		switch ($_POST['a']) {
+			case 'reset-seq-d':
 			case 'reset-seq-g':
 			case 'reset-seq-y':
 			case 'reset-seq-q':
@@ -80,12 +81,16 @@ class Sample extends \OpenTHC\Lab\Controller\Base
 		}
 
 		// $Company->setOption('sample-id-seq', '$YY$MA$SEQ_M');
+		$Seq = new \OpenTHC\Lab\Sequence($_SESSION['Company']['id'], $dbc);
+		$Seq->setTimeZone($_SESSION['tz']);
+		$peek = $Seq->peek();
 
 		$data = $this->loadSiteData();
 		$data['Page']['title'] = 'Config :: Samples';
 
 		$val = $dbc->fetchOne('SELECT val FROM base_option WHERE key = :k', [ ':k' => self::BASE_OPTION_KEY ]);
 		$data['seq_format'] = json_decode($val);
+		$data['seq_peek'] = $peek;
 
 		$data['seq'] = [
 			'YYYY' => date('Y'),
