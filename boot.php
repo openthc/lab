@@ -22,7 +22,7 @@
 
 define('APP_ROOT', __DIR__);
 define('APP_SALT', sha1('$PUT_YOUR_SECRET_VALUE_HERE'));
-define('APP_BUILD', '420.22.240');
+define('APP_BUILD', '420.22.280');
 
 openlog('openthc-lab', LOG_ODELAY|LOG_PID, LOG_LOCAL0);
 
@@ -104,7 +104,7 @@ function _nice_id($x0, $x1=null)
  */
 function _draw_metric($lm)
 {
-	$uom = $lm['meta']['uom'] ?: $lm['metric']['meta']['uom'] ?: $lm['metric']['uom'];
+	$uom = $lm['metric']['uom'] ?: $lm['metric']['meta']['uom'] ?: $lm['meta']['uom'];
 
 ?>
 	<div class="lab-metric-item">
@@ -149,6 +149,7 @@ function _draw_metric_select_pass_fail($lm)
 		<div class="input-group">
 			<div class="input-group-text"><?= __h($lm['name']) ?></div>
 			<select class="form-control" name="<?= sprintf('lab-metric-%s', $lm['id']) ?>">
+				<option>-empty-</option>
 				<option <?= ($sel == '-1' ? 'selected' : null) ?> value="-1">n/a</option>
 				<option <?= ($sel == '0' ? 'selected' : null) ?> value="0">Fail</option>
 				<option <?= ($sel == '1' ? 'selected' : null) ?> value="1">Pass</option>
@@ -168,10 +169,10 @@ function _draw_stat_pick()
 	<div class="input-group">
 	<div class="input-group-text">Result:</div>
 	<select class="form-control lab-metric-qom-bulk">
-	<option value="OK">OK</option>
-	<option value="N/A">N/A</option>
-	<option value="N/D">N/D</option>
-	<option value="N/T">N/T</option>
+		<option value="OK">OK</option>
+		<option value="N/A">N/A</option>
+		<option value="N/D">N/D</option>
+		<option value="N/T">N/T</option>
 	</select>
 	</div>
 	HTML;

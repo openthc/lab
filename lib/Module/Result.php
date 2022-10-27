@@ -19,7 +19,7 @@ class Result extends \OpenTHC\Module\Base
 		// $a->map(['GET','POST'], '/{id}/sync', 'OpenTHC\Lab\Controller\Result\Sync');
 
 		$a->get('/create', 'OpenTHC\Lab\Controller\Result\Create');
-		$a->post('/create', 'OpenTHC\Lab\Controller\Result\Create:save');
+		$a->post('/create', 'OpenTHC\Lab\Controller\Result\Update:post');
 
 		$a->map(['GET','POST'], '/upload', 'OpenTHC\Lab\Controller\Result\Upload');
 		$a->get('/upload/preview', 'OpenTHC\Lab\Controller\Result\Upload:preview');

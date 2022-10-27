@@ -49,50 +49,56 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 	}
 
 	/**
-	 *
+	 * Lab Result POST Handler
 	 */
 	function post($REQ, $RES, $ARG)
 	{
 		$dbc_user = $this->_container->DBC_User;
 
+		$sql = "SELECT *, meta->>'uom' AS uom FROM lab_metric";
+		$res_lab_metric = $dbc_user->fetchAll($sql);
+
+		$dbc_user->query('BEGIN');
+
 		$LR = new Lab_Result($dbc_user, $ARG['id']);
-		if (empty($LR['id'])) {
-			_exit_text('Invalid Lab Result [CRU-075]', 400);
-		}
 
 		switch ($_POST['a']) {
 			case 'lab-result-delete':
 
-				$arg = [
-					':lr0' => $LR['id']
-				];
-
-				$dbc_user->query('BEGIN');
-
-				// v1 lab_result_inventory
-				$dbc_user->query('DELETE FROM lab_result_inventory WHERE lab_result_id = :lr0', $arg);
-				// v0 inventory_lab_result
-				$dbc_user->query('DELETE FROM inventory_lab_result WHERE lab_result_id = :lr0', $arg);
-				$dbc_user->query('DELETE FROM lab_result_metric WHERE lab_result_id = :lr0', $arg);
-				$dbc_user->query('DELETE FROM lab_result WHERE id = :lr0', $arg);
-
-				// Reset Flags on Sample
-				$LS = new Lab_Sample($dbc_user, $LR['lab_sample_id']);
-
-				// Reset Flags on Inventory?
-				// $IY = new Inventory($dbc_user, $LS['inventory_id']);
-
-				// Alert
-
-				$dbc_user->query('COMMIT');
-
-				return $RES->withRedirect('/result');
+				return $this->_delete($RES, $LR, $dbc_user);
 
 				break;
 
 			case 'lab-result-commit':
 			case 'lab-result-save':
 
+				if (empty($LR['id'])) {
+					$LR['id'] = _ulid();
+					$LR['guid'] = substr($LR['id'], 0, 16);
+					// $LR['name'] = sprintf('Lab Result for Sample Lot: %s', $Sample['id']);
+					$LR['license_id'] = $_SESSION['License']['id'];
+					$LR['stat'] = $_POST['lab-result-stat'];
+					$LR['flag'] = 0;
+					$LR['hash'] = '-';
+				}
+
+				// Assign Sample
+				if (empty($LR['lab_sample_id'])) {
+					// Get and validate the QA Sample
+					$sql = 'SELECT * from lab_sample WHERE id = :id AND license_id = :lic';
+					$arg = [
+						':id' => $_POST['sample_id'],
+						':lic' => $_SESSION['License']['id'],
+					];
+					$Sample = $dbc_user->fetchRow($sql, $arg);
+					if (empty($Sample['id'])) {
+						_exit_text(sprintf('Could not find Sample Lot: %s [LPC-120]', $_POST['sample_id']), 409);
+					}
+					$LR['lab_sample_id'] = $Sample['id'];
+				}
+
+				// Get the authorative lab metrics
+				// This list is type-flat, and it's IDs the row ULID
 				$sql = "SELECT *, meta->>'uom' AS uom FROM lab_metric";
 				$res_lab_metric = $dbc_user->fetchAll($sql);
 
@@ -102,8 +108,14 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 				$dbc_user->query('BEGIN');
 
 				$lr0_meta = $LR->getMeta();
+				if (empty($lr0_meta['@context'])) {
+					$lr0_meta['@context'] = 'https://openthc.org/v2018/post';
+				}
+				if (empty($lr0_meta['@version'])) {
+					$lr0_meta['@version'] = '420.18.0';
+				}
 
-				// Section Statuses
+				// Section Status
 				foreach ($_POST as $k => $v) {
 					if (preg_match('/lab\-metric\-type\-(\w+)\-stat$/', $k, $m)) {
 						$lmt_id = $m[1];
@@ -115,6 +127,10 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 					}
 				}
 
+				// Save Lab Result
+				$LR['meta'] = json_encode($lr0_meta);
+				$LR->save();
+
 				// Metric Values
 				foreach ($res_lab_metric as $m) {
 
@@ -123,14 +139,12 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 					// 	'lab_metric_id' => $m['id']
 					// ]);
 
-					$k = sprintf('lab-metric-%s', $m['id']);
+					$qom = trim($_POST[sprintf('lab-metric-%s', $m['id'])]);
+					$uom = $_POST[sprintf('lab-metric-%s-uom', $m['id'])] ?: $m['uom'];
 
-					$qom = trim($_POST[$k]);
 					if (strlen($qom) == 0) {
 						continue;
 					}
-
-					$uom = $_POST[sprintf('lab-metric-%s-uom', $m['id'])] ?: $m['uom'];
 
 					switch ($qom) {
 						case 'N/A':
@@ -169,6 +183,7 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 						case '018NY6XC00LM877GAKMFPK7BMC': // d8-thc
 						case '018NY6XC00LMB0JPRM2SF8F9F2': // thca
 							$thc_list[] = $qom;
+							$thc_uom = $uom;
 							break;
 						case '018NY6XC00DEEZ41QBXR2E3T97': // total-cbd
 						case '018NY6XC00LMK7KHD3HPW0Y90N': // cbd
@@ -193,10 +208,13 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 
 				// And LOCK?
 				if ('lab-result-commit' == $_POST['a']) {
+					// if ('lab-result-save-and-commit' == $_POST['a']) {
 					// Should LOCK promote status to DONE/PASS/FAIL?
 					$LR->setFlag(Lab_Result::FLAG_LOCK);
 				}
-
+				$LR['hash'] = $LR->getHash();
+				// if ($action_context == 'create') {}
+				// $LR->save('Lab/Result/Create by User');
 				$LR->save('Lab/Result/Update by User');
 
 				// Find Sample
@@ -204,6 +222,20 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 				// $I = new Inventory($LS['inventory_id']);
 				// $LR->bindToInventory($I);
 				// $I->bindToLabResult($LR);
+
+				// Update Lab Sample?
+				$LS = new Lab_Sample($dbc_user, $LR['lab_sample_id']);
+				// $LS->delFlag();
+				// $LS->setFlag();
+				// $LS['qty'] = 0;
+				$LS['stat'] = Lab_Sample::STAT_DONE;
+				// $LS['qty'] = 0; // Configure to Zero-Out on Complete?
+				$LS->save('Lab_Sample/Update');
+				// $LS->setFlag();
+				// $LS['stat'] =
+				// $LS->save('Lab_Sample/Create by User');
+
+				$this->_save_update_inventory($dbc_user, $LS, $LR, $thc_uom);
 
 				$dbc_user->query('COMMIT');
 
@@ -214,6 +246,87 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 				return $RES->withRedirect(sprintf('/result/%s', $LR['id']));
 
 		}
+
+	}
+
+	/**
+	 *
+	 */
+	function _save_update_inventory($dbc, $LS0, $LR0, $thc_uom)
+	{
+		$cbd = $thc = '';
+
+		switch ($thc_uom) {
+		case 'pct':
+			$cbd = sprintf('%0.2F%%', $LR0['cbd']);
+			$thc = sprintf('%0.2F%%', $LR0['thc']);
+			break;
+		default:
+			$cbd = sprintf('%0.2F %s', $LR0['cbd'], $cbd_uom);
+			$thc = sprintf('%0.2F %s', $LR0['thc'], $thc_uom);
+		}
+
+		// Link
+		// v1 lab_result_inventory
+		$sql = 'INSERT INTO lab_result_inventory (inventory_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		$res = $dbc->query($sql, [
+			':i0' => $LS0['lot_id'],
+			':lr0' => $LR0['id']
+		]);
+
+		// v0 inventory_lab_result
+		$sql = 'INSERT INTO inventory_lab_result (lot_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		$res = $dbc->query($sql, [
+			':i0' => $LS0['lot_id'],
+			':lr0' => $LR0['id']
+		]);
+
+		$sql = 'UPDATE inventory SET flag = flag | :f1, qa_cbd = :c1, qa_thc = :t1 WHERE id = :i0';
+		$arg = [
+			':i0' => $LS0['lot_id'],
+			':lr1' => $LR0['id'], // v1 inventory.lab_result_id
+			':f1' => 0x00000400, // Inventory::FLAG_QA_PASS,
+			':c1' => $LR0['cbd'],
+			':t1' => $LR0['thc'],
+		];
+
+	}
+
+	/**
+	 * Delete a Lab Result
+	 */
+	function _delete($RES, $LR, $dbc)
+	{
+
+		$arg = [
+			':lr0' => $LR['id']
+		];
+
+		$dbc->query('BEGIN');
+
+		// v1 lab_result_inventory
+		$dbc->query('DELETE FROM lab_result_inventory WHERE lab_result_id = :lr0', $arg);
+		// v0 inventory_lab_result
+		$dbc->query('DELETE FROM inventory_lab_result WHERE lab_result_id = :lr0', $arg);
+		$dbc->query('DELETE FROM lab_result_metric WHERE lab_result_id = :lr0', $arg);
+		$dbc->query('DELETE FROM lab_result WHERE id = :lr0', $arg);
+
+		// Reset Flags on Sample
+		$LS = new Lab_Sample($dbc, $LR['lab_sample_id']);
+
+		// Reset Flags on Inventory?
+		// $IY = new Inventory($dbc_user, $LS['inventory_id']);
+
+		// Alert
+
+		$dbc->query('COMMIT');
+
+		$url = '/result';
+		if ( ! empty($LR['lab_sample_id'])) {
+			$url = sprintf('/sample/%s', $LR['lab_sample_id']);
+		}
+
+		return $RES->withRedirect($url);
 
 	}
 }
