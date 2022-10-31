@@ -8,6 +8,7 @@ namespace OpenTHC\Lab;
 class Sequence
 {
 	const BASE_OPTION_KEY = 'lab-sample-seq-format';
+	const SYMBOL_TYPE_DEFAULT = 'LR';
 
 	const SEQUENCE_SYMBOL_LIST = array(
 		'018NY6XC00SEQH9174ZH0DV5DQ' => array(
@@ -119,10 +120,13 @@ class Sequence
 	protected $sequence_namespace;
 
 	private $_timezone;
+	private $_type;
 
 	function __construct($namespace, $dbc) {
 		$this->sequence_namespace = strtolower($namespace);
 		$this->dbc = $dbc;
+		$this->_timezone = 'UTC';
+		$this->_type = self::SYMBOL_TYPE_DEFAULT;
 	}
 
 	/**
@@ -138,7 +142,7 @@ class Sequence
 	 */
 	function peek($format = null) {
 		$this->format = $format;
-		return $this->_next($this->_sequence_last_value());
+		return $this->_next($this->_sequence_peek_value());
 	}
 
 	function _next($fun_sequence_get_value) {
@@ -151,7 +155,7 @@ class Sequence
 		}
 
 		// Look for things that looks like sequence symbols separated by non-words
-		preg_match_all('/{(\w+)}[\W]?/', $this->format, $matches);
+		preg_match_all('/{(\w+)}[- _!@#$%^&*]?/', $this->format, $matches);
 		$symbols_found = $matches[1];
 
 		$symbols = array();
@@ -167,17 +171,14 @@ class Sequence
 				case '018NY6XC00SEQWYYHWTB9DA4H1':
 				case '018NY6XC00SEQY40MRNEYXG414':
 				case '018NY6XC00SEQSQ2Q3HGEWKVPJ':
-					// @todo Company awareness
 					$s = sprintf('seq_%s_%s', $this->sequence_namespace, strtolower($Symbol['symbol']));
 					$s = strtolower($s);
 
-					// $Symbol['value'] = $this->_sequence_last_value($s);
 					$Symbol['value'] = $fun_sequence_get_value($s);
 					break;
 
 				case '018NY6XC00SEQ91X94PEQE6FE6':
-					$Symbol['value'] = 'LR';
-					// $Symbol['value'] = 'LS'; // @todo
+					$Symbol['value'] = $this->_type;
 					break;
 
 				case '018NY6XC00SEQ2AJG2NWAATGDW':
@@ -192,8 +193,8 @@ class Sequence
 					$Symbol['value'] = $d0->format($Symbol['datetime_format']);
 					break;
 
-				// default:
-				// 	throw new Exception("Unknown Symbol [LSE-196]");
+				default:
+					throw new Exception("Unknown Symbol [LSE-196]");
 			}
 
 			$symbols[ $sym ] = $Symbol;
@@ -221,8 +222,52 @@ class Sequence
 
 	}
 
+	/**
+	 * Set the timezone for sequences governed by time
+	 */
 	function setTimeZone($tz) {
 		$this->_timezone = $tz;
+	}
+
+	/**
+	 * Override the value used for the {TYPE} symbol
+	 */
+	function setType($type) {
+		$this->_type = $type;
+	}
+
+	/**
+	 * Reset a sequence in the database
+	 */
+	function resetSequence($sym, $min = 1) {
+		$Symbol = self::SEQUENCE_SYMBOL_LIST[ $sym ];
+		if (empty($Symbol['id'])) {
+			$Symbol = $this->_findSymbol($sym);
+		}
+		switch ($Symbol['id']) {
+			case '018NY6XC00SEQH9174ZH0DV5DQ':
+			case '018NY6XC00SEQCYWPQKDX1A37D':
+			case '018NY6XC00SEQWYYHWTB9DA4H1':
+			case '018NY6XC00SEQY40MRNEYXG414':
+			case '018NY6XC00SEQSQ2Q3HGEWKVPJ':
+				$s = $Symbol['symbol'];
+				break;
+			default:
+				throw new Exception('Sequence reset not supported');
+		}
+
+		$s = sprintf('seq_%s_%s', $this->sequence_namespace, $s);
+		$s = strtolower($s);
+		$min = max(1, intval($min));
+
+		$res = $this->dbc->query(sprintf('DROP SEQUENCE IF EXISTS %s', $s));
+		$res = $this->dbc->query(sprintf('CREATE SEQUENCE %s MINVALUE %d START WITH %d', $s, $min, $min));
+		$res = $this->dbc->query('SELECT setval(:s, :d, false)', [
+			':s' => $s,
+			':d' => $min,
+		]);
+
+		return $res;
 	}
 
 	/**
@@ -248,7 +293,7 @@ class Sequence
 	/**
 	 * Peek at the next value in the sequence
 	 */
-	function _sequence_last_value() {
+	function _sequence_peek_value() {
 		$dbc = $this->dbc;
 		return function($seq) use ($dbc) {
 			return $dbc->fetchOne(sprintf('SELECT (last_value + 1) FROM "%s"', $seq));
@@ -257,10 +302,10 @@ class Sequence
 	/**
 	 * Pop the next value from the sequence
 	 */
-	function _sequence_next_value($seq) {
+	function _sequence_next_value() {
 		$dbc = $this->dbc;
 		return function ($seq) use ($dbc) {
-			return $this->dbc->fetchOne(sprintf("SELECT nextval('%s')", $s));
+			return $this->dbc->fetchOne(sprintf("SELECT nextval('%s')", $seq));
 		};
 	}
 
