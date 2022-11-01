@@ -592,19 +592,15 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			// However, the QBench Data has a Preference for Authortative Data in mg/L field.
 			// And then stuff in mg/g and then mg/mL then % then mg/unit
 			// So, if there is an ND in the ${NAME}_mg_l field then use that, not the ZERO value in %
-			$metric_key_ulid = _qbench_map_metric($metric_key);
-			if ('018NY6XC00LM00000000000000' == $metric_key_ulid) {
+			$lm0 = _qbench_map_metric($dbc, $metric_key);
+			if ('018NY6XC00LM00000000000000' == $lm0['id']) {
 				// echo "SKIP: $metric_key\n";
 				continue;
-			}
-			if (empty($metric_key_ulid)) {
-				echo "Create: $metric_key [BIQ-346]\n";
-				exit(0);
 			}
 
 			$lrm0 = $dbc->fetchRow('SELECT id FROM lab_result_metric WHERE lab_result_id = :lr0 AND lab_metric_id = :lm0', [
 				':lr0' => $lr0['id']
-				, ':lm0' => $metric_key_ulid
+				, ':lm0' => $lm0['id'],
 			]);
 			if (empty($lrm0['id'])) {
 
@@ -663,9 +659,9 @@ function _qbench_pull_result_import($dbc, $rec) : int
 				$lrm1 = [
 					'id' => _ulid()
 					, 'lab_result_id' => $lr0['id']
-					, 'lab_metric_id' => $metric_key_ulid
+					, 'lab_metric_id' => $lm0['id']
 					, 'qom' => $val
-					, 'uom' => 'pct'
+					, 'uom' => $lm0['uom']
 				];
 
 				try {
@@ -1248,7 +1244,7 @@ function _qbench_pull_report($dbc, $qbc)
 /**
  *
  */
-function _qbench_map_metric($k)
+function _qbench_map_metric($dbc, $metric_key) : array
 {
 	static $metric_map = [
 		  'a_bisabolol_percent' => '018NY6XC00LMQW96F7VFGSCTYK'
@@ -1638,21 +1634,43 @@ function _qbench_map_metric($k)
 		, 'zoxamide' => '018NY6XC00Q04NWA7NDVETQZES'
 	];
 
-	$k = strtolower($k);
+	$metric_key = strtolower($metric_key);
 
-	$r = $metric_map[$k];
+	$metric_ulid = $metric_map[$metric_key];
 
-	if (empty($r)) {
+	if (empty($metric_ulid)) {
 		// Ignore the Pass/Failers
-		if (preg_match('/_pf$/', $k)) {
+		if (preg_match('/_pf$/', $metric_key)) {
 			$r = '018NY6XC00LM00000000000000';
 		}
-		// if (preg_match('/^total_/', $k)) {
+		// if (preg_match('/^total_/', $metric_key)) {
 		// 	return '018NY6XC00LM00000000000000';
 		// }
 
 	}
 
-	return $r;
+	if ('018NY6XC00LM00000000000000' == $metric_ulid) {
+		return [
+			'id' => $metric_ulid,
+			'name' => '-skip-',
+		];
+	}
+
+	if (empty($metric_ulid)) {
+		echo "Create: $metric_key [BIQ-346]\n";
+		exit(0);
+	}
+
+	$sql = <<<SQL
+	SELECT id, name, type, lab_metric_type_id, meta->>'uom'
+	FROM lab_metric
+	WHERE id = :lm0
+	SQL;
+
+	$lm0 = $dbc->fetchRow($sql, [
+		':lm0' => $metric_ulid
+	]);
+
+	return $lm0;
 
 }
