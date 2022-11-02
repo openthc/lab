@@ -17,6 +17,7 @@ class Sample extends \OpenTHC\Lab\Controller\Base
 		$dbc = $this->_container->DBC_User;
 
 		switch ($_POST['a']) {
+			// v0
 			case 'reset-seq-d':
 			case 'reset-seq-g':
 			case 'reset-seq-y':
@@ -42,6 +43,50 @@ class Sample extends \OpenTHC\Lab\Controller\Base
 				var_dump($res);
 
 			break;
+			// v1
+			case 'reset-seq-018NY6XC00SEQH9174ZH0DV5DQ':
+			case 'reset-seq-018NY6XC00SEQCYWPQKDX1A37D':
+			case 'reset-seq-018NY6XC00SEQWYYHWTB9DA4H1':
+			case 'reset-seq-018NY6XC00SEQY40MRNEYXG414':
+			case 'reset-seq-018NY6XC00SEQSQ2Q3HGEWKVPJ':
+				$Seq = new \OpenTHC\Lab\Sequence($_SESSION['Company']['id'], $dbc);
+				$Seq->setTimeZone($_SESSION['tz']);
+				preg_match('/^reset-seq-(\w+)$/', $_POST['a'], $matches);
+				$d = $_POST[sprintf('seq-%s-min', $matches[1])];
+				$d = intval($d);
+				$res = $Seq->resetSequence($matches[1], $d);
+
+				var_dump($res);
+				return $RES->withRedirect($_SERVER['REQUEST_URI']);
+				break;
+			// v2
+			case 'reset-seq-company':
+			case 'reset-seq-license':
+				preg_match('/^reset-seq-(\w+)$/', $_POST['a'], $namespace_match);
+				switch ($namespace_match[1]) {
+					case 'license':
+						$namespace = $_SESSION['License']['id'];
+						break;
+					case 'company':
+					default:
+						$namespace = $_SESSION['Company']['id'];
+				}
+
+				// Find the appropriate ulid-keyd symbol
+				foreach ($_POST as $k => $v) {
+					if (preg_match('/^seq-(\w{26})-min$/', $k, $matches)) {
+						$symbol = $matches[1];
+						$key = $k;
+					}
+				}
+
+				$d = $_POST[$key];
+				$d = intval($d);
+
+				$Seq = new \OpenTHC\Lab\Sequence($namespace, $dbc);
+				$Seq->setTimeZone($_SESSION['tz']);
+				$res = $Seq->resetSequence($symbol, $d);
+				break;
 			case 'update-seq-format':
 				$key = self::BASE_OPTION_KEY;
 				$val = trim($_POST[$key]);
@@ -59,11 +104,14 @@ class Sample extends \OpenTHC\Lab\Controller\Base
 			break;
 		}
 
-
+		// Sequence table holds namespaced copies of $seq_data
+		$seq_table = [];
+		foreach ([ $_SESSION['License']['id'], $_SESSION['Company']['id'] ] as $namespace) {
 		foreach ([ 'G','Y','Q','M','D'] as $c) { // $idx=0; $idx<4; $idx++) {
 			try {
 
 				$s = sprintf('seq_%s_%s', $_SESSION['Company']['id'], $c );
+				$s = sprintf('seq_%s_%s', $namespace, $c );
 				$s = strtolower($s);
 				$arg = [ ':s' => $s ];
 
@@ -71,13 +119,16 @@ class Sample extends \OpenTHC\Lab\Controller\Base
 				// $seq_data[$idx] = $dbc->fetchOne('SELECT currval(:s)', $arg);
 				// $seq_data[$idx] = $dbc->fetchOne('SELECT nextval(:s)', $arg);
 				$seq_data[$c] = $dbc->fetchOne(sprintf('SELECT last_value FROM "%s"', $s));
+				$seq_table[$namespace][$c] = $seq_data[$c];
 
 			} catch (\Exception $e) {
 				// Ignore
 				// _exit_html($e->getMessage());
 				$err = $e->getMessage();
 				$seq_data[$c] = '-not-set-';
+				$seq_table[$namespace][$c] = '-not-set-';
 			}
+		}
 		}
 
 		// $Company->setOption('sample-id-seq', '$YY$MA$SEQ_M');
@@ -110,6 +161,8 @@ class Sample extends \OpenTHC\Lab\Controller\Base
 			'm' => $seq_data['M'],
 			'd' => $seq_data['D'],
 		];
+		$data['seq_company'] = $seq_table[ $_SESSION['Company']['id'] ];
+		$data['seq_license'] = $seq_table[ $_SESSION['License']['id'] ];
 
 		return $RES->write( $this->render('config/sample.php', $data) );
 

@@ -92,10 +92,28 @@ pre.color-invert {
 	<h2>Current Sequence Information</h2>
 	<form autocomplete="off" method="post">
 	<div class="mb-2">
+		<!-- v0 -->
 		<?= _input_group("seq-g-min"
 			, $data['seq']['g']
 			, 'Global'
 			, '<button class="btn btn-warning" name="a" type="submit" value="reset-seq-g"><i class="fas fa-sync"></i></button>'
+		) ?>
+		<!-- v1 -->
+		<?= _input_group("seq-018NY6XC00SEQH9174ZH0DV5DQ-min"
+			, $data['seq']['g']
+			, 'Global'
+			, '<button class="btn btn-warning" name="a" type="submit" value="reset-seq-018NY6XC00SEQH9174ZH0DV5DQ"><i class="fas fa-sync"></i></button>'
+		) ?>
+		<!-- v2 -->
+		<?= _input_group("seq-018NY6XC00SEQH9174ZH0DV5DQ-min"
+			, $data['seq_company']['G']
+			, 'Company Global'
+			, '<button class="btn btn-warning" name="a" type="submit" value="reset-seq-company"><i class="fas fa-sync"></i></button>'
+		) ?>
+		<?= _input_group("seq-018NY6XC00SEQH9174ZH0DV5DQ-min"
+			, $data['seq_license']['G']
+			, 'License Global'
+			, '<button class="btn btn-warning" name="a" type="submit" value="reset-seq-license"><i class="fas fa-sync"></i></button>'
 		) ?>
 	</div>
 
