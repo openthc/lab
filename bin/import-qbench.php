@@ -584,6 +584,8 @@ function _qbench_pull_result_import($dbc, $rec) : int
 	// QBench puts lab_result_metric data into a worksheet
 	if ( ! empty($rec['worksheet_data'])) {
 
+		$need_sum_calc = true;
+
 		foreach ($rec['worksheet_data'] as $metric_key => $metric_val) {
 
 			$metric_val['@key'] = $metric_key;
@@ -593,9 +595,69 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			// And then stuff in mg/g and then mg/mL then % then mg/unit
 			// So, if there is an ND in the ${NAME}_mg_l field then use that, not the ZERO value in %
 			$lm0 = _qbench_map_metric($dbc, $metric_key);
-			if ('018NY6XC00LM00000000000000' == $lm0['id']) {
-				// echo "SKIP: $metric_key\n";
-				continue;
+
+			switch ($lm0['id']) {
+				case '018NY6XC00LM00000000000000':
+					// echo "SKIP: $metric_key\n";
+					continue 2;
+					break;
+				case '018NY6XC00DEEZ41QBXR2E3T97': // total-cbd
+				case '018NY6XC00PXG4PH0TXS014VVW': // total-thc
+					$need_sum_calc = false;
+					break;
+			}
+
+			// Patch the Metric Values to Real Shit
+			$val = $metric_val['value'];
+			if ( ! is_numeric($val)) {
+				// Sadly, these can be basically anything
+				// And are defined by each user of QBench
+				switch (strtoupper($val)) {
+					case 'DET': // Detected
+					case 'Det': // GT-LOD < LOQ-LB
+						$val = -130;
+						break;
+					case 'ND':
+						$val = -2;
+						break;
+					case 'NT':
+						$val = -134; // v0
+						$val = -3; // v1
+						break;
+					case 'PASS':
+						$val = 1;
+						// $val = -587;
+						// $uom = bool;
+						break;
+					case 'TNTC': // Too Numerous to Count
+						$val = -138;
+						break;
+					case 'TRACE':
+						$val = -137;
+						break;
+					// case '33,333':
+					// case '>20':
+					// case '>1%':
+					case '0..1':
+						$val = 0.1;
+						break;
+					case 'CFM':
+						$val = 0;
+						break;
+					case '>20,000': // GT-LOQ
+					case '>20': // GT-LOQ
+					case '>1%':
+						$val = -416;
+						break;
+					default:
+						var_dump($metric_val);
+						// [value] => >20
+						// [value] => 33,333
+						// [value] => >1%
+						// [value] => >20
+						// [value] => >20
+						// echo "Invalid Value: {$metric_val['value']}\n";
+				}
 			}
 
 			$lrm0 = $dbc->fetchRow('SELECT id FROM lab_result_metric WHERE lab_result_id = :lr0 AND lab_metric_id = :lm0', [
@@ -603,58 +665,6 @@ function _qbench_pull_result_import($dbc, $rec) : int
 				, ':lm0' => $lm0['id'],
 			]);
 			if (empty($lrm0['id'])) {
-
-				$val = $metric_val['value'];
-				if ( ! is_numeric($val)) {
-					// Sadly, these can be basically anything
-					// And are defined by each user of QBench
-					switch (strtoupper($val)) {
-						case 'DET': // Detected
-						case 'Det': // GT-LOD < LOQ-LB
-							$val = -130;
-							break;
-						case 'ND':
-							$val = -2;
-							break;
-						case 'NT':
-							$val = -134; // v0
-							$val = -3; // v1
-							break;
-						case 'PASS':
-							$val = 1;
-							// $val = -587;
-							// $uom = bool;
-							break;
-						case 'TNTC': // Too Numerous to Count
-							$val = -138;
-							break;
-						case 'TRACE':
-							$val = -137;
-							break;
-						// case '33,333':
-						// case '>20':
-						// case '>1%':
-						case '0..1':
-							$val = 0.1;
-							break;
-						case 'CFM':
-							$val = 0;
-							break;
-						case '>20,000': // GT-LOQ
-						case '>20': // GT-LOQ
-						case '>1%':
-							$val = -416;
-							break;
-						default:
-							var_dump($metric_val);
-							// [value] => >20
-							// [value] => 33,333
-							// [value] => >1%
-							// [value] => >20
-							// [value] => >20
-							// echo "Invalid Value: {$metric_val['value']}\n";
-					}
-				}
 
 				$lrm1 = [
 					'id' => _ulid()
@@ -674,13 +684,21 @@ function _qbench_pull_result_import($dbc, $rec) : int
 					// exit(0);
 				}
 
+			} else {
+				$update = [];
+				$update['qom'] = $val;
+				$update['uom'] = $lm0['uom'];
+				$filter = [];
+				$filter['id'] = $lrm0['id'];
+				$dbc->update('lab_result_metric', $update, $filter);
 			}
 
 		}
 
+		if ($need_sum_calc) {
+			$lr0->updateCannabinoids();
+		}
 	}
-
-	$lr0->updateCannabinoids();
 
 	return(0);
 
@@ -1269,7 +1287,6 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'acetone' => '018NY6XC00LM9HW5DZGD5KR55G'
 		, 'acetonitrile' => '018NY6XC00STNQ0SR3G2XBMAYJ'
 		, 'aerobic' => '018NY6XC00LMFPY3XH8NNXM9TH'
-		// , 'aflatoxin_pf' => '018NY6XC00LMR9PB7SNBP97DAS' // ?
 		, 'aldicarb_sulfone' => '018NY6XC00KRBFY2AHKHRXN58B'
 		, 'aldicarb' => '018NY6XC00LME4KJM6Y8XP8WGA'
 		, 'aminocarb' => '018NY6XC00X9FKBQTRMMT9CWYB'
@@ -1294,7 +1311,6 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'bifenthrin' => '018NY6XC00LMPH4K88KC1PKJVJ'
 		, 'bifenthrin_gc' => '018NY6XC00LMPH4K88KC1PKJVJ'
 		, 'bifenthrin_lc' => '018NY6XC00LMPH4K88KC1PKJVJ'
-		, 'bile_tolerant_pf_pf' => '018NY6XC00LM00000000000000'
 		, 'bile_tolerant' => '018NY6XC00LM638QCGB50ZKYKJ'
 		, 'boron' => '018NY6XC000WMQVN35HCPYPW8W'
 		, 'boscalid' => '018NY6XC00LM3P767WQ0KSFARZ'
@@ -1415,7 +1431,6 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'dimethomorph' => '018NY6XC00LMYY49X6ZPKWMK0F'
 		, 'dimoxystrobin' => '018NY6XC00FGBE9236HKC2Z99Y'
 		, 'diuron' => '018NY6XC00TZB49XSAM9XMQ0C1'
-		, 'e_coli_pf' => '018NY6XC00LM00000000000000'
 		, 'e_coli' => '018NY6XC00LM7S8H2RT4K4GYME'
 		, 'epoxiconazole' => '018NY6XC00NGT4P7T5BK3Y4WV6'
 		, 'ethanol' => '018NY6XC00LMTBZ6MS529BRMDY'
@@ -1441,7 +1456,7 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'fluometuron' => '018NY6XC0083YEGTKJYVJJ38V7'
 		, 'flutolanil' => '018NY6XC00KZX7A23W14MT2074'
 		, 'flutriafol' => '018NY6XC00LMCQGJHSAQRVR05X'
-		, 'foreign_materials_pf' => '018NY6XC00LM00000000000000'
+		, 'foreign_materials_pf' => '018NY6XC00LMA50497RDC53DB5'
 		, 'fuberidazole' => '018NY6XC00BXDN38RRQFM83K2C'
 		, 'furalaxyl' => '018NY6XC0015HX2C5EYMXAJ9SN'
 		, 'furathiocarb' => '018NY6XC00YD57JR2J0QD9S2ZB'
@@ -1520,7 +1535,6 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'ocimene_1_ug_g' => '018NY6XC00LMPS11DW5VC5ZDF6'
 		, 'omethoate' => '018NY6XC00DBBXM932467MEQRD'
 		, 'other_comments' => '018NY6XC00LM00000000000000'
-		, 'overall_pf' => '018NY6XC00LM00000000000000'
 		, 'oxadixyl' => '018NY6XC00Z3253X3QJKK494CH'
 		, 'oxamyl' => '018NY6XC00LM83VNPJMHTKX5F0'
 		, 'p_cymene' => '018NY6XC00LM00000000000000'
@@ -1559,7 +1573,6 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'pyripoxyfen' => '018NY6XC0032DMCC1E0SQAGB8V' // Actually Spelled: Pyriproxyfen
 		, 'quinoxyfen' => '018NY6XC003PXZ5PXNTVK0Z1VG'
 		, 'rotenone' => '018NY6XC00P9BP9K9YZRC3009W'
-		, 'salmonella_pf' => '018NY6XC00LM00000000000000'
 		, 'salmonella' => '018NY6XC00LMS96WE6KHKNP52T'
 		, 'sample_density' => '018NY6XC00LM00000000000000'
 		, 'sample_mass' => '018NY6XC00LM00000000000000'
@@ -1608,14 +1621,14 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'total_cbd_mg_g' => '018NY6XC00LM00000000000000'
 		, 'total_cbd_mg_ml' => '018NY6XC00LM00000000000000'
 		, 'total_cbd_mg_serving' => '018NY6XC00LM00000000000000'
-		, 'total_cbd_percent' => '018NY6XC00LM00000000000000'
+		, 'total_cbd_percent' => '018NY6XC00DEEZ41QBXR2E3T97'
 		, 'total_terpenes' => '018NY6XC00LM00000000000000'
 		, 'total_terpenes_percent' => '018NY6XC00LM00000000000000'
 		, 'total_terpenes_ug_g' => '018NY6XC00LM00000000000000'
 		, 'total_thc_mg_g' => '018NY6XC00LM00000000000000'
 		, 'total_thc_mg_ml' => '018NY6XC00LM00000000000000'
 		, 'total_thc_mg_serving' => '018NY6XC00LM00000000000000'
-		, 'total_thc_percent' => '018NY6XC00LM00000000000000'
+		, 'total_thc_percent' => '018NY6XC00PXG4PH0TXS014VVW'
 		, 'total_unit_serving' => '018NY6XC00LM00000000000000'
 		, 'trans_nerolidol' => '018NY6XC00LM00000000000000'
 		, 'trans_nerolidol_percent' => '018NY6XC00LMJ3HV06KJXPR9F3'
@@ -1641,12 +1654,8 @@ function _qbench_map_metric($dbc, $metric_key) : array
 	if (empty($metric_ulid)) {
 		// Ignore the Pass/Failers
 		if (preg_match('/_pf$/', $metric_key)) {
-			$r = '018NY6XC00LM00000000000000';
+			$metric_ulid = '018NY6XC00LM00000000000000';
 		}
-		// if (preg_match('/^total_/', $metric_key)) {
-		// 	return '018NY6XC00LM00000000000000';
-		// }
-
 	}
 
 	if ('018NY6XC00LM00000000000000' == $metric_ulid) {
@@ -1662,7 +1671,7 @@ function _qbench_map_metric($dbc, $metric_key) : array
 	}
 
 	$sql = <<<SQL
-	SELECT id, name, type, lab_metric_type_id, meta->>'uom'
+	SELECT id, name, type, lab_metric_type_id, meta->>'uom' AS uom
 	FROM lab_metric
 	WHERE id = :lm0
 	SQL;
