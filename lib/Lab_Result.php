@@ -381,12 +381,14 @@ SQL;
 		$uom_list = [];
 
 		foreach ($res as $rec) {
+
 			switch ($rec['lab_metric_id']) {
 				case '018NY6XC00DEEZ41QBXR2E3T97': // total-cbd
 				case '018NY6XC00PXG4PH0TXS014VVW': // total-thc
-				case '018NY6XC00V7ACCY94MHYWNWRN':
-				case '018NY6XC00SAE8Q4JSMF40YSZ3':
-					break 2;
+				case '018NY6XC00V7ACCY94MHYWNWRN': // total-cbd+thc
+				case '018NY6XC00SAE8Q4JSMF40YSZ3': // total-all
+					continue 2;
+					break;
 				case '018NY6XC00LM49CV7QP9KM9QH9': // d9-thc
 					$sum_thc += $rec['qom'];
 					break;
@@ -401,6 +403,7 @@ SQL;
 					$sum_cbd += ($rec['qom'] * 0.877);
 					break;
 			}
+
 			$sum_all += $rec['qom'];
 			$uom_list[] = $rec['uom'];
 		}

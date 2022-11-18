@@ -173,6 +173,14 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			header('access-control-expose-headers: content-disposition');
 			header('access-control-max-age: 600');
 
+			$download_file_name = sprintf('%s-COA.pdf', $data['Lab_Result']['guid']);
+			if ( ! empty($_GET['n'])) {
+				if (preg_match('/^[\w\-]+\.pdf$/', $_GET['n'])) {
+					$download_file_name = $_GET['n'];
+				}
+			}
+			// header(sprintf('content-disposition: attachment; filename="%s"', $name));
+
 			switch ($data['@context']) {
 				case 'http://openthc.org/lab/2022':
 				case 'http://openthc.org/lab/2021':
@@ -186,7 +194,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 					if ( ! empty($data['Lab_Result']['coa_file'])
 						&& is_file($data['Lab_Result']['coa_file'])) {
 
-						header(sprintf('content-disposition: inline; filename="%s-COA.pdf"', $data['Lab_Result']['guid']));
+						header(sprintf('content-disposition: inline; filename="%s"', $download_file_name));
 						header('content-transfer-encoding: binary');
 						header('content-type: application/pdf');
 
@@ -202,7 +210,7 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 					if ( ! empty($data['Lab_Result']['coa_file'])
 						&& is_file($data['Lab_Result']['coa_file'])) {
 
-						header(sprintf('content-disposition: inline; filename="%s-COA.pdf"', $data['Lab_Result']['guid']));
+						header(sprintf('content-disposition: inline; filename="%s"', $download_file_name));
 						header('content-transfer-encoding: binary');
 						header('content-type: application/pdf');
 
