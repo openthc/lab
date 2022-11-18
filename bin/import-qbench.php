@@ -651,11 +651,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 						break;
 					default:
 						var_dump($metric_val);
-						// [value] => >20
-						// [value] => 33,333
-						// [value] => >1%
-						// [value] => >20
-						// [value] => >20
+						throw new \Exception(sprintf('Invalid Value: "%s"', $val));
 						// echo "Invalid Value: {$metric_val['value']}\n";
 				}
 			}
