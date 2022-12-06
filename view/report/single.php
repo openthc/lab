@@ -78,11 +78,12 @@ use OpenTHC\Lab\UOM;
 					<li class="dropdown-item d-flex justify-content-between">
 						<?php
 						$link = sprintf('/report/%s/download?f=json%%2Bwcia', $data['Lab_Report']['id']);
+						$link_pub = sprintf('https://%s/pub/%s/wcia.json', $_SERVER['SERVER_NAME'], $data['Lab_Report']['id']);
 						?>
 						<a class="btn btn-sm" href="<?= $link ?>">JSON/WCIA <i class="fa-solid fa-code"></i></a>
 						<div class="btn-group btn-group-sm">
 							<a class="btn" download href="<?= $link ?>"><i class="fas fa-download"></i></a>
-							<button class="btn btn-clipcopy" data-clipboard-text="<?= $link ?>" type="button" ><i class="fa-regular fa-clipboard"></i></button>
+							<button class="btn btn-clipcopy" data-clipboard-text="<?= $link_pub ?>" type="button" ><i class="fa-regular fa-clipboard"></i></button>
 						</div>
 					</li>
 					<!-- <a class="dropdown-item" href="<?= $link ?>?f=png%2Bcoa"><i class="fas fa-download"></i> Download COA (PNG/QR)</a> -->
