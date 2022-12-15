@@ -156,7 +156,7 @@ foreach ($out_metric_list as $mk0 => $mn0) {
 		'PASS',
 		$mn0, // trim(sprintf('%s %s', $lrm['name'], $lrm['uom'])),
 		$dtA->format('Y-m-d'), // Test Date
-		_ccrs_uom_fix($lrm['qom']),
+		_ccrs_qom_uom_format($lrm),
 		$lrm['id'],
 		$csv_config['lab_name'],
 		$dt0->format('Y-m-d'),
@@ -196,14 +196,30 @@ foreach ($csv_output as $row) {
  * UOM Helper
  * Since CCRS can't handle things like N/A, N/D or N/T
  */
-function _ccrs_uom_fix($q)
+function _ccrs_qom_uom_format($lrm)
 {
-	if ($q <= 0) {
-		$q = 0;
+	// In OpenTHC BOOL=False => Fail and BOOL=True => Pass
+	// In CCRS for Foreign Matter 0 => PASS and >0 => Fail
+	switch ($lrm['lab_metric_id']) {
+		case '018NY6XC00SV2M1J801BRSMA5F':
+		case '018NY6XC00LMQAZZSDXPYH62SS':
+		case '018NY6XC00LMA50497RDC53DB5':
+			switch ($lrm['qom']) {
+				case 0:
+					$lrm['qom'] = 1; // 'Fail';
+					break;
+				case 1:
+					$lrm['qom'] = 0; // 'Pass';
+					break;
+			}
 	}
 
-	$q = sprintf('%0.2f', $q);
+	if ($lrm['qom'] <= 0) {
+		$lrm['qom'] = 0;
+	}
 
-	return $q;
+	$ret = sprintf('%0.2f', $lrm['qom']);
+
+	return $ret;
 
 }
