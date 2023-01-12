@@ -186,22 +186,30 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 						break;
 					case -2:
 						$metric['qom'] = 'N/D';
-						$metric['uom'] = '';
+						// $metric['uom'] = '';
 						break;
 					case -3:
 						$metric['qom'] = 'N/T';
-						$metric['uom'] = '';
+						// $metric['uom'] = '';
 						break;
 					case -130:
 						$metric['qom'] = 'T/D';
-						$metric['uom'] = '';
+						// $metric['uom'] = '';
 						break;
 				}
+
+				// Status Pass/Fill
+				$css = '';
+				switch ($metric['stat']) {
+					case 400:
+						$css = 'text-danger';
+				}
+
 			?>
 				<div class="result-metric-data" data-metric-id="<?= $metric['lab_metric_id'] ?>">
 					<div class="input-group">
 						<div class="input-group-text"><?= __h($result_data['name']) ?></div>
-						<input class="form-control r" readonly style="font-weight: bold;" value="<?= __h($metric['qom']) ?>">
+						<input class="form-control r <?= $css ?>" readonly style="font-weight: bold;" value="<?= __h($metric['qom']) ?>">
 						<?php
 						if ( ! empty($metric['uom'])) {
 							printf('<div class="input-group-text">%s</div>', UOM::nice($metric['uom']));

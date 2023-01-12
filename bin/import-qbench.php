@@ -595,6 +595,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			// And then stuff in mg/g and then mg/mL then % then mg/unit
 			// So, if there is an ND in the ${NAME}_mg_l field then use that, not the ZERO value in %
 			$lm0 = _qbench_map_metric($dbc, $metric_key);
+			$lm0['meta'] = json_decode($lm0['meta'], true);
 
 			switch ($lm0['id']) {
 				case '018NY6XC00LM00000000000000':
@@ -655,20 +656,31 @@ function _qbench_pull_result_import($dbc, $rec) : int
 						// echo "Invalid Value: {$metric_val['value']}\n";
 				}
 			}
+			$val = floatval($val);
 
 			$lrm0 = $dbc->fetchRow('SELECT id FROM lab_result_metric WHERE lab_result_id = :lr0 AND lab_metric_id = :lm0', [
 				':lr0' => $lr0['id']
 				, ':lm0' => $lm0['id'],
 			]);
-			if (empty($lrm0['id'])) {
 
-				$lrm1 = [
-					'id' => _ulid()
-					, 'lab_result_id' => $lr0['id']
-					, 'lab_metric_id' => $lm0['id']
-					, 'qom' => $val
-					, 'uom' => $lm0['uom']
-				];
+			$lrm1 = [
+				'id' => _ulid()
+				, 'stat' => 200 // Evaluate the Pass/Fail == FAIL=400 and Pass=200
+				, 'lab_result_id' => $lr0['id']
+				, 'lab_metric_id' => $lm0['id']
+				, 'qom' => $val
+				, 'uom' => $lm0['uom']
+			];
+
+			// Check Action Limit
+			if ( ! empty($lm0['meta']['max']['val'])) {
+				$al0 = floatval($lm0['meta']['max']['val']);
+				if ($val >= $al0) {
+					$lrm1['stat'] = 400;
+				}
+			}
+
+			if (empty($lrm0['id'])) {
 
 				try {
 					$dbc->insert('lab_result_metric', $lrm1);
@@ -682,8 +694,9 @@ function _qbench_pull_result_import($dbc, $rec) : int
 
 			} else {
 				$update = [];
-				$update['qom'] = $val;
-				$update['uom'] = $lm0['uom'];
+				$update['stat'] = $lrm1['stat'];
+				$update['qom'] = $lrm1['qom'];
+				$update['uom'] = $lrm1['uom'];
 				$filter = [];
 				$filter['id'] = $lrm0['id'];
 				$dbc->update('lab_result_metric', $update, $filter);
@@ -1667,7 +1680,9 @@ function _qbench_map_metric($dbc, $metric_key) : array
 	}
 
 	$sql = <<<SQL
-	SELECT id, name, type, lab_metric_type_id, meta->>'uom' AS uom
+	SELECT id, name, type, lab_metric_type_id
+	  , meta->>'uom' AS uom
+	  , meta AS meta
 	FROM lab_metric
 	WHERE id = :lm0
 	SQL;
