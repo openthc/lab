@@ -124,12 +124,15 @@ SQL;
 			$rec['sum'] = $rec['meta']['sum'] ?: '-';
 
 			$t = array();
+
+			// @deprecated
 			$x = $rec['meta']['batch_type'];
 			$t[] = $x;
 
 			$x = $rec['meta']['type'];
 			$t[] = $x;
 
+			// @deprecated
 			$x = $rec['meta']['intermediate_type'];
 			$t[] = $x;
 			$rec['type'] = trim(implode('/', $t), '/');
@@ -168,6 +171,7 @@ SQL;
 			case 'completed/passed':
 				$stat[] = '<i class="far fa-check-square" style="color: var(--bs-green);"></i>';
 				break;
+			case 100:
 			case 102:
 			case 'in_progress/':
 				$stat[] = '<i class="fa-regular fa-hourglass" title="Processing"></i>';
@@ -180,7 +184,7 @@ SQL;
 			// 	$stat[] = '<i class="fas fa-check-square" style="color: var(--bs-red);"></i>';
 			// 	break;
 			default:
-				$stat[] = h($x);
+				$stat[] = __h($x);
 			}
 
 			$rec['status_html'] = implode(' ', $stat);

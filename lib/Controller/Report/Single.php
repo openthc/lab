@@ -376,8 +376,9 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		}
 
 		// Metrics
-		$res = $dbc_user->fetchAll("SELECT id, name, meta->>'uom' AS uom, sort FROM lab_metric ORDER BY sort");
+		$res = $dbc_user->fetchAll("SELECT id, name, meta->>'uom' AS uom, meta, sort FROM lab_metric ORDER BY sort");
 		foreach ($res as $rec) {
+			$rec['meta'] = json_decode($rec['meta'], true);
 			$data['lab_metric_list'][ $rec['id'] ] = $rec;
 		}
 

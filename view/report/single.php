@@ -206,78 +206,35 @@ foreach ($data['lab_metric_type_list'] as $lmt) {
 		$lms['name'] = $lms['id'] ?: '-orphan-';
 	}
 
+	// Spin too many times but, whatever /djb 20220222
+	$out_metric_list = [];
+	foreach ($lms['metric_list'] as $lm_id => $result_data) {
+	// foreach ($data['lab_metric_list'] as $lm0) {
+		// $result_data = $lms['metric_list'][ $lm0['id'] ];
+
+		if (empty($result_data['metric'])) {
+			continue;
+		}
+
+		$metric = $result_data['metric'];
+		$metric['name'] = $result_data['name'];
+
+		$out_metric_list[] = \OpenTHC\Lab\UI\Lab_Result_Metric::input_group($metric);
+	}
+
+
 ?>
 	<hr>
+
 	<section>
 		<h3><?= $lmt['name'] ?></h3>
 		<div class="result-metric-wrap">
 			<?php
-			// Spin too many times but, whatever /djb 20220222
-			foreach ($lms['metric_list'] as $lm_id => $result_data) {
-			// foreach ($data['lab_metric_list'] as $lm0) {
-				// $result_data = $lms['metric_list'][ $lm0['id'] ];
-
-				if (empty($result_data['metric'])) {
-					continue;
-				}
-
-				$out = true;
-
-				$metric = $result_data['metric'];
-
-				switch ($metric['uom']) {
-					case 'bool':
-						// Something
-						$metric['uom'] = '';
-						switch ($metric['qom']) {
-							case 0:
-								$metric['qom'] = 'Fail';
-								break;
-							case 1:
-								$metric['qom'] = 'Pass';
-								break;
-						}
-						break;
-				}
-
-				// Special QOM
-				switch ($metric['qom']) {
-					case -1:
-						$metric['qom'] = 'N/A';
-						$metric['uom'] = '';
-						break;
-					case -2:
-						$metric['qom'] = 'N/D';
-						// $metric['uom'] = 'ppm';
-						break;
-					case -3:
-						$metric['qom'] = 'N/T';
-						$metric['uom'] = '';
-						break;
-					case -130:
-						$metric['qom'] = 'T/D';
-						$metric['uom'] = '';
-						break;
-				}
-			?>
-				<div class="result-metric-data" data-metric-id="<?= $metric['lab_metric_id'] ?>">
-					<div class="input-group">
-						<div class="input-group-text"><?= __h($result_data['name']) ?></div>
-						<input class="form-control r" readonly style="font-weight: bold;" value="<?= __h($metric['qom']) ?>">
-						<?php
-						if ( ! empty($metric['uom'])) {
-							printf('<div class="input-group-text">%s</div>', UOM::nice($metric['uom']));
-						}
-						?>
-					</div>
-				</div>
-			<?php
+			if (empty($out_metric_list)) {
+				echo '<div class="alert alert-info">No Metrics for this Section</div>';
+			} else {
+				echo implode('', $out_metric_list);
 			}
-
-			if (!$out) {
-				echo '<div class="alert alert-info" style="flex: 1 1 auto; width: 100%;">No Metrics for this Section</div>';
-			}
-
 			?>
 		</div>
 	</section>

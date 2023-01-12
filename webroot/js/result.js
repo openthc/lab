@@ -85,6 +85,7 @@
 
 	});
 
+	// Automatically fill notes with top terps
 	$('.btn-terp-note-auto').on('click', function() {
 
 		var terp_list = [];

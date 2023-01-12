@@ -61,7 +61,7 @@ class View extends \OpenTHC\Lab\Controller\Base
 			':ls0' => $Lab_Sample['id']
 		]);
 
-		$Lab_Report_list = $dbc->fetchAll('SELECT * FROM lab_report WHERE lab_sample_id = :ls0', [
+		$Lab_Report_list = $dbc->fetchAll('SELECT * FROM lab_report WHERE lab_sample_id = :ls0 ORDER BY id DESC', [
 			':ls0' => $Lab_Sample['id']
 		]);
 
