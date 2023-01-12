@@ -188,7 +188,7 @@ foreach ($lab_metric_list as $lm1) {
 	$lm0 = $data['lab_metric_list'][ $lm1['lab_metric_id'] ];
 	$lm0['metric'] = $lm1;
 
-	$Result_Metric_By_Type_list[ $lmtid ]['metric_list'][] = $lm0;
+	$Result_Metric_By_Type_list[ $lmtid ]['metric_list'][ $lm0['id'] ] = $lm0;
 }
 
 foreach ($data['lab_metric_type_list'] as $lmt) {
@@ -214,6 +214,8 @@ foreach ($data['lab_metric_type_list'] as $lmt) {
 			<?php
 			// Spin too many times but, whatever /djb 20220222
 			foreach ($lms['metric_list'] as $lm_id => $result_data) {
+			// foreach ($data['lab_metric_list'] as $lm0) {
+				// $result_data = $lms['metric_list'][ $lm0['id'] ];
 
 				if (empty($result_data['metric'])) {
 					continue;
