@@ -1166,7 +1166,7 @@ function _qbench_b2b_import_wcia_item($dbc, $b2b, $b2b_item)
 		$t0 = $b2b_item['inventory_category'];
 		$t1 = $b2b_item['inventory_type'];
 
-		$PT = new Product_Type($dbc, \OpenTHC\CRE\WCIA::product_type_map_id($t0, $t1) );
+		$PT = new Product_Type($dbc, \OpenTHC\CRE\WCIA::map_product_type_ct2id($t0, $t1) );
 
 		$P = new Product($dbc);
 		$P['license_id'] = $_SESSION['License']['id'];
