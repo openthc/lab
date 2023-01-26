@@ -228,6 +228,9 @@ function _draw_metric_info_table($metric_type_name, $metric_list, $lab_result_me
 					case -3:
 						printf('<td>%s</td><td class="r">N/T</td>', __h($v['name']));
 						break;
+					case -130:
+						printf('<td>%s</td><td class="r">Detected</td>', __h($v['name']));
+						break;
 					default:
 						switch ($v['uom']) {
 							case 'bool':
@@ -247,7 +250,7 @@ function _draw_metric_info_table($metric_type_name, $metric_list, $lab_result_me
 								break;
 							case 'ppb':
 							case 'ppm':
-								printf('<td>%s</td><td class="r">%d %s</td>', __h($v['name']), $v['qom'], UOM::nice($v['uom']));
+								printf('<td>%s</td><td class="r">%0.1f %s</td>', __h($v['name']), $v['qom'], UOM::nice($v['uom']));
 								break;
 							default:
 								printf('<td>%s</td><td class="r">%0.3f %s</td>', __h($v['name']), $v['qom'], UOM::nice($v['uom']));
