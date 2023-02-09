@@ -70,11 +70,15 @@ foreach ($data['sample_list'] as $s) {
 			printf('<a title="Add Results" class="btn btn-sm btn-primary" href="/result/create?sample_id=%s"><i class="fas fa-flask"></i> Add Result</i></a>', $s['id']);
 			break;
 		case Lab_Sample::STAT_DONE:
+			// View Most Recent Lab Result ?
 			echo '<button class="btn btn-outline-secondary disabled"><i class="fas fa-flag-checkered"></i></button>';
-			// View Most Recent Lab Result
 			break;
 		case Lab_Sample::STAT_VOID:
-			echo '<button class="btn btn-outline-secondary disabled"><i class="fas fa-ban"></i></button>';
+			echo '<button class="btn btn-outline-secondary disabled" disabled><i class="fas fa-ban"></i></button>';
+			break;
+		case Lab_Sample::STAT_WAIT:
+		case 303: // v0
+			echo '<button class="btn btn-outline-secondary disabled" disabled><i class="far fa-clock"></i></button>';
 			break;
 		default:
 			printf('<button class="btn btn-outline-secondary">%d</button>', $s['stat']);

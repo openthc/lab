@@ -30,6 +30,7 @@ class Lab_Sample extends \OpenTHC\SQL\Record
 
 	const STAT_OPEN = 100;
 	const STAT_LIVE = 200;
+	const STAT_WAIT = 203;
 	const STAT_DONE = 302;
 	const STAT_VOID = 410;
 
