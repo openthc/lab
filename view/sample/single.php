@@ -49,7 +49,10 @@ use OpenTHC\Lab\Lab_Result;
 	<div class="col-md-6">
 		<div class="mb-2">
 			<label>Source Lot Identifier:</label>
-			<input class="form-control" name="source-lot-guid" value="<?= $data['Lot']['guid'] ?>">
+			<div class="input-group">
+				<input class="form-control" name="source-lot-guid" value="<?= $data['Lot']['guid'] ?>">
+				<a class="btn btn-outline-secondary" href="https://app.openthc.com/inventory/view?id=<?= $data['Lot']['id'] ?>"><i class="far fa-link-alt"></i></a>
+			</div>
 		</div>
 	</div>
 	<div class="col-md-6">
@@ -140,11 +143,13 @@ if ( ! empty($data['Lab_Sample']['img_link'])) {
 			echo '<button class="btn btn-primary" name="a" type="submit" value="accept-sample"><i class="fas fa-sync"></i> Accept</button>';
 			break;
 		case Lab_Sample::STAT_LIVE:
+		default:
 			printf('<a class="btn btn-primary" href="/result/create?sample_id=%s"><i class="fas fa-plus"></i> Add Results</a>', $data['Lab_Sample']['id']);
 			break;
 	}
 	?>
 	<button class="btn btn-primary" name="a" type="submit" value="save"><i class="fas fa-save"></i> Save</button>
+	<button class="btn btn-outline-secondary" name="a" type="submit" value="lab-sample-sync"><i class="fas fa-sync"></i> Sync</button>
 	<!-- <a class="btn btn-secondary" href="/sample/<?= $data['Lab_Sample']['id'] ?>/edit"><i class="fas fa-edit"></i> Edit</a> -->
 	<!-- <button class="btn btn-secondary" name="a" type="submit" value="done"><i class="fas fa-check-square"></i> Finish</button> -->
 	<button class="btn btn-outline-danger" name="a" type="submit" value="void"><i class="fas fa-ban"></i> Void</button>

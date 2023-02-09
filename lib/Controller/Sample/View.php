@@ -17,6 +17,9 @@ class View extends \OpenTHC\Lab\Controller\Base
 {
 	private $cre;
 
+	/**
+	 *
+	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
 		if (empty($ARG['id'])) {
@@ -43,6 +46,14 @@ class View extends \OpenTHC\Lab\Controller\Base
 				break;
 			case 'lab-report-create':
 				return $this->_createReport($RES, $Lab_Sample);
+				break;
+			case 'lab-sample-sync':
+				$dbc->query('UPDATE lab_sample SET hash = :h1 WHERE id = :ls0', [
+					':h1' => 'SYNC',
+					':ls0' => $Lab_Sample['id'],
+				]);
+				Session::flash('info', _('Lab Sample has been flagged for resynchronisation'));
+				return $RES->withRedirect($_SERVER['HTTP_REFERER']);
 				break;
 			case 'save':
 				return $this->_saveSample($RES, $Lab_Sample);
