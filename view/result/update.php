@@ -180,6 +180,7 @@ foreach ($data['Result_Metric_Group_list'] as $lms_id => $lms) { // @todo metric
 <div class="form-actions">
 	<input name="sample_id" type="hidden" value="<?= $data['Lab_Sample']['id'] ?>">
 	<button class="btn btn-primary" name="a" value="lab-result-save"><i class="fas fa-save"></i> Save</button>
+	<button class="btn btn-outline-secondary" name="a" value="lab-result-sync"><i class="fas fa-sync"></i> Sync</button>
 	<button class="btn btn-outline-danger" name="a" value="lab-result-delete"><i class="fas fa-save"></i> Delete</button>
 </div>
 

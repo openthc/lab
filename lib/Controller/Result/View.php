@@ -410,15 +410,6 @@ SQL;
 
 			break;
 
-		case 'sync':
-
-			_exit_html_fail('<h1>Not Implemented [CRV-387]', 501);
-
-			$S = new Sync($this->_container);
-			return $S->__invoke(null, $RES, array('id' => $data['Lab_Result']['id']));
-
-			break;
-
 		case 'void':
 
 			_exit_html_fail('<h1>Not Implemented [CRV-395]</h1>', 501);
