@@ -279,6 +279,8 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$this->cell(0.75, self::FS_16, sprintf('Page %s/%s', $cp, $pc), 0, 0, 'L');
 
 		// Digital Signature & QR Code
+		$data = sprintf('https://%s/pub/%s', $_SERVER['SERVER_NAME'], $this->_data['Lab_Report']['id']);
+		$this->addQRCode($data, 0.5, 11-1.5, 1, 1);
 
 	}
 
