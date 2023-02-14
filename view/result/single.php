@@ -5,7 +5,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+use OpenTHC\Lab\Lab_Metric;
 use OpenTHC\Lab\Lab_Result;
+use OpenTHC\Lab\Lab_Result_Metric;
 use OpenTHC\Lab\UOM;
 
 ?>
@@ -130,18 +132,7 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 		// var_dump($lms);
 	}
 
-	$status = '-STATUS-';
-	switch ($data['Lab_Result']['meta']['lab_metric_type_list'][ $lms['id'] ]['stat']) {
-		case 100:
-			$status = 'In Progress';
-			break;
-		case 200:
-			$status = '<span class="text-success">Passed</span>';
-			break;
-		case 300:
-			$status = '<span class="text-danger">Failed</span>';
-			break;
-	}
+	$lms_status = $data['Lab_Result']['meta']['lab_metric_type_list'][ $lms['id'] ]['stat'];
 
 	// Spin too many times but, whatever /djb 20220222
 	$out_metric_list = [];
@@ -163,6 +154,22 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 		continue;
 	}
 
+	switch ($lms_status) {
+		case Lab_Result_Metric::STAT_OPEN:
+			$lms_status = 'In Progress';
+			break;
+		case Lab_Result_Metric::STAT_PASS:
+			$lms_status = '<strong class="text-success">Passed</strong>';
+			break;
+		case Lab_Result_Metric::STAT_FAIL: // v1
+			$lms_status = '<strong class="text-danger">Failed</strong>';
+			break;
+		default:
+			$lms_status = sprintf('<span class="text-danger">%d?</span>', $lms_status);
+			break;
+	}
+
+
 ?>
 
 	<hr>
@@ -170,7 +177,7 @@ foreach ($data['Result_Metric_Group_list'] as $lms) {
 	<section>
 		<div class="d-flex justify-content-between">
 			<div><h3><?= $lms['name'] ?></h3></div>
-			<div><?= $status ?></div>
+			<div><?= $lms_status ?></div>
 		</div>
 		<div class="result-metric-wrap">
 			<?= implode('', $out_metric_list); ?>
