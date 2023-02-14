@@ -71,6 +71,7 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 
 			case 'lab-result-commit':
 			case 'lab-result-save':
+			case 'lab-result-save-and-commit':
 
 				if (empty($LR['id'])) {
 					$LR['id'] = _ulid();
@@ -207,13 +208,20 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 				}
 
 				// And LOCK?
-				if ('lab-result-commit' == $_POST['a']) {
-					// if ('lab-result-save-and-commit' == $_POST['a']) {
-					// Should LOCK promote status to DONE/PASS/FAIL?
-					$LR->setFlag(Lab_Result::FLAG_LOCK);
+				switch ($_POST['a']) {
+					case 'lab-result-commit':
+					case 'lab-result-save-and-commit':
+						// Only Allow Commit on Specific Status?
+						switch ($LR['stat']) {
+							case Lab_Result::STAT_PASS:
+							case Lab_Result::STAT_FAIL:
+								break;
+						}
+						// Should LOCK promote status to DONE/PASS/FAIL?
+						// $LR['stat'] = Lab_Result::STAT_PASS;
+						$LR->setFlag(Lab_Result::FLAG_LOCK);
 				}
 				$LR['hash'] = $LR->getHash();
-				// if ($action_context == 'create') {}
 				// $LR->save('Lab/Result/Create by User');
 				$LR->save('Lab/Result/Update by User');
 
@@ -261,6 +269,8 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 				break;
 
 		}
+
+		__exit_text('Invalid Request [CRU-266]', 400);
 
 	}
 

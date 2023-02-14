@@ -79,28 +79,4 @@ class Create extends \OpenTHC\Lab\Controller\Base
 
 	}
 
-	/**
-	 * [save description]
-	 * @param [type] $REQ [description]
-	 * @param [type] $RES [description]
-	 * @param [type] $ARG [description]
-	 * @return [type] [description]
-	 */
-	function save($REQ, $RES, $ARG)
-	{
-		switch ($_POST['a']) {
-		case 'commit':
-			// return $this->_commit($REQ, $RES, $ARG);
-			// require_once(__DIR__ . '/Create_LeafData.php');
-			// $x = new \OpenTHC\Lab\Controller\Result\Create_LeafData($this->_container);
-			// return $x->_commit($REQ, $RES, $ARG);
-		case 'save':
-		case 'lab-result-save':
-		case 'lab-result-save-and-commit':
-			return $this->_save($REQ, $RES, $ARG);
-		default:
-			return $RES->withStatus(400);
-		}
-	}
-
 }
