@@ -248,19 +248,17 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 			case 'sync':
 			case 'lab-result-sync':
 
-				$dbc->query('UPDATE lab_result SET hash = :h1 WHERE id = :lr0', [
+				$dbc_user->query('UPDATE lab_result SET hash = :h1 WHERE id = :lr0', [
 					':h1' => 'SYNC',
 					':lr0' => $LR['id'],
 				]);
+
+				$dbc_user->query('COMMIT');
+
 				Session::flash('info', _('Lab Result has been flagged for resynchronisation'));
 				return $RES->withRedirect($_SERVER['HTTP_REFERER']);
 
-				// $S = new Sync($this->_container);
-				// return $S->__invoke(null, $RES, array('id' => $data['Lab_Result']['id']));
-
 				break;
-
-
 
 		}
 

@@ -21,6 +21,7 @@ class Lab_Result extends \OpenTHC\SQL\Record
 	const STAT_PASS = 200;
 	const STAT_PART = 206;
 	const STAT_FAIL = 400;
+	const STAT_VOID = 410;
 
 	protected $_table = 'lab_result';
 

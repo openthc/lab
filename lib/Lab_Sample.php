@@ -40,6 +40,9 @@ class Lab_Sample extends \OpenTHC\SQL\Record
 	public $_Company;
 	public $_License;
 
+	/**
+	 *
+	 */
 	function __construct($dbc=null, $rec=null)
 	{
 		parent::__construct($dbc, $rec);
