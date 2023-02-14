@@ -18,6 +18,7 @@ use OpenTHC\Variety;
 use OpenTHC\CRE\Base as CRE_Base;
 
 use OpenTHC\Lab\Lab_Result;
+use OpenTHC\Lab\Lab_Result_Metric;
 
 require_once(dirname(dirname(__FILE__)) . '/boot.php');
 require_once(APP_ROOT . '/vendor/openthc/cre-adapter/lib/QBench.php');
@@ -453,7 +454,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 	// State Mapper
 	switch (strtoupper($rec['state'])) {
 		case 'NOT STARTED':
-			$rec['@stat'] = 100;
+			$rec['@stat'] = Lab_Result::STAT_OPEN;
 			break;
 		case 'BEING TESTED':
 		case 'NEEDS GC DATA':
@@ -468,13 +469,13 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			$rec['@stat'] = 307;
 			break;
 		case 'CANCELLED':
-			$rec['@stat'] = 410;
+			$rec['@stat'] = Lab_Result::STAT_VOID;
 			break;
 		case 'SUBCONTRACTING':
 			$rec['@stat'] = 307;
 			break;
 		case 'COMPLETED':
-			$rec['@stat'] = 200;
+			$rec['@stat'] = 200; // Lab_Result::STAT_DONE;
 			break;
 		default:
 			var_dump($rec);
@@ -575,12 +576,6 @@ function _qbench_pull_result_import($dbc, $rec) : int
 
 	}
 
-	// Update Lab Sample to point to Status
-	$dbc->query('UPDATE lab_sample SET stat = 200 WHERE id = :ls0 AND stat != 200', [
-		':ls0' => $rec['@lab_sample_id']
-	]);
-
-
 	// QBench puts lab_result_metric data into a worksheet
 	if ( ! empty($rec['worksheet_data'])) {
 
@@ -615,8 +610,10 @@ function _qbench_pull_result_import($dbc, $rec) : int
 				// And are defined by each user of QBench
 				switch (strtoupper($val)) {
 					case 'DET': // Detected
-					case 'Det': // GT-LOD < LOQ-LB
 						$val = -130;
+						break;
+					case 'FAIL':
+						$val = -1;
 						break;
 					case 'ND':
 						$val = -2;
@@ -673,10 +670,12 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			];
 
 			// Check Action Limit
+			// $Lab_Result_Metric->isPassed(); ?
 			if ( ! empty($lm0['meta']['max']['val'])) {
 				$al0 = floatval($lm0['meta']['max']['val']);
 				if ($val >= $al0) {
-					$lrm1['stat'] = 400;
+					$lrm1['stat'] = Lab_Result_Metric::STAT_FAIL;
+					$lr0['stat'] = Lab_Result::STAT_FAIL;
 				}
 			}
 
@@ -708,6 +707,14 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			$lr0->updateCannabinoids();
 		}
 	}
+
+	// Update Lab Sample to point to Status
+	$dbc->query('UPDATE lab_sample SET stat = :s1 WHERE id = :ls0 AND stat != :s1', [
+		':ls0' => $rec['@lab_sample_id'],
+		':s1' => $lr0['stat'],
+	]);
+
+	$lr0->save('Lab_Result/Import Update');
 
 	return(0);
 
