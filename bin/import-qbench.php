@@ -921,7 +921,7 @@ function _qbench_pull_sample($dbc, $qbc)
 						$update['stat'] = 200;
 						break;
 					case 'IN REVIEW':
-						$update['stat'] = Lab_Sample::STAT_WAIT;
+						$update['stat'] = Lab_Result::STAT_WAIT;
 						break;
 					default:
 						var_dump($rec);
