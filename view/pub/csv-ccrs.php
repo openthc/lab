@@ -145,7 +145,7 @@ $csv_output = [];
 foreach ($out_metric_list as $mk0 => $mn0) {
 
 	$lrm = $data['Lab_Result_Metric_list'][$mk0];
-	if (empty($lrm)) {
+	if (empty($lrm['id'])) {
 		continue;
 	}
 
@@ -153,7 +153,7 @@ foreach ($out_metric_list as $mk0 => $mn0) {
 		$data['License_Source']['code'], // License Owner
 		$data['Lot']['guid'],
 		$data['License_Laboratory']['code'], // Code of the Laboratory
-		'PASS',
+		(Lab_Result::STAT_PASS == $lrm['stat'] ? 'PASS' : 'FAIL'),
 		$mn0, // trim(sprintf('%s %s', $lrm['name'], $lrm['uom'])),
 		$dtA->format('Y-m-d'), // Test Date
 		_ccrs_qom_uom_format($lrm),

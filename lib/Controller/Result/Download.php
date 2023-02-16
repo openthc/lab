@@ -130,6 +130,7 @@ class Download extends \OpenTHC\Lab\Controller\Result\View
 		}
 
 		$data = $this->load_lab_result_full($Lab_Result['id']);
+
 		$data['Lot'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i0', [
 			':i0' => $Lab_Sample['lot_id']
 		]);
@@ -140,7 +141,7 @@ class Download extends \OpenTHC\Lab\Controller\Result\View
 			':l0' => $data['Lab_Sample']['license_id_source']
 		]);
 
-		// __exit_text($data);
+		header('content-type: text/plain');
 
 		require_once(APP_ROOT . '/view/pub/csv-ccrs.php');
 
