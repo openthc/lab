@@ -73,6 +73,16 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 		$Company1 = $dbc_auth->fetchRow('SELECT * FROM auth_company WHERE id = :c0', [
 			':c0' => $c0
 		]);
+		switch ($Company1['stat']) {
+			case 200:
+				// OK
+				break;
+			default:
+				_exit_html_fail('<h1>Invalid Company Profile [CAI-080]', 403);
+		}
+		if (empty($Company1['dsn'])) {
+			_exit_html_fail('<h1>Invalid Company Profile [CAI-083]', 403);
+		}
 
 		$Company = array_merge($Company0, $Company1);
 		$_SESSION['dsn'] = $Company['dsn'];
