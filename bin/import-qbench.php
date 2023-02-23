@@ -248,6 +248,7 @@ function _qbench_pull_license($dbc, $qbc)
 			} else {
 
 				$update = [];
+				$update['code'] = $rec['@code'];
 				$update['hash'] = $rec['@hash'];
 				$update['name'] = $rec['customer_name'];
 				$update['meta'] = json_encode($rec);
