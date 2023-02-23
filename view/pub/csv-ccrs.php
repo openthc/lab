@@ -149,11 +149,11 @@ foreach ($out_metric_list as $mk0 => $mn0) {
 		continue;
 	}
 
-	$csv_output[] = [
+	$rec = [
 		$data['License_Source']['code'], // License Owner
 		$data['Lot']['guid'],
 		$data['License_Laboratory']['code'], // Code of the Laboratory
-		(Lab_Result::STAT_PASS == $lrm['stat'] ? 'PASS' : 'FAIL'),
+		'',
 		$mn0, // trim(sprintf('%s %s', $lrm['name'], $lrm['uom'])),
 		$dtA->format('Y-m-d'), // Test Date
 		_ccrs_qom_uom_format($lrm),
@@ -164,6 +164,18 @@ foreach ($out_metric_list as $mk0 => $mn0) {
 		'',
 		'INSERT',
 	];
+
+	switch ($lrm['stat']) {
+		case Lab_Result::STAT_PASS:
+			$rec[3] = 'PASS';
+			break;
+		case Lab_Result::STAT_FAIL:
+			$rec[3] = 'FAIL';
+			break;
+	}
+
+	$csv_output[] = $rec;
+
 }
 
 $csv_header = [
