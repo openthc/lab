@@ -18,8 +18,7 @@
 		"google/protobuf": "3.21.1",
 		"grpc/grpc": "1.42.0",
 		"league/oauth2-client": "2.6.1",
-		"openthc/api": "dev-master",
-		"openthc/common": "2023.0",
+		"openthc/common": "dev-master",
 		"openthc/cre-adapter": "dev-master",
 		"pear/net_smtp": "1.10.0",
 		"tecnickcom/tcpdf": "6.4.4"
