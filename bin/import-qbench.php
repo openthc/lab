@@ -643,6 +643,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 					case 'CFM':
 						$val = 0;
 						break;
+					case '>10000': // GT-LOQ
 					case '>20,000': // GT-LOQ
 					case '>20': // GT-LOQ
 					case '>1%':
