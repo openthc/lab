@@ -20,7 +20,6 @@ coa-sample/
 composer.lock
 Custom/
 etc/
-lib/RBE/
 node_modules/
 public/
 release/

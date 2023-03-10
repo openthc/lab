@@ -12,7 +12,7 @@
 		}
 	},
 	"require": {
-		"edoceo/lowline": "2022.0.266",
+		"edoceo/lowline": "2022.0.280",
 		"edoceo/radix": "2021.0.0",
 		"endroid/qr-code": "4.4.9",
 		"google/protobuf": "3.21.1",
@@ -21,12 +21,11 @@
 		"openthc/common": "dev-master",
 		"openthc/cre-adapter": "dev-master",
 		"pear/net_smtp": "1.10.0",
-		"tecnickcom/tcpdf": "6.4.4"
+		"tecnickcom/tcpdf": "6.6.2"
 	},
 	"require-dev": {
-		"phpmd/phpmd": "2.12.0",
-		"phpstan/phpstan": "1.7.8",
-		"phpunit/phpunit": "9.5.20",
-		"sebastian/phpcpd": "6.0.3"
+		"phpmd/phpmd": "2.13.0",
+		"phpstan/phpstan": "1.10.5",
+		"phpunit/phpunit": "9.6.4"
 	}
 }
