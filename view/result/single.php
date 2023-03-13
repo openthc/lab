@@ -44,25 +44,24 @@ use OpenTHC\Lab\UOM;
 					case 102:
 					case 200:
 						if (0 == ($data['Lab_Result']['flag'] & Lab_Result::FLAG_LOCK)) {
-							printf('<a class="btn btn-primary" href="/result/%s/update"><i class="far fa-edit"></i> Edit</a>', $data['Lab_Result']['id']);
-							echo '<button class="btn btn-secondary" name="a" value="lab-result-commit"><i class="fa-solid fa-flag-checkered"></i> Commit</button>';
+							echo '<button class="btn btn-primary" name="a" value="lab-result-commit"><i class="fa-solid fa-flag-checkered"></i> Commit</button>';
+							printf('<a class="btn btn-secondary" href="/result/%s/update"><i class="far fa-edit"></i> Edit</a>', $data['Lab_Result']['id']);
 						} else {
 							// Nothing
 						}
 						break;
 				}
 				?>
-				<!-- <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button> -->
-				<!-- <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button> -->
-				<!-- <div class="dropdown-menu dropdown-menu-lg-end"> -->
-					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=pdf"><i class="fas fa-download"></i> Download COA (PDF)</a> -->
-					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=png%2Bcoa"><i class="fas fa-download"></i> Download COA (PNG/QR)</a> -->
+				<button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button>
+				<div class="dropdown-menu dropdown-menu-lg-end">
+					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=pdf"><i class="fas fa-download"></i> Download COA (PDF)</a>
+					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=png%2Bcoa"><i class="fas fa-download"></i> Download COA (PNG/QR)</a>
 					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=csv"><i class="fas fa-download"></i> Download CSV</a> -->
-					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=csv%2Bccrs"><i class="fas fa-download"></i> Download CSV/CCRS</a> -->
-					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=json"><i class="fas fa-download"></i> Download JSON</a> -->
-					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=json%2Bwcia"><i class="fas fa-download"></i> Download JSON/WCIA</a> -->
+					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=csv%2Bccrs"><i class="fas fa-download"></i> Download CSV/CCRS</a>
+					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=json"><i class="fas fa-download"></i> Download JSON</a>
+					<a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=json%2Bwcia"><i class="fas fa-download"></i> Download JSON/WCIA</a>
 					<!-- <a class="dropdown-item" href="/result/<?= $data['Lab_Result']['id'] ?>/download?f=png"><i class="fas fa-download"></i> Download PNG</a> -->
-				<!-- </div> -->
+				</div>
 			</div>
 
 			<?php
