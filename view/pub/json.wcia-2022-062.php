@@ -134,11 +134,11 @@ function _wcia_lab_metric_2($data, $type)
 			break;
 		case -2:
 			$ret['qom'] = 0;
-			$ret['status'] = 'N/T';
+			$ret['status'] = 'pass'; // N/D';
 			break;
 		case -3:
 			$ret['qom'] = 0;
-			$ret['status'] = 'N/D';
+			$ret['status'] = 'N/T';
 			break;
 	}
 
