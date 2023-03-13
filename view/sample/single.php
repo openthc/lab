@@ -207,7 +207,7 @@ if ( ! empty($data['Lab_Result_list'])) {
 	?>
 	</table>
 	<div class="form-actions">
-		<button class="btn btn-primary" name="a" type="submit" value="lab-report-create"><i class="fa-solid fa-file-signature"></i> Report</button>
+		<button class="btn btn-primary" name="a" type="submit" value="lab-report-create"><i class="fa-solid fa-file-signature"></i> Create Report</button>
 	</div>
 	</form>
 <?php
