@@ -65,7 +65,7 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 		if (empty($Company0['id'])) {
 			return $RES->withJSON([
 				'data' => null,
-				'meta' => [ 'detail' => sprintf('Invalid Company "%s" [CAC-067]', $this->_Company_Auth['id']) ],
+				'meta' => [ 'note' => sprintf('Invalid Company "%s" [CAC-067]', $this->_Company_Auth['id']) ],
 			], 400);
 		}
 
@@ -143,6 +143,9 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 	{
 		$dbc_main = _dbc('main');
 		$dbc_user = $this->_container->DBC_User;
+		// if (empty($dbc_user)) {
+
+		// }
 
 		// Set default license if none provided
 		if (empty($_SESSION['License']['id'])) {
@@ -167,7 +170,7 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 		if (empty($License0['id'])) {
 			return $RES->withJSON([
 				'data' => null,
-				'meta' => [ 'detail' => sprintf('Invalid License "%s" [CAI-133]', $_SESSION['License']['id']) ],
+				'meta' => [ 'note' => sprintf('Invalid License "%s" [CAI-133]', $_SESSION['License']['id']) ],
 			], 400);
 		}
 
@@ -180,7 +183,7 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 		if (empty($License1['id'])) {
 			return $RES->withJSON([
 				'data' => null,
-				'meta' => [ 'detail' => sprintf('Invalid License "%s" [CAI-147]', $_SESSION['License']['id']) ],
+				'meta' => [ 'note' => sprintf('Invalid License "%s" [CAI-147]', $_SESSION['License']['id']) ],
 			], 400);
 		}
 
