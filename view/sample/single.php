@@ -57,7 +57,7 @@ use OpenTHC\Lab\Lab_Result;
 			<label>Source Lot Identifier:</label>
 			<div class="input-group">
 				<input class="form-control" name="source-lot-guid" value="<?= $data['Lot']['guid'] ?>">
-				<a class="btn btn-outline-secondary" href="https://app.openthc.com/inventory/view?id=<?= $data['Lot']['id'] ?>"><i class="far fa-link-alt"></i></a>
+				<a class="btn btn-outline-secondary" href="https://app.openthc.com/inventory/view?id=<?= $data['Lot']['id'] ?>"><i class="fas fa-link"></i></a>
 			</div>
 		</div>
 	</div>
