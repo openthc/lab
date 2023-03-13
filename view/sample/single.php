@@ -169,7 +169,7 @@ if ( ! empty($data['Lab_Result_list'])) {
 
 	<hr>
 	<form autocomplete="off" enctype="multipart/form-data" method="post">
-	<h2 style="margin-bottom:0;">Lab Results</h2>
+	<h2 style="margin-bottom:0;">Lab Results [<?= count($data['Lab_Result_list']) ?> Items]</h2>
 	<table class="table table-sm">
 	<?php
 	foreach ($data['Lab_Result_list'] as $lr) {

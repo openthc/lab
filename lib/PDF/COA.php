@@ -9,6 +9,7 @@ namespace OpenTHC\Lab\PDF;
 
 use Edoceo\Radix\DB\SQL;
 
+use OpenTHC\Lab\Lab_Result_Metric;
 use OpenTHC\Lab\UOM;
 
 class COA extends \OpenTHC\Lab\PDF\Base
@@ -24,9 +25,10 @@ class COA extends \OpenTHC\Lab\PDF\Base
 	private $_data = [];
 	private $_dbc_lab_data = null;
 
-	protected $c1w = 2.125;
-	protected $c2w = 0.500;
-	protected $c3w = 0.500;
+	// Table is 3.5 inches wide
+	protected $c1w = 1.750;
+	protected $c2w = 0.6875;
+	protected $c3w = 0.6875;
 	protected $c4w = 0.375;
 
 	/**
@@ -89,14 +91,50 @@ class COA extends \OpenTHC\Lab\PDF\Base
 
 
 		$y += self::FS_12;
-		// if ($this->_data['Lab_Report']['stat'] == 200) {
+
+		// // Evaluate Status
+		$report_stat = 0;
+		foreach ($this->_data['Lab_Result_Metric_list'] as $lrm) {
+			$report_stat = max($report_stat, $lrm['stat']);
+		}
+
+		switch ($this->_data['Lab_Result']['stat']) { // $report_stat) { // $this->_data['Lab_Result']['stat']) {
+			case 100:
+				$this->setXY($x, $y);
+				$this->setFont('freesans', 'B', 12);
+				$this->setTextColor(0x99, 0x99, 0x99);
+				$this->cell(3.25, self::FS_12, 'In Progress', 0, 0, 'C');
+				$this->setFont('freesans', '', 12);
+				$this->setTextColor(0x00, 0x00, 0x00);
+				break;
+			case 200:
+				$this->setXY($x, $y);
+				$this->setFont('freesans', 'B', 12);
+				$this->setTextColor(0x00, 0x99, 0x00);
+				$this->cell(3.25, self::FS_12, 'Passed', 0, 0, 'C');
+				$this->setFont('freesans', '', 12);
+				$this->setTextColor(0x00, 0x00, 0x00);
+				break;
+			case 400:
+				$this->setXY($x, $y);
+				$this->setFont('freesans', 'B', 12);
+				$this->setTextColor(0xCC, 0x00, 0x00);
+				$this->cell(3.25, self::FS_12, 'Failed', 0, 0, 'C');
+				$this->setFont('freesans', '', 12);
+				$this->setTextColor(0x00, 0x00, 0x00);
+				break;
+			default:
+
+		}
+
+		if ($this->_data['Lab_Report']['stat'] == 200) {
 			$this->setXY($x, $y);
 			$this->setFont('freesans', 'B', 12);
 			$this->setTextColor(0x00, 0x99, 0x00);
 			$this->cell(3.25, self::FS_12, 'Passed', 0, 0, 'C');
 			$this->setFont('freesans', '', 12);
 			$this->setTextColor(0x00, 0x00, 0x00);
-		// }
+		}
 
 		// Received
 		// Reported
@@ -264,7 +302,9 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$x = 5.25;
 		$y = 10; // 9.5;
 		$this->setXY($x, $y);
-		$this->setFont('cedarvillecursive', '', 18);
+		$f = realpath(APP_ROOT . '/var/fonts/cedarvillecursive.php');
+		$this->setFont('cedarvillecursive', '', 18, $f);
+		// $this->setFont($f, '', 18);
 		// $pdf->setFont('homemadeapple');
 		$this->cell(2.75, self::FS_16, $sig_name, 'B');
 
@@ -281,50 +321,6 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		// Digital Signature & QR Code
 		$data = sprintf('https://%s/pub/%s', $_SERVER['SERVER_NAME'], $this->_data['Lab_Report']['id']);
 		$this->addQRCode($data, 0.5, 11-1.5, 1, 1);
-
-	}
-
-	/**
-	 *
-	 */
-	function draw_metric_table($metric_list)
-	{
-		foreach ($metric_list as $m) {
-
-			$lrm = $this->_data['Lab_Result_Metric_list'][ $m['id'] ];
-
-			$x = $this->getX();
-			$y = $this->getY();
-
-			$this->setXY($x, $y);
-			$this->cell(2.5, self::FS_10, $m['name'], 0, 0, 'L');
-
-			$this->setXY($x + 1.875, $y);
-			// If the Metric Has an Action Limit
-			// $this->cell(0.5, self::FS_10, 'A/L', 0, 0, 'R');
-
-			$this->draw_metric_qom($lrm);
-			$this->setXY($x + 2.5, $y);
-			$this->cell(0.5, self::FS_10, _qom_nice($lrm['qom']), 0, 0, 'R');
-
-			$this->setXY($x + 3, $y);
-			$this->cell(0.5, self::FS_10, UOM::nice($lrm['uom']), 0, 0, 'L');
-
-			$y += self::FS_10;
-
-			// Advance to Next Line
-			$this->setXY($x, $y);
-			if ($this->checkPageBreak(self::FS_10)) {
-				// We're on the new page
-				// Am I on the new Page?
-				// $this->setXY($x, 1.75);
-				// $this->cell(0.5, self::FS_10, 'FDSFDS');
-			}
-			// 	// $this->setXY($x, $y + self::FS_10);
-			// 	// $this->setXY();
-			// }
-
-		}
 
 	}
 
@@ -351,12 +347,12 @@ class COA extends \OpenTHC\Lab\PDF\Base
 					// $c0 = $this->getTextColor();
 					$this->setTextColorArray([ 0x00, 0x99, 0x00 ]);
 					$this->cell($this->c2w, self::FS_10, 'Pass', 0, 0, 'R');
+					$this->setTextColorArray([ 0x00, 0x00, 0x00 ]);
 				} else {
 					// FAIL
 					$this->setTextColorArray([ 0xCC, 0x00, 0x00 ]);
 					$this->cell($this->c2w, self::FS_10, 'FAIL', 0, 0, 'R');
 				}
-				$this->setTextColorArray([ 0x00, 0x00, 0x00 ]);
 				return;
 				break;
 		}
@@ -374,6 +370,8 @@ class COA extends \OpenTHC\Lab\PDF\Base
 			default:
 				switch ($uom) {
 					case 'pct':
+					case 'ppb':
+					case 'ppm':
 						// $qom = intval($qom);
 						$qom = sprintf('%0.2f', $qom);
 						break;
@@ -381,16 +379,25 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		}
 
 		$this->setXY($x + $this->c1w, $y);
-		$this->cell(0.5, self::FS_10, $qom, 0, 0, 'R');
+		switch ($lrm['stat']) {
+			case Lab_Result_Metric::STAT_FAIL:
+				$tc0 = $this->fgcolor;
+				$this->setTextColorArray([ 0xCC, 0x00, 0x00 ]);
+				$this->cell($this->c2w, self::FS_10, $qom, 0, 0, 'R');
+				$this->setTextColorArray($tc0);
+				break;
+			default:
+				$this->cell($this->c2w, self::FS_10, $qom, 0, 0, 'R');
+		}
 
 		if ( ! empty($max)) {
 			$this->setXY($x + $this->c1w + $this->c2w, $y);
-			$this->cell(0.5, self::FS_10, sprintf('%0.2f', $max['val']), 0, 1, 'C');
+			$this->cell($this->c3w, self::FS_10, sprintf('%0.2f', $max['val']), 0, 0, 'R');
 		}
 
 		if ( ! empty($uom)) {
 			$this->setXY($x + $this->c1w + $this->c2w + $this->c3w, $y);
-			$this->cell(0.5, self::FS_10, UOM::nice($uom), 0, 0, 'C');
+			$this->cell($this->c4w, self::FS_10, UOM::nice($uom), 0, 0, 'C');
 		}
 
 		// if ( ! empty($max)) {
@@ -402,7 +409,7 @@ class COA extends \OpenTHC\Lab\PDF\Base
 	/**
 	 *
 	 */
-	function draw_metric_table_header($x, $y, $metric_name)
+	function draw_metric_table_header($x, $y, $metric_name, $metric_family_stat)
 	{
 		// @todo checkPageBreak for my expected height
 		$y_want = $y + self::FS_14 + self::FS_14;
@@ -418,6 +425,15 @@ class COA extends \OpenTHC\Lab\PDF\Base
 
 		$this->setXY($x, $y);
 		$this->cell(7.5, self::FS_14, $metric_name);
+
+		if (Lab_Result_Metric::STAT_FAIL == $metric_family_stat) {
+			$this->setXY(7.5, $y);
+			$tc0 = $this->fgcolor;
+			$this->setTextColorArray([ 0xCC, 0x00, 0x00 ]);
+			$this->cell(0.5, self::FS_10, 'Failed', 0, 0, 'R');
+			$this->setTextColorArray($tc0);
+		}
+
 		$y += self::FS_14;
 
 		// Table Header - Column A
@@ -431,13 +447,13 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$this->cell($this->c1w, self::FS_12, 'Metric', 'B', 0, 'L');
 
 		$this->setXY($c2x, $y);
-		$this->cell($this->c2w, self::FS_12, 'Result', 'B', 0, 'L');
+		$this->cell($this->c2w, self::FS_12, 'Result', 'B', 0, 'C');
 
 		$this->setXY($c3x, $y);
-		$this->cell($this->c3w, self::FS_12, 'Limit', 'B', 0, 'L');
+		$this->cell($this->c3w, self::FS_12, 'Limit', 'B', 0, 'C');
 
 		$this->setXY($c4x, $y);
-		$this->cell($this->c4w, self::FS_12, 'UOM', 'B', 0, 'R');
+		$this->cell($this->c4w, self::FS_12, 'UOM', 'B', 0, 'C');
 
 		// Table Header - Column B
 		$x = 4.50;
@@ -499,8 +515,15 @@ class COA extends \OpenTHC\Lab\PDF\Base
 			return(false);
 		}
 
+		// Evaluate Group Status
+		$metric_family_stat = 0;
+		foreach ($metric_list as $m) {
+			$lrm = $this->_data['Lab_Result_Metric_list'][ $m['id'] ];
+			$metric_family_stat = max($metric_family_stat, $lrm['stat']);
+		}
+
 		// Section Header
-		$this->draw_metric_table_header($x, $y, $metric_name);
+		$this->draw_metric_table_header($x, $y, $metric_name, $metric_family_stat);
 
 		$x = $this->getX();
 		$y = $this->getY();
@@ -564,7 +587,7 @@ class COA extends \OpenTHC\Lab\PDF\Base
 				// We're on the new page
 				$x = 0.50;
 				$y = 1.75;
-				$this->draw_metric_table_header($x, $y, $metric_name);
+				$this->draw_metric_table_header($x, $y, $metric_name, $metric_family_stat);
 
 				$x = $this->getX();
 				$y = $this->getY();

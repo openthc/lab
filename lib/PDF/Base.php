@@ -5,6 +5,10 @@
 
 namespace OpenTHC\Lab\PDF;
 
+// specify default font for TCPDF
+// define('PDF_FONT_NAME_MAIN', 'freesans');
+// define('K_PATH_FONTS', sprintf('%s/var/fonts/', APP_ROOT));
+
 class Base extends \TCPDF
 {
 	/**
@@ -69,7 +73,7 @@ class Base extends \TCPDF
 		$this->setPrintFooter(true);
 
 		// set auto page breaks
-		$this->setAutoPageBreak(true, 1.125);
+		$this->setAutoPageBreak(true, 2);
 
 		// set image scale factor
 		$this->setImageScale(0);
@@ -80,6 +84,8 @@ class Base extends \TCPDF
 		$this->setFontSubsetting(true);
 
 		$this->setFont('freesans', '', 12, '', true);
+		$this->setHeaderFont(array('freesans', '', 12));
+		$this->setFooterFont(array('freesans', '', 12));
 
 		// Set viewer preferences
 		$arg = array(

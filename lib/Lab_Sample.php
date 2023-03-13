@@ -32,6 +32,7 @@ class Lab_Sample extends \OpenTHC\SQL\Record
 	const STAT_LIVE = 200;
 	const STAT_WAIT = 203;
 	const STAT_DONE = 302;
+	const STAT_FAIL = 400;
 	const STAT_VOID = 410;
 
 	protected $_table = 'lab_sample';
@@ -127,12 +128,15 @@ class Lab_Sample extends \OpenTHC\SQL\Record
 			case self::STAT_DONE:
 				return 'Done';
 				break;
+			case self::STAT_FAIL:
+				return '<span class="text-danger">Failed</span>';
+				break;
 			case self::STAT_VOID:
 				return '<span class="text-danger">VOID</span>';
 				break;
 		}
 
-		return '-unknown-';
+		return sprintf('<span title="Status: %d">-unknown-</span>', $this->_data['stat']);
 	}
 
 }

@@ -168,9 +168,15 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$dtE = clone $dtA;
 		$dtE->add(new \DateInterval('P365D'));
 
+		$report_stat = 0;
+		$report_data = $Lab_Report->getMeta();
+		foreach ($report_data['lab_result_metric_list'] as $lrm) {
+			$report_stat = max($report_stat, $lrm['stat']);
+		}
+
 		$Lab_Report['approved_at'] = $dtA->format(\DateTimeInterface::RFC3339);
 		$Lab_Report['expires_at'] = $dtE->format(\DateTimeInterface::RFC3339);
-		$Lab_Report['stat'] = 200;
+		$Lab_Report['stat'] = $report_stat;
 		$Lab_Report->setFlag(Lab_Report::FLAG_LOCK);
 		$Lab_Report->save('Lab Report Committed by User');
 
