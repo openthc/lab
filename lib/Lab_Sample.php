@@ -117,8 +117,8 @@ class Lab_Sample extends \OpenTHC\SQL\Record
 	function getStatHTML()
 	{
 		switch ($this->_data['stat']) {
-			case 0:
-			case 100:
+			// case 0:
+			case self::STAT_OPEN:
 				return 'Open';
 				break;
 			case self::STAT_LIVE:

@@ -21,9 +21,15 @@ use OpenTHC\Lab\Lab_Result;
 	<div>
 		<h2>Status: <?= $data['Lab_Sample']['stat_html'] ?></h2>
 	</div>
-	<div>
-		<?= $data['Lab_Sample']['flag'] ?>
-	</div>
+	<?php
+	if ( ! empty($data['Lab_Sample']['flag'])) {
+	?>
+		<div>
+			<?= $data['Lab_Sample']['flag'] ?>
+		</div>
+	<?php
+	}
+	?>
 </div>
 
 <div class="row">
