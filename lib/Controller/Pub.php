@@ -101,6 +101,11 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			// I'm the Owner
 			$data['mine'] = true;
 		}
+		// @hack Cake Brands app#1368
+		// @todo Something else /mbw 2023-073
+		if ('01EZ8C7095PB9SAQ1FEY9QCEXT' == $LR['license_id']) {
+			return $RES->withRedirect('https://cakebrand.com/');
+		}
 
 		// Load COA File
 		// Should be Pointing to the Lab Portal when LR has Public Flags Public
