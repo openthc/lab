@@ -41,7 +41,7 @@ use OpenTHC\Lab\UOM;
 					case 100:
 						echo '<button class="btn btn-primary" name="a" value="lab-report-commit"><i class="fa-solid fa-flag-checkered"></i> Commit</button>';
 						break;
-					case 200:
+					default:
 						if ($data['Lab_Report']['flag'] & Lab_Report::FLAG_PUBLIC) {
 							echo '<button class="btn btn-outline-success" formtarget="_blank" name="a" title="Lab Reports Published, click to re-publish &amp; view" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
 						} else {
