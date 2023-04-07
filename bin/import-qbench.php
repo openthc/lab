@@ -19,9 +19,12 @@ use OpenTHC\CRE\Base as CRE_Base;
 
 use OpenTHC\Lab\Lab_Result;
 use OpenTHC\Lab\Lab_Result_Metric;
+use OpenTHC\Lab\Lab_Sample;
 
 require_once(dirname(dirname(__FILE__)) . '/boot.php');
 require_once(APP_ROOT . '/vendor/openthc/cre-adapter/lib/QBench.php');
+
+openlog('openthc-lab', LOG_ODELAY | LOG_PERROR | LOG_PID, LOG_LOCAL0);
 
 // Company ID from Arg?
 $opt = getopt('', [
@@ -580,8 +583,6 @@ function _qbench_pull_result_import($dbc, $rec) : int
 	// QBench puts lab_result_metric data into a worksheet
 	if ( ! empty($rec['worksheet_data'])) {
 
-		$need_sum_calc = true;
-
 		foreach ($rec['worksheet_data'] as $metric_key => $metric_val) {
 
 			$metric_val['@key'] = $metric_key;
@@ -597,10 +598,6 @@ function _qbench_pull_result_import($dbc, $rec) : int
 				case '018NY6XC00LM00000000000000':
 					// echo "SKIP: $metric_key\n";
 					continue 2;
-					break;
-				case '018NY6XC00DEEZ41QBXR2E3T97': // total-cbd
-				case '018NY6XC00PXG4PH0TXS014VVW': // total-thc
-					$need_sum_calc = false;
 					break;
 			}
 
@@ -705,16 +702,24 @@ function _qbench_pull_result_import($dbc, $rec) : int
 
 		}
 
-		if ($need_sum_calc) {
-			$lr0->updateCannabinoids();
-		}
 	}
 
-	// Update Lab Sample to point to Status
-	$dbc->query('UPDATE lab_sample SET stat = :s1 WHERE id = :ls0 AND stat != :s1', [
-		':ls0' => $rec['@lab_sample_id'],
-		':s1' => $lr0['stat'],
-	]);
+	//If Assay is Cannabinoids?
+	// 018NY6XC00SAE8Q4JSMF40YSZ3
+	switch ($rec['@assay_id']) {
+		case 'qbench:1':  // Cannabinoid-Standard
+		case 'qbench:9':  // Expanded Cannabinoid (17 compounds-extra $)
+		case 'qbench:21': // 'Retest-Cannabinoid'
+		case 'qbench:30': // Reporting Cannabinoid
+			$lr0->updateCannabinoids();
+			break;
+	}
+
+	// Update Lab Sample to point use result-status
+	// $dbc->query('UPDATE lab_sample SET stat = :s1 WHERE id = :ls0 AND stat != :s1', [
+	// 	':ls0' => $rec['@lab_sample_id'],
+	// 	':s1' => $lr0['stat'],
+	// ]);
 
 	$lr0->save('Lab_Result/Import Update');
 
@@ -743,6 +748,31 @@ function _qbench_pull_result_import($dbc, $rec) : int
  */
 function _qbench_pull_sample($dbc, $qbc)
 {
+	// Fetch Specific One
+	if ( ! empty($_ENV['object-id'])) {
+
+		$oid = $_ENV['object-id'];
+
+		// Update Object Hash in Database to '-' so it will re-pull
+		$dbc->query("UPDATE lab_sample SET hash = 'SYNC' WHERE id = :ls0", [ ':ls0' => $oid ]);
+
+		// $oid = str_replace('qbench:', '', $oid);
+		// $rec = $qbc->get(sprintf('/api/v1/test/%s', $oid));
+
+		// $x = _qbench_pull_result_import($dbc, $rec);
+		// $oid = str_replace('qbench:', '', $oid);
+		// $res764 = $qbc->get(sprintf('/api/v1/sample/%s', $oid));
+		// print_r($res764);
+		// $qbc->get('/api/v1/sample?' . http_build_query([
+		// 	'page_num' => $idx
+		// 	, 'sort_by' => 'last_updated' // , // 'id'
+		// 	, 'sort_order' => 'desc'
+		// ]));
+
+		// return $x;
+		// exit(0);
+	}
+
 	$dt0 = new DateTime('2000-01-01');
 	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/lab_sample/timestamp'");
 	$chk = json_decode($chk, true);
@@ -892,7 +922,7 @@ function _qbench_pull_sample($dbc, $qbc)
 
 				$lab_sample = [];
 				$lab_sample['id'] = $rec['@id'];
-				$lab_sample['stat'] = 100; // checkout received(bool) also
+				$lab_sample['stat'] = Lab_Sample::STAT_OPEN; // checkout received(bool) also
 				$lab_sample['hash'] = $rec['@hash'];
 				$lab_sample['name'] = $rec['custom_formatted_id'] ?: $rec['sample_name'];
 				$lab_sample['created_at'] = $rec['date_created'];
@@ -905,7 +935,7 @@ function _qbench_pull_sample($dbc, $qbc)
 				$lab_sample['meta'] = json_encode($rec);
 
 				$dbc->insert('lab_sample', $lab_sample);
-				echo '+';
+				syslog(LOG_NOTICE, "Lab_Sample Created {$rec['@id']}");
 
 			} else {
 
@@ -917,10 +947,11 @@ function _qbench_pull_sample($dbc, $qbc)
 
 				switch ($rec['status']) {
 					case '':
-						$update['stat'] = 100;
+						$update['stat'] = Lab_Sample::STAT_OPEN;
 						break;
 					case 'IN PROGRESS':
-						$update['stat'] = 200;
+						// Should PROC == 102?
+						$update['stat'] = Lab_Sample::STAT_LIVE;
 						break;
 					case 'IN REVIEW':
 						$update['stat'] = Lab_Result::STAT_WAIT;
@@ -935,7 +966,7 @@ function _qbench_pull_sample($dbc, $qbc)
 
 				try {
 					$dbc->update('lab_sample', $update, $filter);
-					echo '^';
+					syslog(LOG_NOTICE, "Lab_Sample Updated {$rec['@id']}");
 				} catch (Exception $e) {
 					// Sometimes this fails because of duplicated GUID values which we don't allow.
 					// Would need to move one to a -0 and then update the new one to be -1
@@ -1018,7 +1049,8 @@ function _qbench_b2b_import($dbc, $qbc)
 			// Compare to Sync Time
 			$dt1 = new DateTime(sprintf('@%d', $rec['last_updated']));
 			if ($dt1 < $dt0) {
-				echo "TIMEOUT\n";
+				$x = $dt1->format(\DateTimeInterface::RFC3339);
+				syslog(LOG_INFO, "B2B/Incoming sync timeout; $x");
 				return(0);
 			}
 
@@ -1038,7 +1070,7 @@ function _qbench_b2b_import($dbc, $qbc)
 
 			if ( ! empty($chk['id']) && ($rec['@hash'] == $chk['hash'])) {
 				$hit++;
-				echo '.';
+				syslog(LOG_INFO, "B2B/Incoming sync {$rec['@id']} hash-match");
 				continue;
 			}
 
@@ -1072,7 +1104,7 @@ function _qbench_b2b_import($dbc, $qbc)
 
 			if (empty($chk['id'])) {
 
-				echo '+';
+				syslog(LOG_INFO, "B2B/Incoming/Create {$rec['@id']}");
 
 				$b2b0['id'] = _ulid();
 
@@ -1115,7 +1147,8 @@ function _qbench_b2b_import($dbc, $qbc)
 				$filter['id'] = $b2b0['@id'];
 
 				$dbc->update('b2b_incoming', $update, $filter);
-				echo '^';
+
+				syslog(LOG_INFO, "B2B/Incoming/Update {$rec['@id']}");
 
 			}
 
