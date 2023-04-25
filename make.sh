@@ -6,18 +6,17 @@ set -o errexit
 
 composer update --no-ansi --no-dev --no-progress --quiet --classmap-authoritative
 
-npm install
+npm install --quiet
 
 # Copy stuff to our webroot
 cp node_modules/jquery/dist/jquery.min.js webroot/js/jquery.min.js
-cp node_modules/jqueryui/jquery-ui.min.js webroot/js/jquery-ui.min.js
-cp node_modules/jqueryui/jquery-ui.min.css webroot/css/jquery-ui.min.css
-
+cp node_modules/jquery-ui/dist/jquery-ui.min.js webroot/js/jquery-ui.min.js
+cp node_modules/jquery-ui/dist/themes/base/jquery-ui.min.css webroot/css/jquery-ui.min.css
 
 
 # Google Fonts
-wget https://openthc.com/pub/fonts/CedarvilleCursive-Regular.ttf
-wget https://openthc.com/pub/fonts/HomemadeApple-Regular.ttf
+wget https://openthc.com/pub/font/CedarvilleCursive-Regular.ttf
+wget https://openthc.com/pub/font/HomemadeApple-Regular.ttf
 
 vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php --fonts=CedarvilleCursive-Regular.ttf
 vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php --fonts=HomemadeApple-Regular.ttf
