@@ -11,8 +11,7 @@ Clone this repo, install dependencies, connect the database (using the CRE schem
 
 ```shell
 git clone ...
-composer update
-npm update
+./make.sh install
 ```
 
 

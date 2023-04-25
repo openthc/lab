@@ -4,11 +4,9 @@
 
 set -o errexit
 
-composer update \
-	--classmap-authoritative \
-	--no-dev
+composer update --no-ansi --no-dev --no-progress --quiet --classmap-authoritative
 
-npm update
+npm install
 
 # Copy stuff to our webroot
 cp node_modules/jquery/dist/jquery.min.js webroot/js/jquery.min.js
