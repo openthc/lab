@@ -12,9 +12,6 @@ $pdf = new COA();
 $pdf->setData($data);
 $pdf->setTitle(sprintf('COA %s', $data['Lab_Result']['id']));
 $pdf->setSubject(sprintf('COA %s', $data['Lab_Result']['id']));
-// $pdf->setKeywords($this->name);
-$pdf->setFont('freesans');
-
 $pdf->addPage();
 
 $pdf->setX(0.5);
