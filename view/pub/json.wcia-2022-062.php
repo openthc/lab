@@ -89,7 +89,8 @@ foreach ($data['Lab_Result_Section_Metric_list'] as $lms) {
 		$tmp_metric_list[] = _wcia_lab_metric_2([
 			'id' => $lrm['id'],
 			'lab_metric_id' => $lrm['lab_metric_id'],
-			'name' => $lrm['name'],
+			'lab_metric_name' => $lm['name'],
+			'name' => $lm['name'],
 			'qom' => $lrm['qom'],
 			'uom' => $lrm['uom']
 		], $lms['name']);
