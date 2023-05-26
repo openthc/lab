@@ -27,47 +27,15 @@ require_once(APP_ROOT . '/vendor/openthc/cre-adapter/lib/QBench.php');
 openlog('openthc-lab', LOG_ODELAY | LOG_PERROR | LOG_PID, LOG_LOCAL0);
 
 // Company ID from Arg?
-$opt = getopt('', [
-	'company:',
-	'license:',
-	'object:',
-	'object-id:',
-	'page:',
-]);
-if (empty($opt['company'])) {
-	echo "Say --company=COMPANY_D\n";
-}
-if (empty($opt['license'])) {
-	echo "Say --license=LICENSE_ID\n";
-}
-if (empty($opt['object'])) {
-	$opt['object'] = explode(',', 'license,contact,b2b,sample,result');
-} else {
-	$opt['object'] = explode(',', $opt['object']);
-}
-if ( ! empty($opt['object-id'])) {
-	$_ENV['object-id'] = $opt['object-id'];
-}
-if (empty($opt['page'])) {
-	$opt['page'] = 1;
-}
-
-$_SESSION['Company'] = [
-	'id' => $opt['company'],
-];
-
-$_SESSION['License'] = [
-	'id' => $opt['license'],
-];
+$opt = _cli_options();
 
 $dbc_auth = _dbc('auth');
 
-$dsn = $dbc_auth->fetchOne('SELECT dsn FROM auth_company WHERE id = :c0', [ ':c0' => $_SESSION['Company']['id'] ]);
+$dsn = $dbc_auth->fetchOne('SELECT dsn FROM auth_company WHERE id = :c0', [ ':c0' => $opt['--company'] ]);
 $dbc = new SQL($dsn);
 
-
-$_SESSION['Company'] = $dbc->fetchRow('SELECT * FROM auth_company WHERE id = :c0', [ ':c0' => $_SESSION['Company']['id'] ]);
-$_SESSION['License'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $_SESSION['License']['id'] ]);
+$_SESSION['Company'] = $dbc->fetchRow('SELECT * FROM auth_company WHERE id = :c0', [ ':c0' => $opt['--company'] ]);
+$_SESSION['License'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $opt['--license'] ]);
 if (empty($_SESSION['Company']['id'])) {
 	echo "Invalid Company\n";
 	exit(1);
@@ -87,7 +55,6 @@ $cfg = json_decode($cfg, true);
 $qbc = new \OpenTHC\CRE\QBench($cfg);
 
 $res = $qbc->auth();
-
 
 // List of possible panels
 $lab_panel_list = [];
@@ -118,35 +85,35 @@ foreach ($res['data'] as $x) {
 $dts = new DateTime();
 
 // _qbench_pull_report($dbc, $qbc);
-if (in_array('license', $opt['object'])) {
+if (in_array('license', $opt['--object'])) {
 	_qbench_pull_license($dbc, $qbc);
 	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
 		':k1' => 'sync/license/timestamp',
 		':v1' => json_encode($dts->format(\DateTimeInterface::RFC3339))
 	]);
 }
-if (in_array('contact', $opt['object'])) {
+if (in_array('contact', $opt['--object'])) {
 	_qbench_pull_contact($dbc, $qbc);
 	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
 		':k1' => 'sync/contact/timestamp',
 		':v1' => json_encode($dts->format(\DateTimeInterface::RFC3339))
 	]);
 }
-if (in_array('b2b', $opt['object'])) {
+if (in_array('b2b', $opt['--object'])) {
 	_qbench_b2b_import($dbc, $qbc);
 	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
 		':k1' => 'sync/b2b/timestamp',
 		':v1' => json_encode($dts->format(\DateTimeInterface::RFC3339))
 	]);
 }
-if (in_array('sample', $opt['object'])) {
+if (in_array('sample', $opt['--object'])) {
 	_qbench_pull_sample($dbc, $qbc);
 	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
 		':k1' => 'sync/lab_sample/timestamp',
 		':v1' => json_encode($dts->format(\DateTimeInterface::RFC3339))
 	]);
 }
-if (in_array('result', $opt['object'])) {
+if (in_array('result', $opt['--object'])) {
 	_qbench_pull_result($dbc, $qbc);
 	$dbc->query('INSERT INTO base_option (key, val) VALUES (:k1, :v1) ON CONFLICT (key) DO UPDATE SET val = :v1', [
 		':k1' => 'sync/lab_result/timestamp',
@@ -205,6 +172,9 @@ function _qbench_pull_license($dbc, $qbc)
 				echo "TIMEOUT\n";
 				return(0);
 			}
+
+			// $obj = \OpenTHC\CRE\QBench\License::convert($rec);
+
 
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 			$rec['customer_name'] = trim($rec['customer_name']);
@@ -382,19 +352,23 @@ function _qbench_pull_result($dbc, $qbc)
 		$oid = str_replace('qbench:', '', $oid);
 		$rec = $qbc->get(sprintf('/api/v1/test/%s', $oid));
 
-		$x = _qbench_pull_result_import($dbc, $rec);
+		try {
+			$x = _qbench_pull_result_import($dbc, $rec);
+		} catch (\Exception $e) {
+			echo "Failed to IMPort: $oid\n";
+		}
 
 		return $x;
 	}
 
 
-	$dt0 = new DateTime('2000-01-01');
-	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/lab_result/timestamp'");
-	$chk = json_decode($chk, true);
-	if ( ! empty($chk)) {
-		$dt0 = new DateTime($chk);
-		$dt0->sub(new DateInterval('P21D'));
-	}
+	$dt0 = new DateTime('2023-03-01');
+	// $chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/lab_result/timestamp'");
+	// $chk = json_decode($chk, true);
+	// if ( ! empty($chk)) {
+	// 	$dt0 = new DateTime($chk);
+	// 	$dt0->sub(new DateInterval('P21D'));
+	// }
 
 	printf("_qbench_pull_lab_result(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
 
@@ -421,8 +395,14 @@ function _qbench_pull_result($dbc, $qbc)
 				return(0);
 			}
 
-			$x = _qbench_pull_result_import($dbc, $rec);
-			$hit += $x;
+			try {
+				$x = _qbench_pull_result_import($dbc, $rec);
+				$hit += $x;
+			} catch (\Exception $e) {
+				echo $e->getMessage();
+				echo "\n";
+				echo "Failed to Import Result: {$rec['id']} from Sample {$rec['sample_id']}\n";
+			}
 
 		}
 
@@ -488,6 +468,8 @@ function _qbench_pull_result_import($dbc, $rec) : int
 
 	$rec['@hash'] = CRE_Base::recHash($rec);
 
+	$dbc->query('BEGIN');
+
 	$lr0 = $dbc->fetchRow('SELECT id, hash, name, stat FROM lab_result WHERE (id = :g1 OR guid = :g1)', [
 		':g1' => $rec['@lab_result_id']
 	]);
@@ -522,7 +504,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		$inv = [
 			'id' => $ls0['lot_id'], // v0 lot_id
 			'guid' => $ls0['lot_id'], // v0 lot_id
-			'name' => $ls0['lot_id'], // v0 lot_id
+			'name' => sprintf('%s - IMPORT-527', $ls0['lot_id']), // v0 lot_id
 			'license_id' => $_SESSION['License']['id'],
 			'product_id' => '018NY6XC00PR0DUCT000000000', // $rec['sample_name'] sometimes?
 			'variety_id' => '018NY6XC00VAR1ETY000000000', // $rec['sample_name'] sometimes?
@@ -640,15 +622,20 @@ function _qbench_pull_result_import($dbc, $rec) : int
 					case 'CFM':
 						$val = 0;
 						break;
-					case '>10000': // GT-LOQ
-					case '>20,000': // GT-LOQ
-					case '>20': // GT-LOQ
-					case '>1%':
-						$val = -416;
-						break;
 					default:
-						var_dump($metric_val);
-						throw new \Exception(sprintf('Invalid Value: "%s"', $val));
+						if ('>' == substr($val, 0, 1)) {
+							// case '>10000': // GT-LOQ
+							// case '>20,000': // GT-LOQ
+							// case '>20': // GT-LOQ
+							// case '>1%':
+							$val = -416;
+						} else {
+							$dbc->query('ROLLBACK');
+							var_dump($rec['@lab_result_id']);
+							var_dump($rec['@lab_sample_id']);
+							var_dump($metric_val);
+							throw new \Exception(sprintf('Invalid Value: "%s"', $val));
+						}
 						// echo "Invalid Value: {$metric_val['value']}\n";
 				}
 			}
@@ -722,25 +709,11 @@ function _qbench_pull_result_import($dbc, $rec) : int
 	// ]);
 
 	$lr0->save('Lab_Result/Import Update');
+	$dbc->query('COMMIT');
 
 	return(0);
 
 }
-
-
-// Get Test Groups (Panels)
-// $res = $qbc->get('/api/v1/panel');
-// foreach ($res['data'] as $rec) {
-// 	echo "Panel: {$rec['title']}\n";
-// 	foreach ($rec['panel_assays'] as $a) {
-// 		echo "  Panel: {$a['assay_id']}\n";
-// 	}
-// 	// print_r($rec);
-// 	// exit;
-// }
-// print_r($rec);
-
-		// worksheet_data
 
 
 /**
@@ -1248,6 +1221,7 @@ function _qbench_b2b_import_wcia_item($dbc, $b2b, $b2b_item)
 		':g0' => $b2b_item['inventory_id']
 	]);
 	if (empty($inv0['id'])) {
+
 		// CREATE
 		$lot = [
 			'guid' => $b2b_item['inventory_id'],
@@ -1734,5 +1708,56 @@ function _qbench_map_metric($dbc, $metric_key) : array
 	]);
 
 	return $lm0;
+
+}
+
+
+/**
+ * Parse CLI Options
+ */
+function _cli_options()
+{
+	$doc = <<<DOC
+	BONG CRE CCRS Upload Tool
+	Usage:
+		import-qbench --company=<ID> --license=<ID> [options]
+
+	Options:
+		--company=<ID>
+		--license=<ID>
+		--object=<LIST>
+		--object-id=<ID>
+		--page=<NUM>
+	DOC;
+
+	$res = Docopt::handle($doc, [
+		'help' => true,
+		'optionsFirst' => true,
+	]);
+	$opt = $res->args;
+
+	if (empty($opt['--company'])) {
+		echo "Say --company=COMPANY_D\n";
+	}
+
+	if (empty($opt['--license'])) {
+		echo "Say --license=LICENSE_ID\n";
+	}
+
+	if (empty($opt['--object'])) {
+		$opt['--object'] = explode(',', 'license,contact,b2b,sample,result');
+	} else {
+		$opt['--object'] = explode(',', $opt['--object']);
+	}
+
+	if ( ! empty($opt['--object-id'])) {
+		$_ENV['object-id'] = $opt['--object-id'];
+	}
+
+	if (empty($opt['--page'])) {
+		$opt['--page'] = 1;
+	}
+
+	return $opt;
 
 }
