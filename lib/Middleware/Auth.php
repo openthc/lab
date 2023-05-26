@@ -47,7 +47,7 @@ class Auth extends \OpenTHC\Middleware\Base
 
 		return $RES->withJSON(array(
 			'data' => [],
-			'meta' => [ 'detail' => 'Access Denied [AMA-042]' ],
+			'meta' => [ 'note' => 'Access Denied [AMA-042]' ],
 		), 403);
 
 		return $RES;
@@ -65,7 +65,7 @@ class Auth extends \OpenTHC\Middleware\Base
 		if (empty($tok)) {
 			return $RES->withJSON([
 				'data' => null,
-				'meta' => [ 'detail' => 'Invalid Authentication [AMA#104]' ]
+				'meta' => [ 'note' => 'Invalid Authentication [AMA-104]' ],
 			], 403);
 		}
 
@@ -81,16 +81,16 @@ class Auth extends \OpenTHC\Middleware\Base
 		$res = $dbc->fetchRow($sql, $arg);
 		if (empty($res['id'])) {
 			return $RES->withJSON(array(
-				'status' => 'failure',
-				'detail' => 'Invalid Authentication [AMA#119]'
+				'data' => null,
+				'meta' => [ 'note' => 'Invalid Authentication [AMA-119]' ]
 			), 403);
 		}
 		$data = json_decode($res['json'], true);
 		$Company = new Company($dbc, $data['company_id']);
 		if (empty($Company['id'])) {
 			return $RES->withJSON(array(
-				'status' => 'failure',
-				'detail' => 'Invalid Authentication [AMA#127]'
+				'data' => null,
+				'meta' => [ 'note' => 'Invalid Authentication [AMA-127]' ],
 			), 403);
 		}
 
@@ -102,8 +102,8 @@ class Auth extends \OpenTHC\Middleware\Base
 		$res = $dbc->fetchRow($sql, $arg);
 		if (empty($res['id'])) {
 			return $RES->withJSON(array(
-				'status' => 'failure',
-				'detail' => 'Invalid Authentication [AMA#140]'
+				'data' => null,
+				'meta' => [ 'note' => 'Invalid Authentication [AMA-140]' ],
 			), 403);
 		}
 		$data = json_decode($res['json'], true);
@@ -111,8 +111,8 @@ class Auth extends \OpenTHC\Middleware\Base
 
 		if (empty($Company['id'])) {
 			return $RES->withJSON(array(
-				'status' => 'failure',
-				'detail' => 'Invalid Authentication [AMA#149]'
+				'data' => null,
+				'meta' => [ 'note' => 'Invalid Authentication [AMA-149]' ],
 			), 403);
 		}
 
@@ -121,8 +121,8 @@ class Auth extends \OpenTHC\Middleware\Base
 	}
 
 	/**
-		@param $RES Response
-	*/
+	 * @param $RES Response
+	 */
 	protected function _bearer($REQ, $RES, $tok)
 	{
 		$dbc = $this->_container->DBC_Auth;
@@ -155,7 +155,7 @@ class Auth extends \OpenTHC\Middleware\Base
 
 		return $RES->withJSON([
 			'data' => null,
-			'meta' => 'Bearer Token Not Valid [AMA#147]',
+			'meta' => [ 'note' => 'Bearer Token Not Valid [AMA-147]' ],
 		], 403);
 
 	}
