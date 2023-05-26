@@ -12,6 +12,7 @@
 		}
 	},
 	"require": {
+		"docopt/docopt": "1.0.4",
 		"edoceo/lowline": "2022.0.280",
 		"edoceo/radix": "2021.0.0",
 		"endroid/qr-code": "4.4.9",
