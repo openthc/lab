@@ -1,20 +1,19 @@
 <?php
 /**
  * Wraps all the Routing for the API Module
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace OpenTHC\Lab\Module;
 
 class API extends \OpenTHC\Module\Base
 {
+	/**
+	 *
+	 */
 	function __invoke($a)
 	{
-		// Instructions
-		$a->get('', function($REQ, $RES) {
-			$data = array('Page' => array('title' => 'API'));
-			return $this->view->render($RES, 'page/api/index.html', $data);
-		})->add('OpenTHC\Lab\Middleware\Menu');
-
 		// The Versioned Endpoint
 		$a->group('/v2015', function() {
 
