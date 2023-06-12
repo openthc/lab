@@ -3,12 +3,16 @@
 #
 
 set -o errexit
+set -o errtrace
+set -o nounset
+set -o pipefail
 
 composer update --no-ansi --no-dev --no-progress --quiet --classmap-authoritative
 
 npm install --quiet
 
 # Copy stuff to our webroot
+mkdir -p webroot/css webroot/js webroot/vendor
 cp node_modules/jquery/dist/jquery.min.js webroot/js/jquery.min.js
 cp node_modules/jquery-ui/dist/jquery-ui.min.js webroot/js/jquery-ui.min.js
 cp node_modules/jquery-ui/dist/themes/base/jquery-ui.min.css webroot/css/jquery-ui.min.css
