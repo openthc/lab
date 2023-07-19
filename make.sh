@@ -19,8 +19,8 @@ cp node_modules/jquery-ui/dist/themes/base/jquery-ui.min.css webroot/css/jquery-
 
 
 # Google Fonts
-wget https://openthc.com/pub/font/CedarvilleCursive-Regular.ttf
-wget https://openthc.com/pub/font/HomemadeApple-Regular.ttf
+curl -O https://openthc.com/pub/font/CedarvilleCursive-Regular.ttf
+curl -O https://openthc.com/pub/font/HomemadeApple-Regular.ttf
 
 vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php --fonts=CedarvilleCursive-Regular.ttf
 vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php --fonts=HomemadeApple-Regular.ttf
