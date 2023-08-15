@@ -41,11 +41,49 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		switch ($meta['@context']) {
 			case 'http://openthc.org/lab/2022':
 				// My Published Way
-				$meta['Lab_Result'] = $meta['lab_result'];
-				$meta['Lab_Sample'] = $meta['lab_sample'];
-				$meta['Product'] = $meta['product'];
-				$meta['Product_Type'] = $met['product_type'];
+				$data['Lab_Sample'] = $meta['lab_sample'];
+				$data['Lab_Result'] = $meta['lab_result'];
+				$data['Product'] = $meta['product'];
+				$data['Product_Type'] = $meta['product_type'];
+				$data['Variety'] = $meta['variety'];
+				$data['Lab_Result_Metric_list'] = []; // $meta['lab_result_metric'];
+				$data['Lab_Result_Section_Metric_list'] = [];
+
+				foreach ($meta['lab_result_metric'] as $lrm) {
+
+					// var_dump($lrm); exit;
+
+					$lmt_id = $lrm['lab_metric_type_id'];
+
+					if (empty($data['Lab_Result_Section_Metric_list'][ $lmt_id ])) {
+						$data['Lab_Result_Section_Metric_list'][ $lmt_id ] = [
+							'id' => $lrm['lab_metric_type_id'],
+							'name' => $lrm['lab_metric_type_name'],
+							'sort' => $lrm['lab_metric_type_sort'],
+							'metric_list' => [],
+						];
+					}
+
+					// Metric List
+					$data['Lab_Result_Section_Metric_list'][ $lmt_id ]['metric_list'][] = [
+						'id' => $lrm['lab_metric_id'],
+						'sort' => $lrm['lab_metric_sort'],
+						'name' => $lrm['lab_metric_name'],
+					];
+
+					if (empty($data['Lab_Result_Metric_list'][ $lrm['lab_metric_id'] ])) {
+						$data['Lab_Result_Metric_list'][ $lrm['lab_metric_id'] ] = [
+							// 'id' => $lrm['']
+							'stat' => $lrm['stat'],
+							'qom' => $lrm['qom'],
+							'uom' => $lrm['uom'],
+						];
+					}
+
+				}
+
 				break;
+
 			default:
 
 				// Patch Result

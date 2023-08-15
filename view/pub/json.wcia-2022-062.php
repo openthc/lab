@@ -6,7 +6,6 @@
  */
 
 $lab_result_metric = $data['Lab_Result_Metric_list'];
-$lab_result_section_metric = $data['Lab_Result_Section_Metric_list'];
 
 // Data to Return
 $wcia = [
