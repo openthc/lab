@@ -55,7 +55,6 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		$lr0_meta['@version'] = '2022.256';
 
 		$ret_code = 200;
-		$ret_data = [];
 
 		$Lab_Result1 = new Lab_Result($dbc_main, $data['lab_result']['id']);
 		if (empty($Lab_Result1['id'])) {
@@ -69,7 +68,16 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		$Lab_Result1['name'] = $data['lab_result']['guid'];
 		$Lab_Result1['meta'] = json_encode($lr0_meta);
 		$Lab_Result1->save();
-		$ret_data['pub'] = sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $Lab_Result1['id']);
+
+		$ret_data = [];
+		$ret_data['html'] = sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $Lab_Result1['id']); // v1
+		$ret_data['json'] = sprintf('https://%s/pub/%s.json', $_SERVER['SERVER_NAME'], $Lab_Result1['id']);
+		$ret_data['pub'] = $ret_data['html']; // v0
+
+		// CRE Specific Link
+		if ('usa/wa' == $Company['cre']) {
+			$ret_data['json/wcia'] = sprintf('https://%s/pub/%s/wcia.json', $_SERVER['SERVER_NAME'], $Lab_Result1['id']);
+		}
 
 		// Attachment
 		if ( ! empty($data['lab_result_file']['body'])) {
@@ -111,13 +119,6 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			'data' => $ret_data,
 			'meta' => [ ]
 		], $ret_code);
-
-		// $ret['data'] = [
-		// 	'pub' => sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
-		// 	'coa' => (strlen($lr1_meta['Lab_Result']['coa_file']) ? sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $Lab_Result1['id']) : ''),
-		// 	'json' => sprintf('https://%s/pub/%s.json', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
-		// 	'wcia' => sprintf('https://%s/pub/%s/wcia.json', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
-		// ];
 
 		// // $this->_set_cache_json_wcia($lab_result, $output_data);
 		// // $this->_set_cache_html();
