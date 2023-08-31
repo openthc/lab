@@ -1,3 +1,11 @@
+<?php
+/**
+ * Main Theme
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -207,7 +215,9 @@
 <body>
 
 <?= $this->block('menu-zero.php') ?>
+
 <!-- <?= $this->block('flash-messages.php') ?> -->
+
 <?php
 $x = \Edoceo\Radix\Session::flash();
 if ( ! empty($x)) {
