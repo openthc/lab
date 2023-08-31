@@ -57,30 +57,29 @@ $qbc = new \OpenTHC\CRE\QBench($cfg);
 $res = $qbc->auth();
 
 // List of possible panels
-$lab_panel_list = [];
-$res = $qbc->get('/api/v1/panel');
-foreach ($res['data'] as $x) {
-	$x['@id'] = sprintf('qbench:%d', $x['id']);
-	$lab_panel_list[$x['@id']] = $x;
-	// printf("Panel: %s / '%s'\n", $x['@id'], $x['title']);
-}
+// $lab_panel_list = [];
+// $res = $qbc->get('/api/v1/panel');
+// foreach ($res['data'] as $x) {
+// 	$x['@id'] = sprintf('qbench:%d', $x['id']);
+// 	$lab_panel_list[$x['@id']] = $x;
+// 	// printf("Panel: %s / '%s'\n", $x['@id'], $x['title']);
+// }
 
+// Assay List
 $lab_assay_list = [];
 $res = $qbc->get('/api/v1/assay');
 foreach ($res['data'] as $x) {
 	$x['@id'] = sprintf('qbench:%d', $x['id']);
 	$lab_assay_list[$x['@id']] = $x;
-	// printf("Assay: %s / '%s'\n", $x['@id'], $x['title']);
 }
 
 // Accessioning Type
-$lab_accession_list = [];
-$res = $qbc->get('/api/v1/accessioningtype');
-foreach ($res['data'] as $x) {
-	$x['@id'] = sprintf('qbench:%d', $x['id']);
-	// var_dump($x);
-}
-
+// $lab_accession_list = [];
+// $res = $qbc->get('/api/v1/accessioningtype');
+// foreach ($res['data'] as $x) {
+// 	$x['@id'] = sprintf('qbench:%d', $x['id']);
+// 	// var_dump($x);
+// }
 
 $dts = new DateTime();
 
@@ -355,7 +354,7 @@ function _qbench_pull_result($dbc, $qbc)
 		try {
 			$x = _qbench_pull_result_import($dbc, $rec);
 		} catch (\Exception $e) {
-			echo "Failed to IMPort: $oid\n";
+			echo "Failed to import: $oid\n";
 		}
 
 		return $x;
@@ -419,7 +418,8 @@ function _qbench_pull_result($dbc, $qbc)
  */
 function _qbench_pull_result_import($dbc, $rec) : int
 {
-	global $lab_assay_list, $lab_panel_list;
+	global $lab_assay_list;
+	// $lab_assay_list = $qbc->getAssayList();
 
 	$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 	$rec['@assay_id'] = sprintf('qbench:%s', $rec['assay_id']);
@@ -431,14 +431,10 @@ function _qbench_pull_result_import($dbc, $rec) : int
 	$rec['@lab_result_id'] = sprintf('qbench:%s', $rec['id']);
 	$rec['@lab_sample_id'] = sprintf('qbench:%s', $rec['sample_id']);
 
-	if (empty($rec['worksheet_data'])) {
-		return(0);
-	}
-
 	// State Mapper
 	switch (strtoupper($rec['state'])) {
 		case 'NOT STARTED':
-			$rec['@stat'] = Lab_Result::STAT_OPEN;
+			$rec['@stat'] = 100; // Lab_Result::STAT_OPEN;
 			break;
 		case 'BEING TESTED':
 		case 'NEEDS GC DATA':
@@ -492,15 +488,15 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		':g1' => $rec['@lab_sample_id']
 	]);
 	if (empty ($ls0['id'])) {
-		echo "Missing Sample {$rec['sample_id']}\n";
-		return(0);
+		throw new \Exception(sprintf('Invalid Sample on Result %s [BIQ-483]', $rec['@id']));
 	}
 	// Inventory Data
-	$inv = $dbc->fetchRow('SELECT id FROM inventory WHERE id = :g1', [
+	$inv = $dbc->fetchRow('SELECT id, guid FROM inventory WHERE id = :g1', [
 		':g1' => $ls0['lot_id'] // v0 lot_id
 	]);
-	if (empty ($inv['id'])) {
-
+	if (empty($inv['id'])) {
+		var_dump($rec);
+		throw new \Exception('Invalid Inventory on Result');
 		$inv = [
 			'id' => $ls0['lot_id'], // v0 lot_id
 			'guid' => $ls0['lot_id'], // v0 lot_id
@@ -513,12 +509,10 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		];
 
 		$dbc->insert('inventory', $inv);
-
 		// 'license_id_source' => $b2b['license_id_source']
 		// 'qty' => $rec['@qty'],
 		// 'qty_initial' => $rec['@qty'],
 		// 'stat' => 200
-
 	}
 
 	if (empty($lr0['id'])) {
@@ -634,9 +628,10 @@ function _qbench_pull_result_import($dbc, $rec) : int
 							var_dump($rec['@lab_result_id']);
 							var_dump($rec['@lab_sample_id']);
 							var_dump($metric_val);
-							throw new \Exception(sprintf('Invalid Value: "%s"', $val));
+							// throw new \Exception(sprintf('Invalid Value: "%s"', $val));
 						}
-						// echo "Invalid Value: {$metric_val['value']}\n";
+						echo "Invalid Value: {$metric_val['value']}\n";
+
 				}
 			}
 			$val = floatval($val);
@@ -675,6 +670,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 					var_dump($lrm1);
 					echo "\n####\n";
 					// exit(0);
+					continue;
 				}
 
 			} else {
@@ -711,7 +707,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 	$lr0->save('Lab_Result/Import Update');
 	$dbc->query('COMMIT');
 
-	return(0);
+	return 0;
 
 }
 
@@ -729,21 +725,17 @@ function _qbench_pull_sample($dbc, $qbc)
 		// Update Object Hash in Database to '-' so it will re-pull
 		$dbc->query("UPDATE lab_sample SET hash = 'SYNC' WHERE id = :ls0", [ ':ls0' => $oid ]);
 
-		// $oid = str_replace('qbench:', '', $oid);
-		// $rec = $qbc->get(sprintf('/api/v1/test/%s', $oid));
+		$oid = str_replace('qbench:', '', $oid);
+		$rec = $qbc->get(sprintf('/api/v1/sample/%s', $oid));
 
-		// $x = _qbench_pull_result_import($dbc, $rec);
-		// $oid = str_replace('qbench:', '', $oid);
-		// $res764 = $qbc->get(sprintf('/api/v1/sample/%s', $oid));
-		// print_r($res764);
-		// $qbc->get('/api/v1/sample?' . http_build_query([
-		// 	'page_num' => $idx
-		// 	, 'sort_by' => 'last_updated' // , // 'id'
-		// 	, 'sort_order' => 'desc'
-		// ]));
+		try {
+			$x = _qbench_pull_sample_import($dbc, $rec);
+		} catch (\Exception $e) {
+			echo "Failed to import: $oid\n";
+		}
 
-		// return $x;
-		// exit(0);
+		return $x;
+
 	}
 
 	$dt0 = new DateTime('2000-01-01');
@@ -779,206 +771,8 @@ function _qbench_pull_sample($dbc, $qbc)
 				return(0);
 			}
 
-			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
-			$rec['@lot_guid'] = $rec['ExtInvID'] ?: $rec['lot_number'] ?: $rec['custom_formatted_id'] ?: $rec['@id'];
-			$rec['@order_id'] = sprintf('qbench:%s', $rec['order_id']);
-			$rec['@qty'] = floatval($rec['sample_quantity_received']);
-			if (preg_match('/([0-9\.]+)(a-z)/i', $rec['sample_quantity_received'], $m)) {
-				$rec['@qty'] = $m[1];
-				$rec['@uom'] = $m[2];
-			}
-			$key_list = array_keys($rec);
-			foreach ($key_list as $k) {
-				if (is_string($rec[$k])) {
-					$rec[$k] = trim($rec[$k]);
-				}
-			}
-			$rec['@hash'] = CRE_Base::recHash($rec);
-
-			// echo "Lab Sample: {$rec['@id']} / {$rec['@lot_guid']} / {$rec['custom_formatted_id']}\n";
-
-			// Lookup Record
-			$lab_sample = $dbc->fetchRow('SELECT id, hash FROM lab_sample WHERE id = :i0 OR name = :i0', [
-				':i0' => $rec['@id']
-			]);
-
-			if ( ! empty($lab_sample['id']) && ($rec['@hash'] == $lab_sample['hash'])) {
-				$hit++;
-				echo '.';
-				continue;
-			}
-
-			if (empty($rec['order_id'])) {
-				echo "\nMissing Order ID on Sample {$rec['@id']}\n";
-				continue;
-			}
-
-			$b2b = $dbc->fetchRow('SELECT id, license_id_source, meta FROM b2b_incoming WHERE guid = :g0', [
-				':g0' => $rec['@order_id']
-			]);
-			if (empty($b2b)) {
-				echo "\nMissing Order '{$rec['@order_id']}' on Sample {$rec['@id']}\n";
-				print_r($rec);
-				continue;
-			}
-
-			// Need to Create an Inventory Lot Here
-			$arg = [
-				// ':i0' => $rec['@id'],
-				':g0' => $rec['@lot_guid']
-			];
-			$inv = $dbc->fetchRow('SELECT id FROM inventory WHERE id = :g0', [ ':g0' => $rec['@id'] ]);
-			if (empty($inv['id'])) {
-				$inv = $dbc->fetchRow('SELECT id FROM inventory WHERE guid = :g0', [ ':g0' => $rec['@lot_guid'] ]);
-			}
-			if (empty($inv['id'])) {
-
-				// See if anyone has the same GUID as me, then increment mine
-				// $chk_guid = $dbc->fetchOne('SELECT id FROM inventory WHERE guid = :g0', [
-				// 	':g0' => $rec['@lot_guid']
-				// ]);
-				// if ( ! empty($chk_guid)) {
-				// 	$rec['@lot_name'] = $rec['lot_guid'];
-				// 	$rec['@lot_guid'] = sprintf('%s-%s', $rec['@lot_guid'], $rec['@id']);
-				// }
-
-
-				$inv = [
-					'id' => $rec['@id'],
-					'guid' => $rec['@lot_guid'],
-					'name' => $rec['@lot_guid'],
-					'license_id' => $_SESSION['License']['id'],
-					// 'license_id_source' => $b2b['license_id_source']
-					'product_id' => '018NY6XC00PR0DUCT000000000', // $rec['sample_name'] sometimes?
-					'variety_id' => '018NY6XC00VAR1ETY000000000', // $rec['sample_name'] sometimes?
-					'section_id' => '018NY6XC00SECT10N000000000',
-					'qty' => $rec['@qty'],
-					'qty_initial' => $rec['@qty'],
-					'stat' => 200
-				];
-				// try {
-					$dbc->insert('inventory', $inv);
-				// } catch (\Exception $e) {
-				// 	echo $e->getMessage();
-				// 	echo "\n";
-				// 	continue;
-				// }
-
-			} else {
-
-				// echo "INVENTORY UPDATE?\n";
-
-				$update = [];
-				// $update['guid'] = $rec['@lot_guid'];
-				$update['name'] = $rec['@lot_guid'];
-
-				// Update Status
-				// Update Meta
-				$filter = [];
-				$filter['id'] = $rec['@id'];
-
-				// try {
-					// $dbc->update('inventory', $update, $filter);
-				// } catch (Exception $e) {
-					// Sometimes this fails because of duplicated GUID values which we don't allow.
-					// Would need to move one to a -0 and then update the new one to be -1
-				// 	echo "\nInventory Lot: {$rec['@id']} = {$rec['@lot_guid']}\n";
-				// 	echo $e->getMessage();
-				// 	echo "\n";
-
-				// }
-
-			}
-
-			// Link it to a Lab_Sample
-			if (empty($lab_sample)) {
-
-				$lab_sample = [];
-				$lab_sample['id'] = $rec['@id'];
-				$lab_sample['stat'] = Lab_Sample::STAT_OPEN; // checkout received(bool) also
-				$lab_sample['hash'] = $rec['@hash'];
-				$lab_sample['name'] = $rec['custom_formatted_id'] ?: $rec['sample_name'];
-				$lab_sample['created_at'] = $rec['date_created'];
-				$lab_sample['updated_at'] = date(\DateTime::RFC3339, $rec['last_updated']);
-				$lab_sample['license_id'] = $_SESSION['License']['id'];
-				$lab_sample['license_id_source'] = $b2b['license_id_source'];
-				$lab_sample['lot_id'] = $inv['id']; // v0 lot_id
-				// $lab_sample['inventory_id'] = $inv['id']; // v1 inventory_id
-				$lab_sample['qty'] = $rec['@qty'];
-				$lab_sample['meta'] = json_encode($rec);
-
-				$dbc->insert('lab_sample', $lab_sample);
-				syslog(LOG_NOTICE, "Lab_Sample Created {$rec['@id']}");
-
-			} else {
-
-				// $lab_sample['stat'] = // res['status'] == "IN PROGRESS", "IN REVIEW", NULL
-				$update = [];
-				$update['hash'] = $rec['@hash'];
-				$update['meta'] = json_encode($rec);
-				$update['updated_at'] = date(\DateTime::RFC3339, $rec['last_updated']);
-
-				switch ($rec['status']) {
-					case '':
-						$update['stat'] = Lab_Sample::STAT_OPEN;
-						break;
-					case 'IN PROGRESS':
-						// Should PROC == 102?
-						$update['stat'] = Lab_Sample::STAT_LIVE;
-						break;
-					case 'IN REVIEW':
-						$update['stat'] = Lab_Result::STAT_WAIT;
-						break;
-					default:
-						var_dump($rec);
-						throw new \Exception("Bad Sample Status '{$rec['status']}' ");
-				}
-
-				$filter = [];
-				$filter['id'] = $rec['@id'];
-
-				try {
-					$dbc->update('lab_sample', $update, $filter);
-					syslog(LOG_NOTICE, "Lab_Sample Updated {$rec['@id']}");
-				} catch (Exception $e) {
-					// Sometimes this fails because of duplicated GUID values which we don't allow.
-					// Would need to move one to a -0 and then update the new one to be -1
-					echo "\nSample: {$rec['@id']}\n";
-					echo $e->getMessage();
-					echo "\n";
-
-				}
-
-				// $hit++;
-
-			}
-
-			// Link it to the B2B Incoming Item
-			$b2b_item = $dbc->fetchRow('SELECT id FROM b2b_incoming_item WHERE b2b_incoming_id = :b0 AND id = :b1', [
-				':b0' => $b2b['id']
-				, ':b1' => $rec['@id']
-			]);
-			if (empty($b2b_item)) {
-
-				// Insert B2B Record
-				$dbc->insert('b2b_incoming_item', [
-					'id' => $rec['@id']
-					, 'b2b_incoming_id' => $b2b['id']
-					, 'lot_id' => $lot['id'] // v0 lot_id
-					, 'created_at' => $rec['date_created']
-					, 'updated_at' => date(\DateTime::RFC3339, $rec['last_updated'])
-					// , 'deleted_at' =>
-					, 'stat' => 200
-					, 'flag' => 0
-					, 'unit_count' => $rec['@qty']
-					, 'hash' => '-'
-					, 'name' => $rec['@id']
-					, 'meta' => json_encode($rec)
-				]);
-			} else {
-				// Update?
-				// echo '=B';
-			}
+			$x = _qbench_pull_sample_import($dbc, $rec);
+			$hit += $x;
 
 		}
 
@@ -990,16 +784,241 @@ function _qbench_pull_sample($dbc, $qbc)
 
 }
 
+/**
+ *
+ */
+function _qbench_pull_sample_import($dbc, $rec)
+{
+
+	if (empty($rec['order_id'])) {
+		throw new \Exception('Missing Order ID on Sample [BIQ-807]');
+		echo "\nMissing Order ID on Sample {$rec['@id']}\n";
+		return 0;
+	}
+
+	$rec['@id'] = sprintf('qbench:%s', $rec['id']);
+	$rec['@lot_guid'] = $rec['ExtInvID'] ?: $rec['lot_number'] ?: $rec['custom_formatted_id'] ?: $rec['@id'];
+	$rec['@inventory_guid'] = $rec['ExtInvID'] ?: $rec['lot_number'] ?: $rec['custom_formatted_id'] ?: $rec['@id'];
+	$rec['@order_id'] = sprintf('qbench:%s', $rec['order_id']);
+	$rec['@qty'] = floatval($rec['sample_quantity_received']);
+	if (preg_match('/([0-9\.]+)(a-z)/i', $rec['sample_quantity_received'], $m)) {
+		$rec['@qty'] = $m[1];
+		$rec['@uom'] = $m[2];
+	}
+	$key_list = array_keys($rec);
+	foreach ($key_list as $k) {
+		if (is_string($rec[$k])) {
+			$rec[$k] = trim($rec[$k]);
+		}
+	}
+	$rec['@hash'] = CRE_Base::recHash($rec);
+
+	// echo "Lab Sample: {$rec['@id']} / {$rec['@lot_guid']} / {$rec['custom_formatted_id']}\n";
+
+	// Lookup Record
+	$lab_sample = $dbc->fetchRow('SELECT id, hash FROM lab_sample WHERE id = :i0 OR name = :i0', [
+		':i0' => $rec['@id']
+	]);
+
+	if ( ! empty($lab_sample['id']) && ($rec['@hash'] == $lab_sample['hash'])) {
+		echo '.';
+		return 1;
+	}
+
+	$b2b = $dbc->fetchRow('SELECT id, license_id_source, meta FROM b2b_incoming WHERE guid = :g0', [
+		':g0' => $rec['@order_id']
+	]);
+	if (empty($b2b)) {
+		print_r($rec);
+		echo "\nMissing Order '{$rec['@order_id']}' on Sample {$rec['@id']}\n";
+		return 0;
+	}
+
+	// Need to Create an Inventory Lot Here
+	$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE id = :g0', [ ':g0' => $rec['@id'] ]);
+	if (empty($inv['id'])) {
+		$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE guid = :g0', [ ':g0' => $rec['@lot_guid'] ]);
+	}
+	if (empty($inv['id'])) {
+
+		// See if anyone has the same GUID as me, then increment mine
+		// $chk_guid = $dbc->fetchOne('SELECT id FROM inventory WHERE guid = :g0', [
+		// 	':g0' => $rec['@lot_guid']
+		// ]);
+		// if ( ! empty($chk_guid)) {
+		// 	$rec['@lot_name'] = $rec['lot_guid'];
+		// 	$rec['@lot_guid'] = sprintf('%s-%s', $rec['@lot_guid'], $rec['@id']);
+		// }
+
+		$inv = [
+			'id' => $rec['@id'],
+			'guid' => $rec['@lot_guid'],
+			'name' => sprintf('%s - IMPORT-875', $rec['@lot_guid']),
+			'license_id' => $_SESSION['License']['id'],
+			// 'license_id_source' => $b2b['license_id_source']
+			'product_id' => '018NY6XC00PR0DUCT000000000', // $rec['sample_name'] sometimes?
+			'variety_id' => '018NY6XC00VAR1ETY000000000', // $rec['sample_name'] sometimes?
+			'section_id' => '018NY6XC00SECT10N000000000',
+			'qty' => $rec['@qty'],
+			'qty_initial' => $rec['@qty'],
+			'stat' => 200
+		];
+		$dbc->insert('inventory', $inv);
+
+	} else {
+
+		$update = [];
+		$update['guid'] = $rec['@lot_guid'];
+
+		// Update Status
+		$filter = [];
+		$filter['id'] = $rec['@id'];
+
+		// try {
+			$dbc->update('inventory', $update, $filter);
+		// } catch (Exception $e) {
+			// Sometimes this fails because of duplicated GUID values which we don't allow.
+			// Would need to move one to a -0 and then update the new one to be -1
+		// 	echo "\nInventory Lot: {$rec['@id']} = {$rec['@lot_guid']}\n";
+		// 	echo $e->getMessage();
+		// 	echo "\n";
+
+		// }
+
+	}
+
+	// Link it to a Lab_Sample
+	if (empty($lab_sample)) {
+
+		$lab_sample = [];
+		$lab_sample['id'] = $rec['@id'];
+		$lab_sample['stat'] = Lab_Sample::STAT_OPEN; // checkout received(bool) also
+		$lab_sample['hash'] = $rec['@hash'];
+		$lab_sample['name'] = $rec['custom_formatted_id'] ?: $rec['sample_name'];
+		$lab_sample['created_at'] = $rec['date_created'];
+		$lab_sample['updated_at'] = date(\DateTime::RFC3339, $rec['last_updated']);
+		$lab_sample['license_id'] = $_SESSION['License']['id'];
+		$lab_sample['license_id_source'] = $b2b['license_id_source'];
+		$lab_sample['lot_id'] = $inv['id']; // v0 lot_id
+		// $lab_sample['inventory_id'] = $inv['id']; // v1 inventory_id
+		$lab_sample['qty'] = $rec['@qty'];
+		$lab_sample['meta'] = json_encode($rec);
+
+		$dbc->insert('lab_sample', $lab_sample);
+		syslog(LOG_NOTICE, "Lab_Sample Created {$rec['@id']}");
+
+	} else {
+
+		// $lab_sample['stat'] = // res['status'] == "IN PROGRESS", "IN REVIEW", NULL
+		$update = [];
+		$update['hash'] = $rec['@hash'];
+		$update['meta'] = json_encode($rec);
+		$update['updated_at'] = date(\DateTime::RFC3339, $rec['last_updated']);
+
+		switch ($rec['status']) {
+			case '':
+				$update['stat'] = Lab_Sample::STAT_OPEN;
+				break;
+			case 'IN PROGRESS':
+				// Should PROC == 102?
+				$update['stat'] = Lab_Sample::STAT_LIVE;
+				break;
+			case 'IN REVIEW':
+				$update['stat'] = Lab_Result::STAT_WAIT;
+				break;
+			default:
+				var_dump($rec);
+				throw new \Exception("Bad Sample Status '{$rec['status']}' ");
+		}
+
+		$filter = [];
+		$filter['id'] = $rec['@id'];
+
+		try {
+			$dbc->update('lab_sample', $update, $filter);
+			syslog(LOG_NOTICE, "Lab_Sample Updated {$rec['@id']}");
+		} catch (Exception $e) {
+			// Sometimes this fails because of duplicated GUID values which we don't allow.
+			// Would need to move one to a -0 and then update the new one to be -1
+			echo "\nSample: {$rec['@id']}\n";
+			echo $e->getMessage();
+			echo "\n";
+
+		}
+
+		// $hit++;
+
+	}
+
+	// Link it to the B2B Incoming Item
+	$b2b_item = $dbc->fetchRow('SELECT id, lot_id FROM b2b_incoming_item WHERE b2b_incoming_id = :b0 AND id = :b1', [
+		':b0' => $b2b['id']
+		, ':b1' => $rec['@id']
+	]);
+	if (empty($b2b_item)) {
+
+		// Insert B2B Record
+		$dbc->insert('b2b_incoming_item', [
+			'id' => $rec['@id']
+			, 'b2b_incoming_id' => $b2b['id']
+			, 'lot_id' => $inv['id'] // v0 lot_id
+			, 'created_at' => $rec['date_created']
+			, 'updated_at' => date(\DateTime::RFC3339, $rec['last_updated'])
+			// , 'deleted_at' =>
+			, 'stat' => 200
+			, 'flag' => 0
+			, 'unit_count' => $rec['@qty']
+			, 'hash' => '-'
+			, 'name' => $rec['@id']
+			, 'meta' => json_encode($rec)
+		]);
+	} elseif (empty($b2b_item['lot_id'])) {
+		// Update?
+		$update = [];
+		$update['lot_id'] = $inv['id'];
+		$filter = [];
+		$filter['id'] = $b2b_item['id'];
+		$dbc->update('b2b_incoming_item', $update, $filter);
+		// echo '=B';
+	}
+
+	return 0;
+
+}
+
 // Get Orders
 function _qbench_b2b_import($dbc, $qbc)
 {
-	$dt0 = new DateTime('2000-01-01');
-	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/b2b/timestamp'");
-	$chk = json_decode($chk, true);
-	if ( ! empty($chk)) {
-		$dt0 = new DateTime($chk);
-		$dt0->sub(new DateInterval('P14D'));
+	// 6531
+	// Fetch Specific One
+	if ( ! empty($_ENV['object-id'])) {
+
+		$oid = $_ENV['object-id'];
+
+		// Update Object Hash in Database to '-' so it will re-pull
+		$dbc->query("UPDATE b2b_incoming SET hash = 'SYNC' WHERE id = :o0", [ ':o0' => $oid ]);
+
+		$oid = str_replace('qbench:', '', $oid);
+		$rec = $qbc->get(sprintf('/api/v1/order/%s', $oid));
+
+		try {
+			$x = _qbench_sync_b2b_incoming_import($dbc, $rec);
+		} catch (\Exception $e) {
+			echo "Failed to import: $oid\n";
+		}
+
+		return $x;
+
 	}
+
+
+	$dt0 = new DateTime('2000-01-01');
+	// $chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/b2b/timestamp'");
+	// $chk = json_decode($chk, true);
+	// if ( ! empty($chk)) {
+	// 	$dt0 = new DateTime($chk);
+	// 	$dt0->sub(new DateInterval('P14D'));
+	// }
 
 	printf("_qbench_b2b_import(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
 
@@ -1027,111 +1046,7 @@ function _qbench_b2b_import($dbc, $qbc)
 				return(0);
 			}
 
-			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
-			$rec['@hash'] = CRE_Base::recHash($rec);
-
-			// echo "b2b: {$rec['@id']}\n";
-			$chk = $dbc->fetchRow('SELECT id, hash, stat, license_id_source FROM b2b_incoming WHERE guid = :x1', [
-				':x1' => $rec['@id']
-			]);
-
-			if ( ! empty($rec['WCIA_JSON_OrderInput'])) {
-				$rec['@source'] = _qbench_b2b_import_wcia($rec['WCIA_JSON_OrderInput']);
-				// clear hash to reload
-				$chk['hash'] = null;
-			}
-
-			if ( ! empty($chk['id']) && ($rec['@hash'] == $chk['hash'])) {
-				$hit++;
-				syslog(LOG_INFO, "B2B/Incoming sync {$rec['@id']} hash-match");
-				continue;
-			}
-
-			$b2b0 = [
-				// 'id' => _ulid()
-				// , 'license_id_source' => $l1['id']
-				'license_id_target' => $_SESSION['License']['id']
-				, 'created_at' => $rec['date_created']
-				, 'updated_at' => date(\DateTime::RFC3339, $rec['last_updated'])
-				, 'guid' => $rec['@id']
-				, 'name' => sprintf('QBench Order %d', $rec['id'])
-				, 'hash' => $rec['@hash']
-				, 'meta' => json_encode($rec)
-				, 'stat' => 200
-			];
-
-			// Order Status
-			switch (strtoupper($rec['state'])) {
-				case 'CANCELLED':
-					$b2b0['stat'] = 410;
-					break;
-				case 'COMPLETED':
-					$b2b0['stat'] = 307;
-					break;
-				case 'CREATED':
-				case 'IN PROGRESS': // sub category of CREATED
-				case 'ON HOLD':     // sub category of CREATED
-					$b2b0['stat'] = 200;
-					break;
-			}
-
-			if (empty($chk['id'])) {
-
-				syslog(LOG_INFO, "B2B/Incoming/Create {$rec['@id']}");
-
-				$b2b0['id'] = _ulid();
-
-				// License = customer_account_id?
-				// License = explode(',', strtolower($rec['email_to']));
-
-				$l1 = $dbc->fetchRow('SELECT id FROM license WHERE (code = :l1 OR guid = :l1)', [
-					':l1' => sprintf('qbench:%s', $rec['customer_account_id'])
-				]);
-				if (empty($l1['id'])) {
-
-					printf("CREATE License: qbench:%s in %s\n", $rec['customer_account_id'], $rec['@id']);
-
-					$l1 = [
-						'id' => _ulid(),
-						'code' => sprintf('qbench:%s', $rec['customer_account_id']),
-						'guid' => sprintf('qbench:%s', $rec['customer_account_id']),
-						'name' => sprintf('qbench:%s', $rec['customer_account_id']),
-						'type' => 'X',
-						'hash' => '-'
-					];
-					$dbc->insert('license', $l1);
-				}
-
-				$b2b0['license_id_source'] = $l1['id'];
-
-				$dbc->insert('b2b_incoming', $b2b0);
-
-			} else {
-
-				$b2b0 = array_merge($b2b0, $chk);
-
-				$update = [];
-				$update['hash'] = $rec['@hash'];
-				$update['stat'] = $b2b0['stat'];
-				$update['meta'] = json_encode($rec);
-				$update['updated_at'] = date(\DateTime::RFC3339, $rec['last_updated']);
-
-				$filter = [];
-				$filter['id'] = $b2b0['@id'];
-
-				$dbc->update('b2b_incoming', $update, $filter);
-
-				syslog(LOG_INFO, "B2B/Incoming/Update {$rec['@id']}");
-
-			}
-
-			// Importing WCIA Source Data
-			if ( ! empty($rec['@source'])) {
-				$src = $rec['@source'];
-				foreach ($src['inventory_transfer_items'] as $b2b_item) {
-					_qbench_b2b_import_wcia_item($dbc, $b2b0, $b2b_item);
-				}
-			}
+			_qbench_sync_b2b_incoming_import($dbc, $rec);
 
 		}
 
@@ -1141,6 +1056,120 @@ function _qbench_b2b_import($dbc, $qbc)
 
 }
 
+/**
+ *
+ */
+function _qbench_sync_b2b_incoming_import($dbc, $rec) : int
+{
+	$rec['@id'] = sprintf('qbench:%s', $rec['id']);
+	$rec['@hash'] = CRE_Base::recHash($rec);
+
+	// echo "b2b: {$rec['@id']}\n";
+	$chk = $dbc->fetchRow('SELECT id, hash, stat, license_id_source FROM b2b_incoming WHERE guid = :x1', [
+		':x1' => $rec['@id']
+	]);
+
+	if ( ! empty($rec['WCIA_JSON_OrderInput'])) {
+		$rec['@source'] = _qbench_b2b_import_wcia($rec['WCIA_JSON_OrderInput']);
+		// clear hash to reload
+		$chk['hash'] = null;
+	}
+
+	// Hash Match
+	if ( ! empty($chk['id']) && ($rec['@hash'] == $chk['hash'])) {
+		syslog(LOG_INFO, "B2B/Incoming sync {$rec['@id']} hash-match");
+		return 1;
+	}
+
+	$b2b0 = [
+		// 'id' => _ulid()
+		// , 'license_id_source' => $l1['id']
+		'license_id_target' => $_SESSION['License']['id']
+		, 'created_at' => $rec['date_created']
+		, 'updated_at' => date(\DateTime::RFC3339, $rec['last_updated'])
+		, 'guid' => $rec['@id']
+		, 'name' => sprintf('QBench Order %d', $rec['id'])
+		, 'hash' => $rec['@hash']
+		, 'meta' => json_encode($rec)
+		, 'stat' => 200
+	];
+
+	// Order Status
+	switch (strtoupper($rec['state'])) {
+		case 'CANCELLED':
+			$b2b0['stat'] = 410;
+			break;
+		case 'COMPLETED':
+			$b2b0['stat'] = 307;
+			break;
+		case 'CREATED':
+		case 'IN PROGRESS': // sub category of CREATED
+		case 'ON HOLD':     // sub category of CREATED
+			$b2b0['stat'] = 200;
+			break;
+	}
+
+	if (empty($chk['id'])) {
+
+		syslog(LOG_INFO, "B2B/Incoming/Create {$rec['@id']}");
+
+		$b2b0['id'] = _ulid();
+
+		// License = customer_account_id?
+		// License = explode(',', strtolower($rec['email_to']));
+
+		$l1 = $dbc->fetchRow('SELECT id FROM license WHERE (code = :l1 OR guid = :l1)', [
+			':l1' => sprintf('qbench:%s', $rec['customer_account_id'])
+		]);
+		if (empty($l1['id'])) {
+
+			printf("CREATE License: qbench:%s in %s\n", $rec['customer_account_id'], $rec['@id']);
+
+			$l1 = [
+				'id' => _ulid(),
+				'code' => sprintf('qbench:%s', $rec['customer_account_id']),
+				'guid' => sprintf('qbench:%s', $rec['customer_account_id']),
+				'name' => sprintf('qbench:%s', $rec['customer_account_id']),
+				'type' => 'X',
+				'hash' => '-'
+			];
+			$dbc->insert('license', $l1);
+		}
+
+		$b2b0['license_id_source'] = $l1['id'];
+
+		$dbc->insert('b2b_incoming', $b2b0);
+
+	} else {
+
+		$b2b0 = array_merge($b2b0, $chk);
+
+		$update = [];
+		$update['hash'] = $rec['@hash'];
+		$update['stat'] = $b2b0['stat'];
+		$update['meta'] = json_encode($rec);
+		$update['updated_at'] = date(\DateTime::RFC3339, $rec['last_updated']);
+
+		$filter = [];
+		$filter['id'] = $b2b0['@id'];
+
+		$dbc->update('b2b_incoming', $update, $filter);
+
+		// syslog(LOG_INFO, "B2B/Incoming/Update {$rec['@id']}");
+
+	}
+
+	// Importing WCIA Source Data
+	if ( ! empty($rec['@source'])) {
+		$src = $rec['@source'];
+		foreach ($src['inventory_transfer_items'] as $b2b_item) {
+			_qbench_b2b_import_wcia_item($dbc, $b2b0, $b2b_item);
+		}
+	}
+
+	return 0;
+
+}
 /**
  *
  */
@@ -1236,8 +1265,7 @@ function _qbench_b2b_import_wcia_item($dbc, $b2b, $b2b_item)
 		];
 
 		// var_dump($lot);
-		echo "WAITING FOR INVENTORY '{$b2b_item['inventory_id']}' to APPEAR\n";
-
+		// syslog(LOG_NOTICE, "Order: '{$b2b['id']}'; Create Inventory '{$b2b_item['inventory_id']}' from WCIA Data");
 		// $dbc->insert('inventory', $lot);
 
 	} else {
@@ -1341,6 +1369,7 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'boscalid' => '018NY6XC00LM3P767WQ0KSFARZ'
 		, 'boscalid_gc' => '018NY6XC00LM3P767WQ0KSFARZ' // @dedupe
 		, 'boscalid_lc' => '018NY6XC00LM3P767WQ0KSFARZ' // @dedupe
+		, 'bot_name' => '018NY6XC00LM00000000000000'    // Ignore Unsure what this is
 		, 'butafenacil' => '018NY6XC00QVEKQ8JCMP68DFJ7'
 		, 'butane' => '018NY6XC00LMSTBW55VFR0QG56'
 		, 'cadmium_ug_g' => '018NY6XC00LMGNGNEW1XMNRS8S'
@@ -1468,6 +1497,7 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'eucalyptol' => '018NY6XC00LM00000000000000'
 		, 'eucalyptol_percent' => '018NY6XC00LM2E59R89FKZEVY8'
 		, 'eucalyptol_ug_g' => '018NY6XC00LM2E59R89FKZEVY8'
+		, 'extr_distill' => '018NY6XC00LM00000000000000' // Ignore
 		, 'fenamidone' => '018NY6XC00C9ETHT8V2SDPXVZ5'
 		, 'fenazaquin' => '018NY6XC0083TN9WFAX9CKABRV'
 		, 'fenoxycarb' => '018NY6XC00LMGN496XNG04YCKA'
@@ -1691,8 +1721,7 @@ function _qbench_map_metric($dbc, $metric_key) : array
 	}
 
 	if (empty($metric_ulid)) {
-		echo "Create: $metric_key [BIQ-346]\n";
-		exit(0);
+		throw new \Exception(sprintf('Invalid Lab Metric Key for "%s", create? [BIQ-346]', $metric_key));
 	}
 
 	$sql = <<<SQL
