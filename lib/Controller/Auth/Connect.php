@@ -86,8 +86,8 @@ class Connect extends \OpenTHC\Controller\Auth\Connect
 		$dbc_auth = _dbc('auth');
 
 		// Lookup Program
-		$sql = 'SELECT * FROM auth_service WHERE code = ?';
-		$arg = array($jwt['body']['iss']);
+		$sql = 'SELECT * FROM auth_service WHERE (id = :s0 OR code = :s0)';
+		$arg = [ ':s0' => $jwt['body']['iss'] ];
 		$App = $dbc_auth->fetchRow($sql, $arg);
 		if (empty($App['id'])) {
 			return $RES->withJSON([
