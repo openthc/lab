@@ -153,4 +153,8 @@ foreach ($data['lab_metric_section_list'] as $lms) {
 </div>
 </form>
 
+<script>
+var Product = <?= json_encode($data['Product']) ?>;
+var Product_Type = <?= json_encode($data['Product_Type']) ?>;
+</script>
 <script src="/js/result.js"></script>
