@@ -1,10 +1,12 @@
 <?php
 /**
- * lab.openthc
- * Application Configuration
+ * OpenTHC Lab Configuration Example
  */
 
+// Init
 $cfg = [];
+
+// Database
 $cfg['database'] = [
 	'auth' => [
 		'hostname' => 'sql0',
@@ -20,21 +22,22 @@ $cfg['database'] = [
 	],
 ];
 
+// OpenTHC
 $cfg['openthc'] = [
 	'dir' => [
-		'hostname' => 'dir.openthc.dev'
+		'origin' => 'dir.openthc.example.com'
 	],
 	'lab' => [
-		'hostname' => 'lab.openthc.dev',
-		'secret' => 'lab.openthc.dev-secret'
+		'id' => '',
+		'origin' => 'lab.openthc.example.com',
+		'secret' => 'lab.openthc.example.com-secret'
 	],
 	'pipe' => [
-		'hostname' => 'pipe.openthc.dev'
+		'origin' => 'pipe.openthc.example.com'
 	],
 	'sso' => [
-		'hostname' => 'sso.openthc.dev',
-		'public' => 'lab.openthc.dev',
-		'secret' => 'lab.openthc.dev-secret'
+		'origin' => 'sso.openthc.example.com',
+		'public' => 'lab.openthc.example.com',
 	],
 ];
 
