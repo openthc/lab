@@ -1,12 +1,17 @@
 <?php
 /**
  * Open oAuth2 authentication process
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace OpenTHC\Lab\Controller\Auth\oAuth2;
 
 class Open extends \OpenTHC\Controller\Auth\oAuth2
 {
+	/**
+	 *
+	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
 		// Clear Session

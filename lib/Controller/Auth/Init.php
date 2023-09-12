@@ -143,9 +143,6 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 	{
 		$dbc_main = _dbc('main');
 		$dbc_user = $this->_container->DBC_User;
-		// if (empty($dbc_user)) {
-
-		// }
 
 		// Set default license if none provided
 		if (empty($_SESSION['License']['id'])) {
@@ -170,7 +167,7 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 		if (empty($License0['id'])) {
 			return $RES->withJSON([
 				'data' => null,
-				'meta' => [ 'note' => sprintf('Invalid License "%s" [CAI-133]', $_SESSION['License']['id']) ],
+				'meta' => [ 'note' => sprintf('License Must Be Globally Registered "%s" [CAI-133]', $_SESSION['License']['id']) ],
 			], 400);
 		}
 
@@ -188,6 +185,8 @@ class Init extends \OpenTHC\Controller\Auth\oAuth2
 		}
 
 		$License = array_merge($License0, $License1);
+
+		$License['meta'] = json_decode($License['meta'], true);
 
 		unset($License['address_full']);
 		unset($License['address_meta']);
