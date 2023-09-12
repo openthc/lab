@@ -83,12 +83,26 @@ if (empty($data['Lab_Sample']['name'])) {
 		<div class="input-group">
 			<div class="input-group-text">QTY:</div>
 			<input name="qty" class="form-control r" type="number" step="0.0001" value="<?= sprintf('%0.2f', $data['Source_Lot']['qty']) ?>">
+			<div class="input-group-append">
+				<?php
+				if (empty($data['Source_Product']['id'])) {
+				?>
 			<select class="form-control">
 				<option value="ea">ea</option>
 				<option value="g">g</option>
 				<option value="mg">mg</option>
 				<option value="ml">ml</option>
 			</select>
+				<?php
+				} else {
+				?>
+				<span class="input-group-text">
+					<?= $data['Source_Product']['package_unit_uom'] ?>
+				</span>
+				<?php
+				}
+				?>
+			</div>
 		</div>
 	</div>
 

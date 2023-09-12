@@ -1,5 +1,5 @@
 /**
- * Companion script for the create.html twig script.
+ * Companion script for the create view.
  *
  * SPDX-License-Identifier: GPL-3.0-only
  */
