@@ -33,7 +33,7 @@ class Base extends \OpenTHC\Controller\Base
 				'hostname' => $_SERVER['SERVER_NAME'],
 			],
 			'OpenTHC' => [],
-			'menu' => $this->_container->view['menu']
+			'menu' => $this->makeMenu(),
 		];
 
 		$data = array_merge($base, $data);
@@ -61,6 +61,66 @@ class Base extends \OpenTHC\Controller\Base
 		];
 
 		return $data;
+
+	}
+
+	function makeMenu() : array
+	{
+		$menu = array(
+			'home_link' => '/',
+			'home_html' => '<i class="fas fa-home"></i>',
+			'show_search' => false,
+			'main' => array(),
+			'page' => array(
+				array(
+					'link' => '/auth/open',
+					'html' => '<i class="fas fa-sign-in-alt text-success"></i>',
+				)
+			),
+		);
+
+		$auth = false;
+		if (!empty($_SESSION['Contact']['id'])) {
+			$auth = true;
+		}
+		if (!empty($_SESSION['pipe-token'])) {
+			$auth = true;
+		}
+
+		if ($auth) {
+
+			$menu['home_link'] = '/dashboard';
+			$menu['main'] = array();
+			$menu['show_search'] = true;
+
+			$menu['main'][] = array(
+				'link' => '/sample',
+				'html' => '<i class="fas fa-flask"></i> Samples',
+			);
+
+			$menu['main'][] = array(
+				'link' => '/result',
+				'html' => '<i class="fas fa-check-square"></i> Results',
+			);
+
+			$menu['main'][] = array(
+				'link' => '/report',
+				'html' => '<i class="fa-solid fa-file-signature"></i> Reports',
+			);
+
+			$menu['page'] = array(
+				[
+					'link' => '/config',
+					'html' => '<i class="fas fa-cogs"></i>',
+				],
+				[
+					'link' => '/auth/shut',
+					'html' => '<i class="fas fa-power-off"></i>',
+				]
+			);
+		}
+
+		return $menu;
 
 	}
 

@@ -122,56 +122,47 @@ $app->get('/inventory/{id}', function($REQ, $RES, $ARG) {
 
 // Sample Group
 $app->group('/sample', 'OpenTHC\Lab\Module\Sample')
-	->add('OpenTHC\Lab\Middleware\Menu')
 	->add('OpenTHC\Lab\Middleware\Auth')
 	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Report Group
 $app->group('/report', 'OpenTHC\Lab\Module\Report')
-	->add('OpenTHC\Lab\Middleware\Menu')
 	->add('OpenTHC\Lab\Middleware\Auth')
 	->add('OpenTHC\Lab\Middleware\Session');
 
 // Result Group
 $app->group('/result', 'OpenTHC\Lab\Module\Result')
-	->add('OpenTHC\Lab\Middleware\Menu')
 	->add('OpenTHC\Lab\Middleware\Auth')
 	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Client Group
 $app->group('/client', 'OpenTHC\Lab\Module\Client')
-	->add('OpenTHC\Lab\Middleware\Menu')
 	->add('OpenTHC\Lab\Middleware\Auth')
 	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Search
 $app->get('/search', 'OpenTHC\Lab\Controller\Search')
-	->add('OpenTHC\Lab\Middleware\Menu')
 	->add('OpenTHC\Lab\Middleware\Auth')
 	->add('OpenTHC\Lab\Middleware\Session');
 
 // Config Group
 $app->group('/config', 'OpenTHC\Lab\Module\Config')
-	->add('OpenTHC\Lab\Middleware\Menu')
 	->add('OpenTHC\Lab\Middleware\Auth')
 	->add('OpenTHC\Lab\Middleware\Session');
 
 // Sync
 // $app->get('/sync', 'OpenTHC\Lab\Controller\Sync')
-// 	->add('OpenTHC\Lab\Middleware\Menu')
 // 	->add('OpenTHC\Lab\Middleware\Session');
 
 // $app->post('/sync', 'OpenTHC\Lab\Controller\Sync:exec')
-// 	->add('OpenTHC\Lab\Middleware\Menu')
 // 	->add('OpenTHC\Lab\Middleware\Session');
 
 
 // Dashboard
 $app->get('/dashboard', 'OpenTHC\Lab\Controller\Dashboard')
-	->add('OpenTHC\Lab\Middleware\Menu')
 	->add('OpenTHC\Lab\Middleware\Auth')
 	->add('OpenTHC\Lab\Middleware\Session');
 
@@ -195,7 +186,6 @@ $app->group('/auth', function() {
 	$this->get('/ping', 'OpenTHC\Controller\Auth\Ping');
 	$this->get('/shut', 'OpenTHC\Controller\Auth\Shut');
 })
-	->add('OpenTHC\Lab\Middleware\Menu')
 	->add('OpenTHC\Lab\Middleware\Session');
 
 
