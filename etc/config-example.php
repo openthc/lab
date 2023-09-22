@@ -25,19 +25,20 @@ $cfg['database'] = [
 // OpenTHC
 $cfg['openthc'] = [
 	'dir' => [
-		'origin' => 'dir.openthc.example.com'
+		'origin' => 'https://dir.openthc.example'
 	],
 	'lab' => [
-		'id' => '',
-		'origin' => 'lab.openthc.example.com',
-		'secret' => 'lab.openthc.example.com-secret'
+		'id' => '/* LAB SERVICE ULID */',
+		'origin' => 'https://lab.openthc.example',
+		'secret' => 'lab.openthc.example-secret'
 	],
 	'pipe' => [
-		'origin' => 'pipe.openthc.example.com'
+		'origin' => 'https://pipe.openthc.example'
 	],
 	'sso' => [
-		'origin' => 'sso.openthc.example.com',
-		'public' => 'lab.openthc.example.com',
+		'origin' => 'https://sso.openthc.example',
+		'oauth-client-id' => '/* LAB SERVICE ULID */',
+		'oauth-client-sk' => '/* LAB SERVICE CLIENT KEY */',
 	],
 ];
 
