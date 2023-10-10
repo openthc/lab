@@ -140,9 +140,15 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			$data['mine'] = true;
 		}
 		// @hack Cake Brands app#1368
+		// @hack Cake / Delta Distribution app#1801
 		// @todo Something else /mbw 2023-073
 		if ('01EZ8C7095PB9SAQ1FEY9QCEXT' == $LR['license_id']) {
+			if ('pdf' !== $this->type_want) {
+				$RES->withRedirect($_SERVER['REQUEST_URI'].'.pdf');
+			}
+			/*
 			return $RES->withRedirect('https://cakebrand.com/');
+			*/
 		}
 
 		// Load COA File
