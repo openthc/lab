@@ -143,8 +143,8 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		// @hack Cake / Delta Distribution app#1801
 		// @todo Something else /mbw 2023-073
 		if ('01EZ8C7095PB9SAQ1FEY9QCEXT' == $LR['license_id']) {
-			if ('pdf' !== $this->type_want) {
-				return $RES->withRedirect($_SERVER['REQUEST_URI'].'.pdf');
+			if ('application/pdf' !== $this->type_want) {
+				return $RES->withRedirect(sprintf('/pub/%s.pdf', $LR['id']));
 			}
 		}
 
