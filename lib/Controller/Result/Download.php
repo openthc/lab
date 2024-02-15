@@ -137,7 +137,7 @@ class Download extends \OpenTHC\Lab\Controller\Result\View
 		$data['License_Laboratory'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
 			':l0' => $data['Lab_Sample']['license_id']
 		]);
-		$data['License_Source'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
+		$data['Source_License'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
 			':l0' => $data['Lab_Sample']['license_id_source']
 		]);
 
@@ -301,7 +301,7 @@ class Download extends \OpenTHC\Lab\Controller\Result\View
 			':l0' => $data['Lab_Result']['license_id']
 		]);
 
-		$data['License_Source'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
+		$data['Source_License'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
 			':l0' => $data['Lab_Sample']['license_id_source']
 		]);
 

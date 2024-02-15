@@ -176,15 +176,15 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		$data['License_Laboratory']['icon'] =    $C0->getOption('coa/icon');
 
 		// $data['License_Client'] = [];
-		// $License = new License($dbc, $data['License_Source']['id']);
+		// $License = new License($dbc, $data['Source_License']['id']);
 		// $License->getIcon();
-		$url = sprintf('https://directory.openthc.com/api/license/%s', $data['License_Source']['id']);
+		$url = sprintf('https://directory.openthc.com/api/license/%s', $data['Source_License']['id']);
 		$req = _curl_init($url);
 		$res = curl_exec($req);
 		$res = json_decode($res, true);
 		$res = $res['data'];
 
-		$data['License_Source']['icon'] = sprintf('https://directory.openthc.com/img/company/%s/icon.png', $res['company']['id']);
+		$data['Source_License']['icon'] = sprintf('https://directory.openthc.com/img/company/%s/icon.png', $res['company']['id']);
 
 		$data['footer_text'] = $C0->getOption('coa/footer');
 

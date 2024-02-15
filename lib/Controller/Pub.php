@@ -158,9 +158,9 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 			$data['Lab_Result']['coa_file'] = null;
 		}
 
-		if (empty($data['License_Source']['id'])) {
+		if (empty($data['Source_License']['id'])) {
 			$chk = $dbc_main->fetchRow('SELECT id, name, code, guid FROM license WHERE id = :l0', [ ':l0' => $data['Lab_Sample']['license_id_source'] ]);
-			$data['License_Source'] = [
+			$data['Source_License'] = [
 				'id' => $chk['id'],
 				'name' => $chk['name'],
 				'code' => $chk['code'],

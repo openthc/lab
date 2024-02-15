@@ -203,7 +203,7 @@ SQL;
 
 		// $data['License'] = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id'] ]);
 		// $dbc_main = $this->_container->DBC_Main;
-		$License_Source = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id_source'] ]);
+		$Source_License = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id_source'] ]);
 
 		return [
 			'Lot' => $Lot,
@@ -214,7 +214,7 @@ SQL;
 			'Product' => $Product,
 			'Product_Type' => $ProductType,
 			'Variety' => $Variety,
-			'License_Source' => $License_Source
+			'Source_License' => $Source_License
 		];
 
 	}

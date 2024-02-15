@@ -178,7 +178,7 @@ class Intent extends \OpenTHC\Lab\Controller\Base
 				$Lab_Sample['product_id'] = '018NY6XC00PR00000000000001';
 				$Lab_Sample['strain_id'] = '018NY6XC00VR00000000000001';
 				$Lab_Sample['meta'] = json_encode([
-					'License_Source' => [
+					'Source_License' => [
 						'id' => $_POST['license-id'],
 						'name' => $_POST['license-name'],
 					],
@@ -221,10 +221,10 @@ class Intent extends \OpenTHC\Lab\Controller\Base
 		$data = $this->loadSiteData();
 		$data['Page']['title'] = 'Submit Intake Samples';
 		$data['Company'] = $Company0;
-		$data['License_Source'] = [];
-		$data['License_Source']['id'] = $ctx['License_Source']['id'];
-		$data['License_Source']['name'] = $ctx['License_Source']['name'];
-		$data['License_Source']['code'] = $ctx['License_Source']['code'];
+		$data['Source_License'] = [];
+		$data['Source_License']['id'] = $ctx['Source_License']['id'];
+		$data['Source_License']['name'] = $ctx['Source_License']['name'];
+		$data['Source_License']['code'] = $ctx['Source_License']['code'];
 		$data['product_type'] = $dbc_user->fetchMix('SELECT id, name FROM product_type WHERE stat = 200 ORDER BY name');
 
 		return $RES->write( $this->render('page/intent/create-sample.php', $data) );

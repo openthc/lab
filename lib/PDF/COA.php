@@ -209,7 +209,7 @@ class COA extends \OpenTHC\Lab\PDF\Base
 
 		// Client Logo Image
 		$url_logo = 'https://cdn.openthc.com/img/icon.png';
-		$url_logo = $this->_data['License_Source']['icon'];
+		$url_logo = $this->_data['Source_License']['icon'];
 
 		$x = 0.50;
 		$y = 1.50;
@@ -240,7 +240,7 @@ class COA extends \OpenTHC\Lab\PDF\Base
 		$this->setFont('freesans', 'B', 14);
 
 		$this->setXY($x, $y);
-		$this->cell(3.25, self::FS_14, $this->_data['License_Source']['name']);
+		$this->cell(3.25, self::FS_14, $this->_data['Source_License']['name']);
 		$y += self::FS_14;
 
 		$this->setFont('freesans', '', 12);

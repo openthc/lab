@@ -133,7 +133,6 @@ class View extends \OpenTHC\Lab\Controller\Base
 			'ProductType' => $ProductType,
 			'Variety' => $Variety,
 			'Source_License' => $L_Source,
-			'License_Source' => $L_Source,
 		]);
 
 		// Nicely Formatted ID

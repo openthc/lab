@@ -38,7 +38,7 @@ class Create extends \OpenTHC\Lab\Controller\Base
 		$meta = \json_decode($chk['meta'], true);
 
 		$data['Lab_Sample'] = $chk;
-		$data['License_Source'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :ls0', [ $chk['license_id_source'] ]);
+		$data['Source_License'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :ls0', [ $chk['license_id_source'] ]);
 		$data['Lot'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i', [ ':i' => $chk['lot_id'] ]);
 		$data['Lot_Meta'] = json_decode($data['Lot']['meta'], true);
 		$data['Product'] = $dbc->fetchRow('SELECT * FROM product WHERE id = :p', [ ':p' => $data['Lot']['product_id'] ]); // $meta['Product'];

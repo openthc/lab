@@ -150,7 +150,7 @@ foreach ($out_metric_list as $mk0 => $mn0) {
 	}
 
 	$rec = [
-		$data['License_Source']['code'], // License Owner
+		$data['Source_License']['code'], // License Owner
 		$data['Lot']['guid'],
 		$data['License_Laboratory']['code'], // Code of the Laboratory
 		'',

@@ -36,9 +36,9 @@ HTML;
 		<div class="col-md-6">
 			<div class="input-group mb-2">
 				<div class="input-group-text">
-					<a href="/report/license?id=<?= $data['License_Source']['id'] ?>">License:</a>
+					<a href="/report/license?id=<?= $data['Source_License']['id'] ?>">License:</a>
 				</div>
-				<input class="form-control" readonly value="<?= __h($data['License_Source']['name']) ?>">
+				<input class="form-control" readonly value="<?= __h($data['Source_License']['name']) ?>">
 			</div>
 		</div>
 	</div>

@@ -54,16 +54,16 @@ function _lab_metric_section_status($name, $stat)
 		<div class="col-md-6">
 			<div class="input-group mb-2">
 				<?php
-				if (empty($data['License_Source']['id'])) {
+				if (empty($data['Source_License']['id'])) {
 					echo '<div class="input-group-text">';
 					echo '<span class="text-warning">License:</span>';
 					echo '</div>';
 					echo '<input class="form-control" readonly value="-orphan-">';
 				} else {
 					echo '<div class="input-group-text">';
-					printf('<a href="/report/license?id=%s">License:</a>', $data['License_Source']['id']);
+					printf('<a href="/report/license?id=%s">License:</a>', $data['Source_License']['id']);
 					echo '</div>';
-					printf('<input class="form-control" readonly value="%s">', __h($data['License_Source']['name']));
+					printf('<input class="form-control" readonly value="%s">', __h($data['Source_License']['name']));
 				}
 				?>
 			</div>

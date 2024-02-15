@@ -65,10 +65,10 @@ use OpenTHC\Lab\Lab_Result;
 		<div class="mb-2">
 			<label>Source License:</label>
 			<div class="input-group">
-				<input name="source-license-name" class="form-control license-autocomplete" value="<?= __h($data['License_Source']['name']) ?>">
-				<input class="autocomplete-data-id" id="source-license-id" name="source-license-id" type="hidden" value="<?= $data['License_Source']['id'] ?>">
+				<input name="source-license-name" class="form-control license-autocomplete" value="<?= __h($data['Source_License']['name']) ?>">
+				<input class="autocomplete-data-id" id="source-license-id" name="source-license-id" type="hidden" value="<?= $data['Source_License']['id'] ?>">
 				<button class="btn btn-outline-secondary btn-autocomplete-hint disabled" type="button"><i class="fas fa-sync"></i></button>
-				<!-- <a class="btn btn-outline-secondary" href="/reports/b2b/license-detail??id=<?= $data['License_Source']['id'] ?>"><i class="fas fa-link"></i></a> -->
+				<!-- <a class="btn btn-outline-secondary" href="/reports/b2b/license-detail??id=<?= $data['Source_License']['id'] ?>"><i class="fas fa-link"></i></a> -->
 			</div>
 		</div>
 	</div>
