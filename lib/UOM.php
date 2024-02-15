@@ -14,6 +14,7 @@ class UOM
 	 */
 	public static $uom_list = [
 		'pct' => '%',
+		'num' => '#',
 		'mg'  => 'mg',
 		'mgg' => 'mg/g',
 		'mgp' => 'mg/p',
@@ -33,9 +34,13 @@ class UOM
 			'code' => 'a/w',
 			'name' => '',
 		],
-		'pct' => [
-			'code' => '%',
-			'name' => 'Percent',
+		'bool' => [
+			'code' => 'bool',
+			'name' => 'Pass/Fail'
+		],
+		'cfu' => [
+			'code' => 'cfu',
+			'name' => 'Coliform Forming Units',
 		],
 		'mg' => [
 			'code' => 'mg',
@@ -53,21 +58,21 @@ class UOM
 			'code' => 'mg/s',
 			'name' => 'Milligrams per Serving'
 		],
-		'cfu' => [
-			'code' => 'cfu',
-			'name' => 'Coliform Forming Units',
+		'num' => [
+			'code' => '#',
+			'name' => 'Number',
 		],
-		'ppm' => [
-			'code' => 'ppm',
-			'name' => 'Parts per Million',
+		'pct' => [
+			'code' => '%',
+			'name' => 'Percent',
 		],
 		'ppb' => [
 			'code' => 'ppb',
 			'name' => 'Parts per Billion',
 		],
-		'bool' => [
-			'code' => 'bool',
-			'name' => 'Pass/Fail'
+		'ppm' => [
+			'code' => 'ppm',
+			'name' => 'Parts per Million',
 		],
 	];
 
@@ -85,22 +90,8 @@ class UOM
 			$r = '-';
 		}
 
-		// switch ($uom) {
-		// 	case 'pct':
-		// 		return '&percnt;';
-		// 	case 'mg_g':
-		// 		return 'mg/g';
-		// 	case 'cfu/g':
-		// 		return 'cfu/g';
-		// 	case 'aw':
-		// 		return 'a<sub>w</sub>';
-		// 	case 'ppm':
-		// 		return 'ppm';
-		// }
-
-		// return '-unknown-';
-
 		return $r;
+
 	}
 
 }
