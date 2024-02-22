@@ -14,6 +14,9 @@ use OpenTHC\Lab\UI\Pager;
 
 class Main extends \OpenTHC\Lab\Controller\Base
 {
+	/**
+	 *
+	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
 		// Check Connect
@@ -43,22 +46,22 @@ class Main extends \OpenTHC\Lab\Controller\Base
 		$sql_param[':l0'] = $_SESSION['License']['id'];
 
 		$sql_select = <<<SQL
-SELECT lab_sample.*
-  , license.name AS source_license_name
-  , product.name AS product_name
-  , variety.name AS variety_name
-FROM lab_sample
-JOIN license ON lab_sample.license_id_source = license.id
-LEFT JOIN inventory ON lab_sample.lot_id = inventory.id
-LEFT JOIN product ON inventory.product_id = product.id
-LEFT JOIN variety ON inventory.variety_id = variety.id
-{WHERE}
-ORDER BY lab_sample.created_at DESC
-OFFSET %d
-LIMIT %d
-SQL;
+		SELECT lab_sample.*
+			, license.name AS source_license_name
+			, product.name AS product_name
+			, variety.name AS variety_name
+		FROM lab_sample
+		JOIN license ON lab_sample.license_id_source = license.id
+		LEFT JOIN inventory ON lab_sample.lot_id = inventory.id
+		LEFT JOIN product ON inventory.product_id = product.id
+		LEFT JOIN variety ON inventory.variety_id = variety.id
+		{WHERE}
+		{ORDER}
+		OFFSET %d
+		LIMIT %d
+		SQL;
 
-
+		// WHERE
 		if ( ! empty($_GET['q'])) {
 			$sql_where[] = sprintf('(lab_sample.id ILIKE :q83 OR lab_sample.name ILIKE :q83 OR license.name ILIKE :q83 OR license.code ILIKE :q83)');
 			$sql_param[':q83'] = sprintf('%%%s%%', trim($_GET['q']));
@@ -75,6 +78,23 @@ SQL;
 		}
 		$sql_where = implode(' AND ', $sql_where);
 		$sql = str_replace('{WHERE}', sprintf('WHERE %s', $sql_where), $sql_select);
+
+		// ORDER
+		$sql_order = '';
+		switch ($_GET['sort']) {
+			case 'license-origin':
+				$sql_order = 'ORDER BY license.name %s, lab_sample.name ASC';
+				break;
+			case 'sample-id':
+				$sql_order = 'ORDER BY lab_sample.name %s';
+				break;
+			default:
+				$sql_order = 'ORDER BY lab_sample.created_at %s, lab_sample.name ASC';
+		}
+		$sql_order = sprintf($sql_order, ($_GET['sort-dir'] == 'desc' ? 'desc' : 'asc'));
+		$sql = str_replace('{ORDER}', $sql_order, $sql);
+
+		// Offset and Limit
 		$sql = sprintf($sql, $item_offset, $item_limit);
 
 		// Get Sample Data
