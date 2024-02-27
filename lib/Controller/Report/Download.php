@@ -107,7 +107,7 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		// Have to Make it look like the way the 'result' outputter wants it to be.
 		$dbc_user = $this->_container->DBC_User;
 		$data['Lot'] = $dbc_user->fetchRow('SELECT * FROM inventory WHERE id = :i0', [
-			':i0' => $data['Lab_Sample']['lot_id']
+			':i0' => $data['Lab_Sample']['inventory_id'] ?: $data['Lab_Sample']['lot_id']
 		]);
 
 		$dt0 = new \DateTime($data['Lab_Result']['approved_at']);
