@@ -20,6 +20,8 @@
  * along with OpenTHC Laboratory Portal.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+use OpenTHC\Sodium;
+
 define('APP_ROOT', __DIR__);
 define('APP_SALT', sha1('$PUT_YOUR_SECRET_VALUE_HERE'));
 define('APP_BUILD', '420.23.255');
@@ -227,4 +229,80 @@ function _lab_result_status_nice($x)
 			return sprintf('<span class="text-warning" title="Status: %s">-unknown-</span>', $x);
 			break;
 	}
+}
+
+/**
+ * @param $path should be something like /$PK/$FILE
+ * @param $body should be a bunch of bytes
+ * @param $type should tell me what kind of bytes $body is
+ */
+function _openthc_pub($path, $body=null, $type='application/json')
+{
+	// Construct Message
+	$msg = [];
+	$msg['name'] = basename($path);
+	$msg['path'] = dirname($path);
+
+	if ( ! empty($body)) {
+		switch ($type) {
+			case 'application/json':
+			case 'application/pdf':
+			case 'text/html':
+			case 'text/plain':
+				$msg['type'] = $type;
+				break;
+			default:
+				throw new \Exception('Invalid Media Type for OpenTHC/Pub');
+		}
+	}
+
+	$client_pk = \OpenTHC\Config::get('openthc/lab/public');
+	$client_sk = \OpenTHC\Config::get('openthc/lab/secret');
+	$server_pk = \OpenTHC\Config::get('openthc/pub/public');
+
+	// Create Predictable Location
+	$hkey = sodium_crypto_generichash($client_sk, '', SODIUM_CRYPTO_GENERICHASH_KEYBYTES);
+	$seed = sodium_crypto_generichash($path, $hkey, SODIUM_CRYPTO_GENERICHASH_KEYBYTES);
+	$msg['kp'] = sodium_crypto_box_seed_keypair($seed);
+	$msg['pk'] = sodium_crypto_box_publickey($msg['kp']);
+	$msg['sk'] = sodium_crypto_box_secretkey($msg['kp']);
+
+	$msg['id'] = sprintf('%s/%s', Sodium::b64encode($msg['pk']), $msg['name']);
+
+	$msg['auth'] = Sodium::b64encode($msg['pk']);
+	$msg['auth'] = Sodium::encrypt($msg['auth'], $msg['sk'], $server_pk);
+	$msg['auth'] = Sodium::b64encode($msg['auth']);
+
+	$req_auth = json_encode([
+		'service' => OPENTHC_SERVICE_ID,
+		'contact' => $_SESSION['Contact']['id'],
+		'company' => $_SESSION['Company']['id'],
+		'license' => $_SESSION['License']['id'],
+		'message' => $msg['auth']
+	]);
+
+	$req_auth = Sodium::encrypt($req_auth, $client_sk, $server_pk);
+	$req_auth = Sodium::b64encode($req_auth);
+
+	$url = sprintf('%s/%s', \OpenTHC\Config::get('openthc/pub/origin'), $msg['id']);
+	$req = _curl_init($url);
+	curl_setopt($req, CURLOPT_CUSTOMREQUEST, 'POST');
+	curl_setopt($req, CURLOPT_POSTFIELDS, $body);
+	curl_setopt($req, CURLOPT_HTTPHEADER, [
+		sprintf('authorization: OpenTHC %s.%s', $client_pk, $req_auth),
+		sprintf('content-type: %s', $msg['type']),
+	]);
+
+	$res = curl_exec($req);
+	// echo "<<<\n$res\n###\n";
+	$res = json_decode($res, true);
+	$inf = curl_getinfo($req);
+
+	$ret = [];
+	$res['code'] = $inf['http_code'];
+	$ret['data'] = $res['data'];
+	$ret['meta'] = $res['meta'];
+
+	return $ret;
+
 }
