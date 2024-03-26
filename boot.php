@@ -243,26 +243,13 @@ function _openthc_pub($path, $body=null, $type='application/json')
 	$msg['name'] = basename($path);
 	$msg['path'] = dirname($path);
 
-	if ( ! empty($body)) {
-		switch ($type) {
-			case 'application/json':
-			case 'application/pdf':
-			case 'text/html':
-			case 'text/plain':
-				$msg['type'] = $type;
-				break;
-			default:
-				throw new \Exception('Invalid Media Type for OpenTHC/Pub');
-		}
-	}
-
 	$client_pk = \OpenTHC\Config::get('openthc/lab/public');
 	$client_sk = \OpenTHC\Config::get('openthc/lab/secret');
 	$server_pk = \OpenTHC\Config::get('openthc/pub/public');
 
 	// Create Predictable Location
 	$hkey = sodium_crypto_generichash($client_sk, '', SODIUM_CRYPTO_GENERICHASH_KEYBYTES);
-	$seed = sodium_crypto_generichash($path, $hkey, SODIUM_CRYPTO_GENERICHASH_KEYBYTES);
+	$seed = sodium_crypto_generichash($msg['path'], $hkey, SODIUM_CRYPTO_GENERICHASH_KEYBYTES);
 	$msg['kp'] = sodium_crypto_box_seed_keypair($seed);
 	$msg['pk'] = sodium_crypto_box_publickey($msg['kp']);
 	$msg['sk'] = sodium_crypto_box_secretkey($msg['kp']);
