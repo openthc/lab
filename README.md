@@ -4,6 +4,16 @@ This service provides a method for all interested parties to upload and share th
 
 It integrates with BioTrackTHC, Franwell/METRC and MJ Freeway/LeafData.
 
+```mermaid
+erDiagram
+  Inventory ||--o{ Lab_Sample : "1+ Samples"
+  Lab_Sample ||--o{ Lab_Result : "1+ Results"
+  Lab_Sample }|--o{ Lab_Report : "1+ Reports"
+  Lab_Result }|--o{ Lab_Report : "Many Results to Many Reports"
+  Inventory ||--o{ Lab_Result : "1+ Results"
+  Lab_Report }o--|{ Inventory : "1+ Reports"
+```
+
 
 ## Installation
 
