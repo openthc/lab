@@ -43,9 +43,9 @@ use OpenTHC\Lab\UOM;
 						break;
 					default:
 						if ($data['Lab_Report']['flag'] & Lab_Report::FLAG_PUBLIC) {
-							echo '<button class="btn btn-outline-success" formtarget="_blank" name="a" title="Lab Reports Published, click to re-publish &amp; view" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
+							echo '<button class="btn btn-outline-success" name="a" title="Lab Reports Published, click to re-publish &amp; view" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
 						} else {
-							echo '<button class="btn btn-primary" formtarget="_blank" name="a" title="Lab Results NOT Published" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
+							echo '<button class="btn btn-primary" name="a" title="Lab Results NOT Published" type="submit" value="lab-report-share"><i class="fas fa-share-alt"></i> Share</button>';
 						}
 						break;
 				}
@@ -136,36 +136,57 @@ use OpenTHC\Lab\UOM;
 
 <?php
 if ( ! empty($data['lab_report_file_list'])) {
-?>
-	<section id="lab-report-file-list">
+	$public_link_list = $data['Lab_Report']['meta']['public_link_list'];
+	?>
+	<section class="mb-2" id="lab-report-file-list">
+	<table class="table table-sm">
+		<thead class="table-dark">
+			<tr>
+				<th>File</th>
+				<th>Type</th>
+				<th class="r">Size</th>
+				<th class="r">Stat</th>
+				<th class="r">Actions</th>
+			</tr>
+		</thead>
+	<tbody>
 	<?php
-	echo '<table class="table table-sm">';
 	foreach ($data['lab_report_file_list'] as $f) {
-?>
+		$pub_link = $public_link_list[ $f['id'] ];
+		?>
 		<tr>
 		<td><?= sprintf('<a href="?a=lab-report-file-download&id=%s">%s</a>', $f['id'], __h($f['name'])) ?></td>
-<?php
+		<?php
 		printf('<td>%s</td>', __h($f['type']));
 		printf('<td class="r">%d</td>', __h($f['size']));
 		printf('<td class="r">%d</td>', __h($f['stat']));
-		printf('<td class="r">%08x</td>', __h($f['flag']));
-?>
+		// printf('<td class="r">%08x</td>', __h($f['flag']));
+		?>
 		<td class="r">
 		<div class="btn-group btn-group-sm">
+			<?php
+			if (empty($pub_link['link'])) {
+				echo '<button class="btn btn-outline-secondary disabled"><i class="fa-solid fa-ban"></i></button>';
+			} else {
+				echo sprintf('<a class="btn btn-sm btn-primary" href="%s" target="_blank"><i class="fa-regular fa-share-from-square"></i></a>', $pub_link['link'], $pub_link['name']);
+			}
+			?>
 			<a class="btn btn-outline-secondary" download href="?a=lab-report-file-download&id=<?= $f['id'] ?>"><i class="fas fa-download"></i></a>
-			<!-- <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+			<button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
 			<ul class="dropdown-menu dropdown-menu-end">
-				<li><a class="dropdown-item" href="#">Action</a></li>
-				<li><a class="dropdown-item" href="#">Another action</a></li>
-				<li><a class="dropdown-item" href="#">Something else here</a></li>
-			</ul> -->
+				<li><button class="dropdown-item btn-clipcopy"
+						data-clipboard-text="<?= $link ?>"
+						title="Copy Link"><i class="fa-regular fa-clipboard"></i> Copy Link</button>
+				</li>
+			</ul>
 		</div>
 		</td>
 		</tr>
-<?php
+	<?php
 	}
-	echo '</table>';
 	?>
+	</tbody>
+	</table>
 	</section>
 <?php
 }
