@@ -100,59 +100,59 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				break;
 			case 'lab-report-share':
 
-				// Move to PUB somehow?
 				$data = $this->_load_data($dbc_user, $Lab_Report);
 
 				$lab_report_file_list = $data['lab_report_file_list'];
 				unset($data['lab_report_file_list']);
 
-				// Alias the data into this field
-				$data['Lab_Result'] = $data['Lab_Report'];
+				$Lab_Report_Meta = $Lab_Report->getMeta();
+				$Lab_Report_Meta['public_link_list'] = [];
 
-				// Create Lab Report in Main/Public Database
-				$data['@context'] = 'http://openthc.org/lab/2021';
-
-				$dbc_main = $this->_container->DBC_Main;
-				$Lab_Result1 = new Lab_Result($dbc_main, $Lab_Report['id']);
-				$Lab_Result1['id'] = $Lab_Report['id'];
-				$Lab_Result1['license_id'] = $Lab_Report['license_id'];
-				$Lab_Result1['flag'] = $Lab_Report['flag'];
-				$Lab_Result1['stat'] = $Lab_Report['stat'];
-				$Lab_Result1['type'] = 'Lab_Report';
-				$Lab_Result1['name'] = $Lab_Report['name'];
-				$Lab_Result1['meta'] = json_encode($data);
-
-				$Lab_Result1->save();
-
-				$Lab_Report->setFlag(Lab_Report::FLAG_PUBLIC);
-
-				// $coa_file = $Lab_Result1->getCOAFile();
-				// $coa_file = $Lab_Report->getCOA();
+				// Publish Files
 				if ( ! empty($lab_report_file_list)) {
-					$lrf_id = $lab_report_file_list[0]['id'];
-					$lrf = $dbc_user->fetchOne('SELECT body FROM lab_report_file WHERE id = :lrf0', [
-						':lrf0' => $lrf_id
-					]);
-					$lrf_body = stream_get_contents($lrf);
-					$Lab_Result1->importCOA($lrf_body);
+
+					foreach ($lab_report_file_list as $lrf) {
+
+						// Re-maps Path
+						$req_path = [];
+						$req_path[] = 'lab';
+						$req_path[] = $Lab_Report['id'];
+						// Custom Shit Here
+						if (preg_match('/\w{26}\-CCRS.csv$/', $lrf['name'])) {
+							$req_path[] = 'ccrs.csv';
+						} elseif (preg_match('/\w{26}\-WCIA.json/', $lrf['name'])) {
+							$req_path[] = 'wcia.json';
+						} else {
+							$req_path[] = $lrf['name'];
+						}
+						$req_path = implode('/', $req_path);
+
+						$lrf_body = $dbc_user->fetchOne('SELECT body FROM lab_report_file WHERE id = :lrf0', [
+							':lrf0' => $lrf['id']
+						]);
+						$req_body = stream_get_contents($lrf_body);
+						$req_type = $lrf['type'];
+						// $Lab_Result1->importCOA($req_body);
+						$res = _openthc_pub($req_path, $req_body, $req_type);
+						var_dump($res);
+						if ( ! empty($res['data'])) {
+							$url = $res['data'];
+							$Lab_Report_Meta['public_link_list'][ $lrf['id'] ] = [
+								'link' => $url,
+								'name' => $lrf['name'],
+							];
+						}
+
+					}
+
+					$Lab_Report['meta'] = json_encode($Lab_Report_Meta);
+					$Lab_Report->setFlag(Lab_Report::FLAG_PUBLIC);
 					$Lab_Report->setFlag(Lab_Report::FLAG_PUBLIC_COA);
 				}
 
-				// if (_is_ajax()) {
-				// 	$ret['data'] = [
-				// 		'pub' => sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
-				// 		'coa' => sprintf('https://%s/pub/%s.pdf', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
-				// 		'json' => sprintf('https://%s/pub/%s.json', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
-				// 		'wcia' => sprintf('https://%s/pub/%s/wcia.json', $_SERVER['SERVER_NAME'], $Lab_Result1['id']),
-				// 	];
-				// }
-
-				// Publish (eg CRE, Qbench)
-				// $this->_publish_external($Lab_Report);
-
 				$Lab_Report->save('Lab Report Published by User');
 
-				return $RES->withRedirect(sprintf('/pub/%s.html', $Lab_Result1['id']));
+				Session::flash('info', 'Lab Results Published');
 
 				break;
 		}
@@ -181,7 +181,6 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$Lab_Report['expires_at'] = $dtE->format(\DateTimeInterface::RFC3339);
 		$Lab_Report['stat'] = $report_stat;
 		$Lab_Report->setFlag(Lab_Report::FLAG_LOCK);
-		$Lab_Report->save('Lab Report Committed by User');
 
 		$data = $this->_load_data($dbc_user, $Lab_Report);
 
@@ -210,12 +209,8 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				, $out_body->getContents()
 			);
 
-			// _openthc_pub(sprintf('/lab/%s/coa.pdf', $Lab_Report['id']), $out_body->getContents(), 'application/pdf');
-
 			$Lab_Report->setFLag(Lab_Report::FLAG_OUTPUT_COA);
 		}
-
-		// WCIAdataLINK
 
 		// Invoke on ourselves for the HTML view
 		// $res1 = $RES->withBody(new \Slim\Http\Body(fopen('php://temp', 'r+')));
@@ -241,7 +236,6 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$Lab_Report->setFLag(Lab_Report::FLAG_OUTPUT_CSV);
 
 		$out_body->rewind();
-		// _openthc_pub(sprintf('/lab/%s/ccrs.csv', $Lab_Report['id']), $out_body->getContents(), 'text/csv');
 
 		// Generate the HTML?
 		// $res1 = $subC->html($RES, $ARG, $data);
@@ -275,13 +269,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		);
 		$Lab_Report->setFLag(Lab_Report::FLAG_OUTPUT_JSON);
 
-		// API to Self
-		// $lab_self = new \OpenTHC\Service\OpenTHC('lab');
-		// $arg = [ 'json' => [
-		// 	'company' => $_SESSION['Company']['id']
-		// 	, 'lab_report' => $Lab_Report['id']
-		// ]];
-		// $res = $lab_self->post('/api/v2018/report/publish', $arg);
+		$Lab_Report->save('Lab Report Committed by User');
 
 		return $RES;
 
@@ -341,11 +329,12 @@ class Single extends \OpenTHC\Lab\Controller\Base
 			$coa_data = $this->_qbench_sample_report_fetch($dbc_user, $qbc, $Lab_Sample);
 			if ( ! empty($coa_data)) {
 
-				// Do we want to give it an alternate name somehow?
-				_openthc_pub(sprintf('/lab/%s/coa?name=%s.pdf', $Lab_Report['id'], $Lab_Report['name']), $coa_data['body'], 'application/pdf');
+				$lrf = [];
+				$lrf['id'] = _ulid();
 
-				$sql = 'INSERT INTO lab_report_file (id, lab_report_id, name, size, type, body) VALUES (ulid_create(), :lr0, :n1, :s1, :t1, :b1)';
+				$sql = 'INSERT INTO lab_report_file (id, lab_report_id, name, size, type, body) VALUES (:lrf0, :lr0, :n1, :s1, :t1, :b1)';
 				$cmd = $dbc_user->prepare($sql, null);
+				$cmd->bindParam(':lrf0', $lrf['id']);
 				$cmd->bindParam(':lr0', $Lab_Report['id']);
 				$cmd->bindParam(':n1', $coa_data['name']);
 				$cmd->bindParam(':s1', $coa_data['size']);
@@ -355,7 +344,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 
 				Session::flash('info', 'COA File was attached from QBench');
 
-				return true;
+				return $lrf['id'];;
 			}
 
 		}
@@ -457,9 +446,9 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		// __exit_text($Lab_Sample);
 
 		// Flag in QBench
-		// if (empty($rec['has_report'])) {
+		// if (empty($Lab_Sample['meta']['has_report'])) {
 		// 	echo "NO REPORT\n";
-		// 	return(null);
+		// 	return null;
 		// }
 
 		// Get the QBench COA?
