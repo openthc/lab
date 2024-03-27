@@ -242,6 +242,7 @@ function _openthc_pub($path, $body=null, $type='application/json')
 	$msg = [];
 	$msg['name'] = basename($path);
 	$msg['path'] = dirname($path);
+	$msg['type'] = $type;
 
 	$client_pk = \OpenTHC\Config::get('openthc/lab/public');
 	$client_sk = \OpenTHC\Config::get('openthc/lab/secret');
@@ -286,7 +287,7 @@ function _openthc_pub($path, $body=null, $type='application/json')
 	$inf = curl_getinfo($req);
 
 	$ret = [];
-	$res['code'] = $inf['http_code'];
+	$ret['code'] = $inf['http_code'];
 	$ret['data'] = $res['data'];
 	$ret['meta'] = $res['meta'];
 
