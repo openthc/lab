@@ -298,6 +298,9 @@ class View extends \OpenTHC\Lab\Controller\Base
 		}
 
 		// @idea Make sure all the selected RESULT objects are LOCK flag?
+		// $lr0 = $dbc->fetchRow('SELECT id FROM lab_report WHERE lab_sample_id = :ls0 ORDER BY id DESC', [
+		// 	':ls0' => $Lab_Sample['id']
+		// ]);
 
 
 		// Create a Lab Report
@@ -312,6 +315,7 @@ class View extends \OpenTHC\Lab\Controller\Base
 		$lr1['license_id_client'] = $Lab_Sample['license_id_source'];
 		$lr1['name'] = sprintf('%s-LR', $Lab_Sample['name']);
 		$lr1['meta'] = json_encode([
+			'@version' => '420.18.097',
 			'lab_report_list' => $_POST['lab-result'], // @deprecated
 			'lab_result_list' => $_POST['lab-result'],
 			'lab_metric_list' => $lab_metric_list, // @deprecated
