@@ -13,7 +13,7 @@
     "clipboard": "^2.0.11",
     "jquery": "3.7.1",
     "jquery-ui": "1.13.2",
-    "puppeteer": "^20.8.3"
+    "puppeteer": "21.5.2"
   },
   "scripts": {
     "test": "test.js"
