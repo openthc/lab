@@ -454,7 +454,7 @@ class View extends \OpenTHC\Lab\Controller\Base
 
 		if ( ! empty($_POST['source-lot-id'])) {
 			$m = json_decode($Lab_Sample['meta'], true);
-			$m['Lot_Source']['id'] = $_POST['source-lot-id'];
+			$m['Source_Inventory']['id'] = $_POST['source-lot-id'];
 			$Lab_Sample['meta'] = json_encode($m);
 		}
 

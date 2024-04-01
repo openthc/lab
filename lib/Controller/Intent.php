@@ -182,7 +182,7 @@ class Intent extends \OpenTHC\Lab\Controller\Base
 						'id' => $_POST['license-id'],
 						'name' => $_POST['license-name'],
 					],
-					'Lot_Source' => [
+					'Source_Inventory' => [
 						'id' => $_POST['lot-id-source'],
 					],
 					'Product' => [
