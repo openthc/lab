@@ -90,9 +90,14 @@ foreach ($data['Lab_Result_Section_Metric_list'] as $lms) {
 			'lab_metric_id' => $lrm['lab_metric_id'],
 			'lab_metric_name' => $lrm['name'],
 			'name' => $lm['name'],
+			'stat' => $lrm['stat'],
 			'qom' => $lrm['qom'],
 			'uom' => $lrm['uom']
 		], $lms['name']);
+
+		if (200 != $lrm['stat']) {
+			$wcia['status'] = 'fail';
+		}
 	}
 
 	if (count($tmp_metric_list)) {
@@ -106,7 +111,7 @@ foreach ($data['Lab_Result_Section_Metric_list'] as $lms) {
 // Cleanup to Remove Named Keys
 $wcia['metric_list'] = array_values($wcia['metric_list']);
 
-return($wcia);
+return $wcia;
 
 
 /**
@@ -124,7 +129,7 @@ function _wcia_lab_metric_2($data, $type)
 		'analyte_type' => $type,
 		'qom' => $data['qom'],
 		'uom' => $data['uom'],
-		'status' => 'pass'
+		'status' => ($data['stat'] == 200 ? 'pass' : 'fail')
 	];
 
 	switch ($ret['qom']) {
