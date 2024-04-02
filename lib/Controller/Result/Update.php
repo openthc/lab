@@ -292,23 +292,15 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 		}
 
 		// Link
-		// v1 lab_result_inventory
-		$sql = 'INSERT INTO lab_result_inventory (inventory_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
+		$sql = 'INSERT INTO inventory_lab_result (inventory_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
 		$res = $dbc->query($sql, [
-			':i0' => $LS0['lot_id'],
-			':lr0' => $LR0['id']
-		]);
-
-		// v0 inventory_lab_result
-		$sql = 'INSERT INTO inventory_lab_result (lot_id, lab_result_id) VALUES (:i0, :lr0) ON CONFLICT DO NOTHING';
-		$res = $dbc->query($sql, [
-			':i0' => $LS0['lot_id'],
+			':i0' => $LS0['inventory_id'],
 			':lr0' => $LR0['id']
 		]);
 
 		$sql = 'UPDATE inventory SET flag = flag | :f1, qa_cbd = :c1, qa_thc = :t1 WHERE id = :i0';
 		$arg = [
-			':i0' => $LS0['lot_id'],
+			':i0' => $LS0['inventory_id'],
 			':lr1' => $LR0['id'], // v1 inventory.lab_result_id
 			':f1' => 0x00000400, // Inventory::FLAG_QA_PASS,
 			':c1' => $LR0['cbd'],
@@ -329,9 +321,7 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 
 		$dbc->query('BEGIN');
 
-		// v1 lab_result_inventory
-		$dbc->query('DELETE FROM lab_result_inventory WHERE lab_result_id = :lr0', $arg);
-		// v0 inventory_lab_result
+		// inventory_lab_result
 		$dbc->query('DELETE FROM inventory_lab_result WHERE lab_result_id = :lr0', $arg);
 		$dbc->query('DELETE FROM lab_result_metric WHERE lab_result_id = :lr0', $arg);
 		$dbc->query('DELETE FROM lab_result WHERE id = :lr0', $arg);

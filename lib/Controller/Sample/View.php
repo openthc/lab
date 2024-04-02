@@ -324,7 +324,7 @@ class View extends \OpenTHC\Lab\Controller\Base
 
 		$dbc->insert('lab_report', $lr1);
 
-		$dbc->insert('lab_report_inventory', [
+		$dbc->insert('inventory_lab_report', [
 			'lab_report_id' => $lr1['id'],
 			'inventory_id' => $Lab_Sample['lot_id'], // v0 lot_id
 			// 'inventory_id' => $Lab_Sample['inventory_id'], // v1 inventory_id

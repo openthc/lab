@@ -9,7 +9,6 @@ namespace OpenTHC\Lab;
 
 class Lab_Result extends \OpenTHC\SQL\Record
 {
-	const FLAG_SYNC = 0x00100000;
 	const FLAG_LOCK = 0x00200000;
 	const FLAG_MUTE = 0x04000000;
 	const FLAG_DEAD = 0x08000000;

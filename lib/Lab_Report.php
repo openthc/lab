@@ -9,8 +9,6 @@ namespace OpenTHC\Lab;
 
 class Lab_Report extends \OpenTHC\SQL\Record
 {
-	// const FLAG_SYNC = 0x00100000;
-
 	const FLAG_OUTPUT_COA  = 0x00000010;
 	const FLAG_OUTPUT_CSV  = 0x00000020;
 	const FLAG_OUTPUT_HTML = 0x00000040;
