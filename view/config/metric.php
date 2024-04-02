@@ -52,7 +52,7 @@ function _draw_select_uom($id, $uom_want)
 <p>Configure which metrics are used with which product classes.</p>
 
 <form autocomplete="off" method="post">
-<table class="table table-sm table-bordered table-metric">
+<table class="table table-sm table-bordered table-hover table-metric">
 <?php
 foreach ($this->data['metric_list'] as $m) {
 
@@ -78,7 +78,7 @@ foreach ($this->data['metric_list'] as $m) {
 		<td><?= h($m['name']) ?></td>
 		<?php
 		if (308 == $m['stat']) {
-			printf('<td colspan="5">%s</td>', $m['meta']['goto']);
+			printf('<td colspan="5">goto:%s</td>', $m['meta']['goto']);
 		} else {
 		?>
 		<td><?= __h($m['meta']['uom']) ?></td>

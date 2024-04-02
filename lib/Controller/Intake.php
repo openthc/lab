@@ -48,6 +48,9 @@ class Intake extends \OpenTHC\Lab\Controller\Base
 
 
 		$data = $this->loadSiteData();
+		$data['menu0'] = 'hide';
+
+		$data['Laboratory_License'] = $L0;
 
 		$sql = 'SELECT id, name FROM product_type WHERE stat = 200 ORDER BY name';
 		$data['product_type'] = $dbc_user->fetchMix($sql);
