@@ -31,11 +31,11 @@ $cli_args = _cli_options();
 
 $dbc_auth = _dbc('auth');
 
-$dsn = $dbc_auth->fetchOne('SELECT dsn FROM auth_company WHERE id = :c0', [ ':c0' => $opt['--company'] ]);
+$dsn = $dbc_auth->fetchOne('SELECT dsn FROM auth_company WHERE id = :c0', [ ':c0' => $cli_args['--company'] ]);
 $dbc = new SQL($dsn);
 
-$_SESSION['Company'] = $dbc->fetchRow('SELECT * FROM auth_company WHERE id = :c0', [ ':c0' => $opt['--company'] ]);
-$_SESSION['License'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $opt['--license'] ]);
+$_SESSION['Company'] = $dbc->fetchRow('SELECT * FROM auth_company WHERE id = :c0', [ ':c0' => $cli_args['--company'] ]);
+$_SESSION['License'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $cli_args['--license'] ]);
 if (empty($_SESSION['Company']['id'])) {
 	echo "Invalid Company\n";
 	exit(1);
@@ -65,16 +65,48 @@ switch ($cli_args['--object']) {
 			':ls0' => $cli_args['--object-id']
 		]);
 		$lab_sample['meta'] = json_decode($lab_sample['meta'], true);
-		var_dump($lab_sample);
-		exit;
+
+		$url = _openthc_pub_path(sprintf('lab/%s/wcia.json', $lab_sample['id']));
+		var_dump($url);
 
 		$res = $qbc->post(sprintf('/api/v1/sample/%s', $lab_sample['meta']['id']), [
-			'WCIAdataLINK' => 'https://openthc.pub/p2ITcMW3Rz2WRXR8UCDdMhQMH9Pb_WAjx9Cqwp8kLAY/wcia.json',
+			'WCIAdataLINK' => $url,
 		]);
 
 		var_dump($res);
 
 		exit;
+
+	case 'lab-report':
+
+		// Works Perfect
+		$lab_report = $dbc->fetchRow('SELECT * FROM lab_report WHERE id = :ls0', [
+			':ls0' => $cli_args['--object-id']
+		]);
+		// $lab_report['meta'] = json_decode($lab_sample['meta'], true);
+		// var_dump($lab_report);
+
+		$lab_sample = $dbc->fetchRow('SELECT * FROM lab_sample WHERE id = :ls0', [
+			':ls0' => $lab_report['lab_sample_id']
+		]);
+		$lab_sample['meta'] = json_decode($lab_sample['meta'], true);
+
+		// $cfg = [];
+		// $pub = new \OpenTHC\Service\Pub($cfg);
+		// $pub->setPath(sprintf('/lab/...?'));
+		// $pub->setName('wcia.json');
+		// $url = $pub->getURL();
+
+		$url = _openthc_pub_path(sprintf('lab/%s/wcia.json', $lab_report['id']));
+		var_dump($url);
+
+		$res = $qbc->post(sprintf('/api/v1/sample/%s', $lab_sample['meta']['id']), [
+			'WCIAdataLINK' => $url,
+		]);
+
+		var_dump($res);
+
+		break;
 
 }
 
