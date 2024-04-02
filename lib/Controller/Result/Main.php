@@ -42,18 +42,27 @@ class Main extends \OpenTHC\Lab\Controller\Base
 
 		// Stuff my Company is linked to?
 		$sql = <<<SQL
-SELECT lab_result.*
-  , lab_sample.id AS lab_sample_id
-  , lab_sample.name AS lab_sample_guid
-  , inventory.guid AS inventory_guid
-FROM lab_result
-JOIN lab_sample ON lab_result.lab_sample_id = lab_sample.id
-JOIN inventory ON lab_sample.lot_id = inventory.id
-WHERE {WHERE}
-ORDER BY {SORTBY}
-OFFSET $sql_offset
-LIMIT $sql_limit
-SQL;
+		SELECT lab_result.*
+			, lab_sample.id AS lab_sample_id
+			, lab_sample.name AS lab_sample_guid
+			, inventory.id AS inventory_id
+			, inventory.guid AS inventory_guid
+		FROM lab_result
+		JOIN lab_sample ON lab_result.lab_sample_id = lab_sample.id
+		JOIN inventory ON lab_sample.lot_id = inventory.id
+		WHERE {WHERE}
+		ORDER BY {SORTBY}
+		OFFSET $sql_offset
+		LIMIT $sql_limit
+		SQL;
+
+		// Paging by ID not OFFSET?
+		// if ( ! empty($_GET['gt'])) {
+		//      $sql_where[][
+		//              'sql' => sprintf(' id > :id1'),
+		//              'arg' => $_GET['gt']
+		//      ];
+		// }
 
 		if ('ALL' === $_GET['p']) {
 			$sql = preg_replace('/OFFSET \d+/', '', $sql);
