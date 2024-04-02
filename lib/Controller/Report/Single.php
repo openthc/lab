@@ -111,7 +111,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 							$req_path[] = 'wcia.json';
 							$pub_link_list['wcia'] = implode('/', $req_path);
 						} elseif (('application/pdf' == $lrf['type']) && (preg_match('/\d+\.pdf$/', $lrf['name']))) {
-							$req_path[] = 'coa.json';
+							$req_path[] = 'coa.pdf';
 							$pub_link_list['coa'] = implode('/', $req_path);
 						}
 
@@ -129,7 +129,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 						} elseif (preg_match('/\w{26}\-WCIA.json/', $lrf['name'])) {
 							$req_path[] = 'wcia.json';
 						} elseif (('application/pdf' == $lrf['type']) && (preg_match('/\d+\.pdf$/', $lrf['name']))) {
-							$req_path[] = 'coa.json';
+							$req_path[] = 'coa.pdf';
 						} else {
 							$req_path[] = $lrf['name'];
 						}
@@ -179,14 +179,12 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				$cmd[] = sprintf('%s/bin/qbench-export.php', APP_ROOT);
 				$cmd[] = sprintf('--company=%s', $_SESSION['Company']['id']);
 				$cmd[] = sprintf('--license=%s', $_SESSION['License']['id']);
-				$cmd[] = '--object=lab-sample';
-				$cmd[] = sprintf('--object-id=%s', escapeshellarg($data['Lab_Sample']['id']));
+				$cmd[] = '--object=lab-report';
+				$cmd[] = sprintf('--object-id=%s', escapeshellarg($Lab_Report['id']));
 				$cmd[] = '>/dev/null';
 				$cmd[] = '2>&1';
 				$cmd[] = '&';
 				$cmd = implode(' ', $cmd);
-				// var_dump($cmd);
-				// exit;
 				$buf = shell_exec($cmd);
 
 				Session::flash('info', 'Lab Results Published');
