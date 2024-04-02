@@ -6,14 +6,24 @@ It integrates with BioTrackTHC, Franwell/METRC and MJ Freeway/LeafData.
 
 ```mermaid
 erDiagram
-  Inventory ||--o{ Lab_Sample : "1+ Samples"
-  Lab_Sample ||--o{ Lab_Result : "1+ Results"
+  Inventory ||--o{ Lab_Sample : "1 Inventory w/1+ Samples"
+  Lab_Sample ||--o{ Lab_Result : "1 Inventory w/1+ Results"
   Lab_Sample }|--o{ Lab_Report : "1+ Reports"
   Lab_Result }|--o{ Lab_Report : "Many Results to Many Reports"
   Inventory ||--o{ Lab_Result : "1+ Results"
   Lab_Report }o--|{ Inventory : "1+ Reports"
 ```
 
+```mermaid
+flowchart LR
+    A[Sample] --> B[Result]
+    B --> C{Report}
+    C -->|Download| D[PDFs]
+    C -->|Locked Download|E[Commit]
+    E --> F[Publish]
+    G[Metric] --> B
+    G -.-> C
+```
 
 ## Installation
 
