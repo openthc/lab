@@ -94,6 +94,29 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				// Publish Files
 				if ( ! empty($lab_report_file_list)) {
 
+					// Find the COA
+					// Find the WCIA
+					$pub_link_list = [];
+					foreach ($lab_report_file_list as $lrf) {
+
+						$req_path = [];
+						$req_path[] = 'lab';
+						$req_path[] = $Lab_Report['id'];
+
+						// Custom Shit Here
+						if (preg_match('/\w{26}\-CCRS.csv$/', $lrf['name'])) {
+							$req_path[] = 'ccrs.csv';
+							$pub_link_list['ccrs'] = implode('/', $req_path);
+						} elseif (preg_match('/\w{26}\-WCIA.json/', $lrf['name'])) {
+							$req_path[] = 'wcia.json';
+							$pub_link_list['wcia'] = implode('/', $req_path);
+						} elseif (('application/pdf' == $lrf['type']) && (preg_match('/\d+\.pdf$/', $lrf['name']))) {
+							$req_path[] = 'coa.json';
+							$pub_link_list['coa'] = implode('/', $req_path);
+						}
+
+					}
+
 					foreach ($lab_report_file_list as $lrf) {
 
 						// Re-maps Path
@@ -105,6 +128,8 @@ class Single extends \OpenTHC\Lab\Controller\Base
 							$req_path[] = 'ccrs.csv';
 						} elseif (preg_match('/\w{26}\-WCIA.json/', $lrf['name'])) {
 							$req_path[] = 'wcia.json';
+						} elseif (('application/pdf' == $lrf['type']) && (preg_match('/\d+\.pdf$/', $lrf['name']))) {
+							$req_path[] = 'coa.json';
 						} else {
 							$req_path[] = $lrf['name'];
 						}
@@ -115,7 +140,20 @@ class Single extends \OpenTHC\Lab\Controller\Base
 						]);
 						$req_body = stream_get_contents($lrf_body);
 						$req_type = $lrf['type'];
-						// $Lab_Result1->importCOA($req_body);
+
+						// Rewrite the Origin and COA Links
+						if ('application/json' == $req_type) {
+							$req_body = json_decode($req_body, true);
+							if ( ! empty($req_body['document_origin'])) {
+								$req_body['document_origin'] = _openthc_pub_path($pub_link_list['wcia']);
+							}
+							if ( ! empty($req_body['coa'])) {
+								$req_body['coa'] = _openthc_pub_path($pub_link_list['coa']);
+							}
+							$req_body = json_encode($req_body, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+						}
+
 						$res = _openthc_pub($req_path, $req_body, $req_type);
 						var_dump($res);
 						if ( ! empty($res['data'])) {
@@ -134,6 +172,22 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				}
 
 				$Lab_Report->save('Lab Report Published by User');
+
+				// Publish (eg CRE, Qbench)
+				// $this->_publish_external($Lab_Report);
+				$cmd = [];
+				$cmd[] = sprintf('%s/bin/qbench-export.php', APP_ROOT);
+				$cmd[] = sprintf('--company=%s', $_SESSION['Company']['id']);
+				$cmd[] = sprintf('--license=%s', $_SESSION['License']['id']);
+				$cmd[] = '--object=lab-sample';
+				$cmd[] = sprintf('--object-id=%s', escapeshellarg($data['Lab_Sample']['id']));
+				$cmd[] = '>/dev/null';
+				$cmd[] = '2>&1';
+				$cmd[] = '&';
+				$cmd = implode(' ', $cmd);
+				// var_dump($cmd);
+				// exit;
+				$buf = shell_exec($cmd);
 
 				Session::flash('info', 'Lab Results Published');
 
@@ -175,7 +229,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$got_coa = $this->_import_external_system($dbc_user, $Lab_Report, $data['Lab_Sample']);
 		if ($got_coa) {
 			// Use External System COA
-			$Lab_Report->setFLag(Lab_Report::FLAG_OUTPUT_COA);
+			$Lab_Report->setFlag(Lab_Report::FLAG_OUTPUT_COA);
 		} else {
 			// Use Internal System COA
 			// Generate the COA/PDF
@@ -192,12 +246,21 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				, $out_body->getContents()
 			);
 
-			$Lab_Report->setFLag(Lab_Report::FLAG_OUTPUT_COA);
+			$Lab_Report->setFlag(Lab_Report::FLAG_OUTPUT_COA);
 		}
 
 		// Invoke on ourselves for the HTML view
 		// $res1 = $RES->withBody(new \Slim\Http\Body(fopen('php://temp', 'r+')));
 		// $res1 = $this->__invoke($res1, $ARG, $data);
+		// $out_body = $res1->getBody();
+		// $out_body->rewind();
+		// $out_size = $out_body->getSize();
+		// $out_data = $out_body->getContents();
+		// $Lab_Report->setFlag(Lab_Report::FLAG_OUTPUT_HTML);
+
+		// Generate the HTML?
+		// $res1 = $subC->html($RES, $ARG, $data);
+		// Get Response Body into File
 		// $out_body = $res1->getBody();
 		// $out_body->rewind();
 		// $out_size = $out_body->getSize();
@@ -218,24 +281,18 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		);
 		$Lab_Report->setFLag(Lab_Report::FLAG_OUTPUT_CSV);
 
-		$out_body->rewind();
-
-		// Generate the HTML?
-		// $res1 = $subC->html($RES, $ARG, $data);
-		// Get Response Body into File
-		// $out_body = $res1->getBody();
-		// $out_body->rewind();
-		// $out_size = $out_body->getSize();
-		// $out_data = $out_body->getContents();
-		// $Lab_Report->setFLag(Lab_Report::FLAG_OUTPUT_HTML);
-
 		// Generate the JSON/OpenTHC
 		// $res1 = $RES->withBody(new \Slim\Http\Body(fopen('php://temp', 'r+')));
 		// $res1 = $subC->json_openthc($res1, $ARG, $data);
 		// $out_body = $res1->getBody();
 		// $out_body->rewind();
-		// $out_size = $out_body->getSize();
-		// $out_data = $out_body->getContents();
+		// $this->_commit_insert_file($dbc_user
+		// 	, $Lab_Report['id']
+		// 	, sprintf('%s.json', $data['Lab_Report']['id'])
+		// 	, $out_body->getSize()
+		// 	, 'application/json'
+		// 	, $out_body->getContents()
+		// );
 		// $Lab_Report->setFLag(Lab_Report::FLAG_OUTPUT_JSON);
 
 		// Generate the JSON/WCIA
@@ -263,14 +320,19 @@ class Single extends \OpenTHC\Lab\Controller\Base
 	 */
 	function _commit_insert_file($dbc_user, $lr0_ulid, $name, $size, $type, $body)
 	{
-		$sql = 'INSERT INTO lab_report_file (id, lab_report_id, name, size, type, body) VALUES (ulid_create(), :lr0, :n1, :s1, :t1, :b1)';
+		$lrf0_ulid = _ulid();
+
+		$sql = 'INSERT INTO lab_report_file (id, lab_report_id, name, size, type, body) VALUES (:lrf0, :lr0, :n1, :s1, :t1, :b1)';
 		$cmd = $dbc_user->prepare($sql, null);
+		$cmd->bindParam(':lrf0', $lrf0_ulid);
 		$cmd->bindParam(':lr0', $lr0_ulid);
 		$cmd->bindParam(':n1', $name);
 		$cmd->bindParam(':s1', $size);
 		$cmd->bindParam(':t1', $type);
 		$cmd->bindParam(':b1', $body, \PDO::PARAM_LOB);
-		return $cmd->execute();
+		$res = $cmd->execute();
+
+		return $lrf0_ulid;
 	}
 
 	/**
@@ -315,6 +377,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				$lrf = [];
 				$lrf['id'] = _ulid();
 
+				// _commit_insert_file
 				$sql = 'INSERT INTO lab_report_file (id, lab_report_id, name, size, type, body) VALUES (:lrf0, :lr0, :n1, :s1, :t1, :b1)';
 				$cmd = $dbc_user->prepare($sql, null);
 				$cmd->bindParam(':lrf0', $lrf['id']);
@@ -327,7 +390,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 
 				Session::flash('info', 'COA File was attached from QBench');
 
-				return $lrf['id'];;
+				return $lrf['id'];
 			}
 
 		}
