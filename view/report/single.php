@@ -153,9 +153,10 @@ if ( ! empty($data['lab_report_file_list'])) {
 	<?php
 	foreach ($data['lab_report_file_list'] as $f) {
 		$pub_link = $public_link_list[ $f['id'] ];
+		$int_link = sprintf('/report/%s/download/%s', $data['Lab_Report']['id'], $f['id']);
 		?>
 		<tr>
-		<td><?= sprintf('<a href="?a=lab-report-file-download&id=%s">%s</a>', $f['id'], __h($f['name'])) ?></td>
+		<td><a href="<?= $int_link ?>"><?= __h($f['name']) ?></a></td>
 		<?php
 		printf('<td>%s</td>', __h($f['type']));
 		printf('<td class="r">%d</td>', __h($f['size']));
@@ -171,7 +172,7 @@ if ( ! empty($data['lab_report_file_list'])) {
 				echo sprintf('<a class="btn btn-sm btn-primary" href="%s" target="_blank"><i class="fa-regular fa-share-from-square"></i></a>', $pub_link['link'], $pub_link['name']);
 			}
 			?>
-			<a class="btn btn-outline-secondary" download href="?a=lab-report-file-download&id=<?= $f['id'] ?>"><i class="fas fa-download"></i></a>
+			<a class="btn btn-outline-secondary" download href="<?= $int_link ?>"><i class="fas fa-download"></i></a>
 			<button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
 			<ul class="dropdown-menu dropdown-menu-end">
 				<li><button class="dropdown-item btn-clipcopy"

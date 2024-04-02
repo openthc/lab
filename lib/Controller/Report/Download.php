@@ -62,6 +62,26 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		if (empty($Lab_Report['id'])) {
 			_exit_html_warn('<h1>Lab Report Not Found [CRS-030]', 404);
 		}
+
+		if ( ! empty($ARG['fid'])) {
+
+			$rec = $dbc_user->fetchRow('SELECT * FROM lab_report_file WHERE id = :lf0 AND lab_report_id = :lr0', [
+					':lr0' => $Lab_Report['id'],
+					':lf0' => $ARG['fid']
+			]);
+			if (empty($rec['id'])) {
+					_exit_html_warn('<h1>Lab Report Data File Not Found [CRD-073]', 404);
+			}
+
+			header('content-transfer-encoding: binary');
+			header(sprintf('content-type: %s', $rec['type']));
+			header(sprintf('content-disposition: inline; filename="%s"', $rec['name']));
+
+			fpassthru($rec['body']);
+
+			exit;
+		}
+
 		$data = $this->_load_data($dbc_user, $Lab_Report);
 
 		// Alias the data into this field
@@ -209,11 +229,15 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 	 */
 	function png($RES, $ARG)
 	{
-		// $qrCode = new \Endroid\QrCode\QrCode(sprintf('https://%s/pub/%s.html', $_SERVER['SERVER_NAME'], $ARG['id']));
+		$req_path = [];
+		$req_path[] = 'lab';
+		$req_path[] = $ARG['id'];
+		$req_path[] = 'coa.html';
+		$url = _openthc_pub_path(implode('/', $req_path));
 		$res = \Endroid\QrCode\Builder\Builder::create()
 			->writer(new \Endroid\QrCode\Writer\PngWriter())
 			->writerOptions([])
-			->data('Custom QR code contents')
+			->data($url)
 			->encoding(new \Endroid\QrCode\Encoding\Encoding('UTF-8'))
 			->errorCorrectionLevel(new \Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh())
 			// ->size(300)
@@ -224,8 +248,6 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 			// ->labelFont(new \Endroid\QrCode\Label\Font\NotoSans(20))
 			// ->labelAlignment(new LabelAlignmentCenter())
 			->build();
-
-		// var_dump($res); exit;
 
 		$img_name = sprintf('%s.png', $ARG['id']);
 

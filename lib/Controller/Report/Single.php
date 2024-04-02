@@ -27,23 +27,6 @@ class Single extends \OpenTHC\Lab\Controller\Base
 			_exit_html_warn('<h1>Lab Report Not Found [CRS-030]', 404);
 		}
 
-		switch ($_GET['a']) {
-			case 'lab-report-file-download':
-				$rec = $dbc_user->fetchRow('SELECT * FROM lab_report_file WHERE id = :lf0 AND lab_report_id = :lr0', [
-					':lr0' => $Lab_Report['id'],
-					':lf0' => $_GET['id']
-				]);
-				// var_dump($rec);
-
-				header('content-transfer-encoding: binary');
-				header(sprintf('content-type: %s', $rec['type']));
-				header(sprintf('content-disposition: inline; filename="%s"', $rec['name']));
-
-				fpassthru($rec['body']);
-
-				exit;
-		}
-
 		// $data['Page'] = [ 'title' => 'Lab Reports' ];
 		$data = $this->_load_data($dbc_user, $Lab_Report);
 		$data = $this->loadSiteData($data);
@@ -299,7 +282,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 			':lr0' => $Lab_Report['id']
 		];
 
-		$sql = 'DELETE FROM lab_report_inventory WHERE lab_report_id = :lr0';
+		$sql = 'DELETE FROM inventory_lab_report WHERE lab_report_id = :lr0';
 		$dbc_user->query($sql, $arg);
 
 		$sql = 'DELETE FROM lab_report_file WHERE lab_report_id = :lr0';
