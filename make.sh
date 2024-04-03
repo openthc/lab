@@ -7,16 +7,18 @@ set -o errtrace
 set -o nounset
 set -o pipefail
 
-composer update --no-ansi --no-dev --no-progress --quiet --classmap-authoritative
+BIN_SELF=$(readlink -f "$0")
+APP_ROOT=$(dirname "$BIN_SELF")
+
+composer install --no-ansi --no-dev --no-progress --quiet --classmap-authoritative
 
 npm install --quiet
 
-# Copy stuff to our webroot
-mkdir -p webroot/css webroot/js webroot/vendor
-cp node_modules/jquery/dist/jquery.min.js webroot/js/jquery.min.js
-cp node_modules/jquery-ui/dist/jquery-ui.min.js webroot/js/jquery-ui.min.js
-cp node_modules/jquery-ui/dist/themes/base/jquery-ui.min.css webroot/css/jquery-ui.min.css
+. vendor/openthc/common/lib/lib.sh
 
+copy_bootstrap
+copy_fontawesome
+copy_jquery
 
 # Google Fonts
 curl -O https://openthc.com/pub/font/CedarvilleCursive-Regular.ttf
