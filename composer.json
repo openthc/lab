@@ -12,21 +12,21 @@
 		}
 	},
 	"require": {
-		"docopt/docopt": "1.0.4",
+		"docopt/docopt": "1.0.5",
 		"edoceo/lowline": "2022.0.280",
 		"edoceo/radix": "2021.0.0",
 		"endroid/qr-code": "4.4.9",
 		"google/protobuf": "3.21.1",
 		"grpc/grpc": "1.42.0",
-		"league/oauth2-client": "2.6.1",
+		"league/oauth2-client": "2.7.0",
 		"openthc/common": "dev-master",
 		"openthc/cre-adapter": "dev-master",
 		"pear/net_smtp": "1.10.0",
-		"tecnickcom/tcpdf": "6.6.2"
+		"tecnickcom/tcpdf": "6.7.4"
 	},
 	"require-dev": {
-		"phpmd/phpmd": "2.13.0",
-		"phpstan/phpstan": "1.10.5",
-		"phpunit/phpunit": "9.6.4"
+		"phpmd/phpmd": "2.15.0",
+		"phpstan/phpstan": "1.10.66",
+		"phpunit/phpunit": "9.6.18"
 	}
 }
