@@ -83,6 +83,8 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				break;
 			case 'lab-report-share':
 
+				$pub_service = new \OpenTHC\Lab\Facade\Pub();
+
 				$data = $this->_load_data($dbc_user, $Lab_Report);
 
 				$lab_report_file_list = $data['lab_report_file_list'];
@@ -145,16 +147,16 @@ class Single extends \OpenTHC\Lab\Controller\Base
 						if ('application/json' == $req_type) {
 							$req_body = json_decode($req_body, true);
 							if ( ! empty($req_body['document_origin'])) {
-								$req_body['document_origin'] = _openthc_pub_path($pub_link_list['wcia']);
+								$req_body['document_origin'] = $pub_service->getURL($pub_link_list['wcia']);
 							}
 							if ( ! empty($req_body['coa'])) {
-								$req_body['coa'] = _openthc_pub_path($pub_link_list['coa']);
+								$req_body['coa'] = $pub_service->getURL($pub_link_list['coa']);
 							}
 							$req_body = json_encode($req_body, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
 						}
 
-						$res = _openthc_pub($req_path, $req_body, $req_type);
+						$pub_service->put($req_path, $req_body, $req_type);
 						var_dump($res);
 						if ( ! empty($res['data'])) {
 							$url = $res['data'];
@@ -174,7 +176,10 @@ class Single extends \OpenTHC\Lab\Controller\Base
 				$Lab_Report->save('Lab Report Published by User');
 
 				// Publish (eg CRE, Qbench)
-				// $this->_publish_external($Lab_Report);
+				// @todo Should be Webhook
+				$who_service = new \OpenTHC\Lab\Facade\Webhook();
+				$who_service->post('/lab/report/publish', $data);
+
 				$cmd = [];
 				$cmd[] = sprintf('%s/bin/qbench-export.php', APP_ROOT);
 				$cmd[] = sprintf('--company=%s', $_SESSION['Company']['id']);
