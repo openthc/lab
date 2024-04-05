@@ -24,7 +24,7 @@ class Open extends \OpenTHC\Controller\Auth\oAuth2
 
 		$p = $this->getProvider($ret);
 		$url = $p->getAuthorizationUrl([
-			'scope' => 'profile lab',
+			'scope' => 'contact company license lab',
 		]);
 
 		$_SESSION['oauth2-state'] = $p->getState();
