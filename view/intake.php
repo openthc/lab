@@ -1,6 +1,8 @@
 <?php
 /**
+ * Incoming Data Portal
  *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 $variety_package_list = [];
@@ -11,31 +13,56 @@ $variety_package_list[] = [
 
 ?>
 
-<h1>Incoming Samples</h1>
+<div class="hero-wrap">
+	<div class="hero-core">
+		<h1>Sample Intake</h1>
+		<?php
+		// Laboratyr Data Here
+		// echo $data['Laboratory']['intake-note'];
+		?>
+	</div>
+</div>
+
 
 <form autocomplete="off" method="post">
 <div class="container mt-4" style="min-height: 80vh;">
 
+<div class="mb-2">
+	<div class="input-group">
+		<div class="input-group-text">Laboratory:</div>
+		<input autofocus name="laboratory_license" class="form-control license-autocomplete" value="<?= __h($data['Laboratory_License']['name']) ?>">
+		<input class="autocomplete-data-id" id="laboratory-license-id" name="laboratory-license_id" type="hidden" value="">
+		<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
+		<a class="btn btn-outline-secondary" href="#" id="license-id-link" target="_blank"><i class="fas fa-address-book"></i></a>
+	</div>
+</div>
 
-	<div class="mb-2">
-		<div class="input-group">
-			<div class="input-group-text">Origin License:</div>
-			<input autofocus name="origin_license" class="form-control license-autocomplete">
-			<input class="autocomplete-data-id" id="license-id" name="license_id" type="hidden" value="">
-			<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
-			<a class="btn btn-outline-secondary" href="#" id="license-id-link" target="_blank"><i class="fas fa-address-book"></i></a>
+<div class="row">
+	<div class="col-md-6">
+		<div class="mb-2">
+			<div class="input-group">
+				<div class="input-group-text">Origin License:</div>
+				<input autofocus name="origin_license" class="form-control license-autocomplete">
+				<input class="autocomplete-data-id" id="license-id" name="license_id" type="hidden" value="">
+				<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
+				<a class="btn btn-outline-secondary" href="#" id="license-id-link" target="_blank"><i class="fas fa-address-book"></i></a>
+			</div>
 		</div>
 	</div>
-
-	<div class="mb-2">
-		<div class="input-group">
-			<div class="input-group-text">Origin Contact:</div>
-			<input autofocus name="origin_contact" class="form-control">
-			<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
+	<div class="col-md-6">
+		<div class="mb-2">
+			<div class="input-group">
+				<div class="input-group-text">Origin Contact:</div>
+				<input autofocus name="origin_contact" class="form-control">
+				<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
+			</div>
 		</div>
 	</div>
+</div>
 
 <hr>
+
+<h2>Sample Data</h2>
 
 <table class="table">
 <thead class="table-dark">
@@ -43,7 +70,8 @@ $variety_package_list[] = [
 		<td>Product Type</td>
 		<td>Product</td>
 		<td>Variety</td>
-		<td>Quantity</td>
+		<td>Origin Quantity</td>
+		<td>Sample Quantity</td>
 		<td></td>
 	</tr>
 </thead>
@@ -70,10 +98,22 @@ foreach ($variety_package_list as $i => $p) {
 		<td>
 			<input class="form-control" name="variety_name[]" placeholder="- Alpha Dawg -" type="text" value="<?= (intval($p['variety_name']) ?: '') ?>">
 		</td>
+		<!-- Origin -->
 		<td>
 			<div class="input-group">
-				<input class="form-control r" name="qty[]" min="0" placeholder="- 5.00 -" step="0.01" type="number" value="<?= (floatval($p['qty']) ?: '') ?>">
-				<select class="form-select" name="uom[]" style="max-width: 6em;">
+				<input class="form-control r" name="origin-qty[]" min="0" placeholder="- 5.00 -" step="0.01" type="number" value="<?= (floatval($p['qty']) ?: '') ?>">
+				<select class="form-select" name="origin-uom[]" style="max-width: 6em;">
+					<option value="ea">ea</option>
+					<option value="g">g</option>
+					<!-- <option value="lb">lb</option> -->
+				</select>
+			</div>
+		</td>
+		<!-- Sample -->
+		<td>
+			<div class="input-group">
+				<input class="form-control r" name="sample-qty[]" min="0" placeholder="- 5.00 -" step="0.01" type="number" value="<?= (floatval($p['qty']) ?: '') ?>">
+				<select class="form-select" name="sample-uom[]" style="max-width: 6em;">
 					<option value="ea">ea</option>
 					<option value="g">g</option>
 					<!-- <option value="lb">lb</option> -->
@@ -81,7 +121,7 @@ foreach ($variety_package_list as $i => $p) {
 			</div>
 		</td>
 		<td class="r">
-			<div class="btn-group btn-group-sm">
+			<div class="btn-group">
 				<button class="btn btn-primary btn-package-add" type="button"><i class="fas fa-plus-square"></i></button>
 				<button class="btn btn-outline-danger btn-package-del" type="button"><i class="fas fa-trash"></i></button>
 			</div>
