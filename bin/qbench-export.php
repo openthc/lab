@@ -55,6 +55,7 @@ $cfg = json_decode($cfg, true);
 $qbc = new \OpenTHC\CRE\QBench($cfg);
 $res = $qbc->auth();
 
+$pub_service = new \OpenTHC\Lab\Facade\Pub();
 
 switch ($cli_args['--object']) {
 	case 'sample':
@@ -66,7 +67,7 @@ switch ($cli_args['--object']) {
 		]);
 		$lab_sample['meta'] = json_decode($lab_sample['meta'], true);
 
-		$url = _openthc_pub_path(sprintf('lab/%s/wcia.json', $lab_sample['id']));
+		$url = $pub_service->getURL(sprintf('lab/%s/wcia.json', $lab_report['id']));
 		var_dump($url);
 
 		$res = $qbc->post(sprintf('/api/v1/sample/%s', $lab_sample['meta']['id']), [
