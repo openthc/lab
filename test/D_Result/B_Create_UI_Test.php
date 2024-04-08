@@ -3,8 +3,7 @@
  *
  */
 
-?>
-
+/*
 // Bulk Set these Values via JavaScfript
 
 // Cannabinoid
@@ -30,3 +29,5 @@ $('#lab-metric-type-018NY6XC00LMT09ZG05C2NE7KX .lab-metric-qom').val('5');
 
 // Solvents
 $('#lab-metric-type-018NY6XC00LMT0AQAMJEDSD0NW .lab-metric-qom').val('6');
+
+*/

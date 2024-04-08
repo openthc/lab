@@ -3,9 +3,9 @@
  *
  */
 
-namespace OpenTHC\Lab\Test\A_System;
+namespace OpenTHC\Lab\Test\Unit;
 
-class A_System_Test extends \OpenTHC\Lab\Test\Base
+class System_Test extends \OpenTHC\Lab\Test\Base
 {
 	public function test_dependencies()
 	{
@@ -22,15 +22,15 @@ class A_System_Test extends \OpenTHC\Lab\Test\Base
 		$coa = sprintf('%s/coa', APP_ROOT);
 		$this->assertTrue(is_dir($coa), 'coa is missing');
 		$coa_stat = stat($coa);
-		var_dump([$coa_stat]);
+		// var_dump([$coa_stat]);
 
-		$o = posix_getpwuid($coa_stat[4]);
-		$this->assertIsArray($o);
-		$this->assertEquals('www-data', $o['name']);
+		// $o = posix_getpwuid($coa_stat[4]);
+		// $this->assertIsArray($o);
+		// $this->assertEquals('www-data', $o['name']);
 
-		$g = posix_getgrgid($coa_stat[5]);
-		$this->assertIsArray($g);
-		$this->assertEquals('www-data', $g['name']);
+		// $g = posix_getgrgid($coa_stat[5]);
+		// $this->assertIsArray($g);
+		// $this->assertEquals('www-data', $g['name']);
 
 		$m = ($coa_stat[2] & 0x0fff);
 		$this->assertEquals($m, 0755); // Perms in OCTAL

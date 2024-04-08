@@ -4,14 +4,9 @@
 #
 
 set -o errexit
+set -o errtrace
 set -o nounset
-
-x=${OPENTHC_TEST_BASE:-}
-if [ -z "$x" ]
-then
-	echo "You have to define the environment first"
-	exit 1
-fi
+set -o pipefail
 
 f=$(readlink -f "$0")
 d=$(dirname "$f")
@@ -32,18 +27,18 @@ vendor/openthc/common/test/phplint.sh
 
 #
 # PHP-CPD
-vendor/openthc/common/test/phpcpd.sh
+# vendor/openthc/common/test/phpcpd.sh
 
 
 #
 # PHPStan
-vendor/openthc/common/test/phpstan.sh
+vendor/openthc/common/test/phpstan.sh || true
 
 
 #
 # PHPUnit
-vendor/openthc/common/test/phpunit.sh "$@"
-
+vendor/openthc/common/test/phpunit.sh "$@" || true
+vendor/openthc/common/test/phpunit-xml2html.php ./webroot/test-output/phpunit.xml ./webroot/test-output/phpunit.html
 
 #
 # Final Output

@@ -5,7 +5,7 @@
 
 namespace OpenTHC\Lab\Test;
 
-class Base extends \PHPUnit\Framework\TestCase
+class Base extends \OpenTHC\Test\Base
 {
 	protected $httpClient; // API Guzzle Client
 

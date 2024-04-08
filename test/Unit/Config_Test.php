@@ -3,22 +3,22 @@
  *
  */
 
-namespace OpenTHC\Lab\Test\A_System;
+namespace OpenTHC\Lab\Test\Unit;
 
-class B_Config_Test extends \OpenTHC\Lab\Test\Base
+class Config_Test extends \OpenTHC\Lab\Test\Base
 {
 	function test_sso()
 	{
 		$cfg = \OpenTHC\Config::get('openthc/sso');
 
 		$key_list = [
-			'hostname',
+			'origin',
 			'public',
 			'secret',
 		];
 
 		foreach ($key_list as $k) {
-			$this->assertArrayHasKey($cfg, $k, "SSO '$k' not set");
+			$this->assertArrayHasKey($k, $cfg, "SSO '$k' not set");
 		}
 
 	}
