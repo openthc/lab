@@ -22,7 +22,8 @@ class Lab_Report extends \OpenTHC\SQL\Record
 	const FLAG_DEAD        = 0x08000000;
 
 
-	const STAT_WAIT = 100;
+	const STAT_OPEN = 100;
+	const STAT_WAIT = 102;
 	const STAT_PASS = 200;
 	const STAT_PART = 206;
 	const STAT_FAIL = 400;

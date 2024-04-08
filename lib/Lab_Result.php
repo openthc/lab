@@ -16,7 +16,8 @@ class Lab_Result extends \OpenTHC\SQL\Record
 	const FLAG_PUBLIC     = 0x00000400;
 	const FLAG_PUBLIC_COA = 0x00000800;
 
-	const STAT_WAIT = 100;
+	const STAT_OPEN = 100;
+	const STAT_WAIT = 102;
 	const STAT_PASS = 200;
 	const STAT_PART = 206;
 	const STAT_FAIL = 400;
