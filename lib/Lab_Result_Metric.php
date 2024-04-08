@@ -1,6 +1,6 @@
 <?php
 /**
- * Lab Result
+ * Lab Result Metric
  *
  * SPDX-License-Identifier: GPL-3.0-only
  */
