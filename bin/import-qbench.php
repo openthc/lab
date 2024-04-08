@@ -797,7 +797,6 @@ function _qbench_pull_sample_import($dbc, $rec)
 	}
 
 	$rec['@id'] = sprintf('qbench:%s', $rec['id']);
-	$rec['@lot_guid'] = $rec['ExtInvID'] ?: $rec['lot_number'] ?: $rec['custom_formatted_id'] ?: $rec['@id'];
 	$rec['@inventory_guid'] = $rec['ExtInvID'] ?: $rec['lot_number'] ?: $rec['custom_formatted_id'] ?: $rec['@id'];
 	$rec['@order_id'] = sprintf('qbench:%s', $rec['order_id']);
 	$rec['@qty'] = floatval($rec['sample_quantity_received']);
@@ -813,7 +812,7 @@ function _qbench_pull_sample_import($dbc, $rec)
 	}
 	$rec['@hash'] = CRE_Base::recHash($rec);
 
-	// echo "Lab Sample: {$rec['@id']} / {$rec['@lot_guid']} / {$rec['custom_formatted_id']}\n";
+	// echo "Lab Sample: {$rec['@id']} / {$rec['@inventory_guid']} / {$rec['custom_formatted_id']}\n";
 
 	// Lookup Record
 	$lab_sample = $dbc->fetchRow('SELECT id, hash FROM lab_sample WHERE id = :i0 OR name = :i0', [
@@ -837,23 +836,23 @@ function _qbench_pull_sample_import($dbc, $rec)
 	// Need to Create an Inventory Lot Here
 	$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE id = :g0', [ ':g0' => $rec['@id'] ]);
 	if (empty($inv['id'])) {
-		$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE guid = :g0', [ ':g0' => $rec['@lot_guid'] ]);
+		$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE guid = :g0', [ ':g0' => $rec['@inventory_guid'] ]);
 	}
 	if (empty($inv['id'])) {
 
 		// See if anyone has the same GUID as me, then increment mine
 		// $chk_guid = $dbc->fetchOne('SELECT id FROM inventory WHERE guid = :g0', [
-		// 	':g0' => $rec['@lot_guid']
+		// 	':g0' => $rec['@inventory_guid']
 		// ]);
 		// if ( ! empty($chk_guid)) {
-		// 	$rec['@lot_name'] = $rec['lot_guid'];
-		// 	$rec['@lot_guid'] = sprintf('%s-%s', $rec['@lot_guid'], $rec['@id']);
+		// 	$rec['@lot_name'] = $rec['@inventory_guid'];
+		// 	$rec['@inventory_guid'] = sprintf('%s-%s', $rec['@inventory_guid'], $rec['@id']);
 		// }
 
 		$inv = [
 			'id' => $rec['@id'],
-			'guid' => $rec['@lot_guid'],
-			'name' => sprintf('%s - IMPORT-875', $rec['@lot_guid']),
+			'guid' => $rec['@inventory_guid'],
+			'name' => sprintf('%s - IMPORT-875', $rec['@inventory_guid']),
 			'license_id' => $_SESSION['License']['id'],
 			// 'license_id_source' => $b2b['license_id_source']
 			'product_id' => '018NY6XC00PR0DUCT000000000', // $rec['sample_name'] sometimes?
@@ -868,7 +867,7 @@ function _qbench_pull_sample_import($dbc, $rec)
 	} else {
 
 		$update = [];
-		$update['guid'] = $rec['@lot_guid'];
+		$update['guid'] = $rec['@inventory_guid'];
 
 		// Update Status
 		$filter = [];
@@ -879,7 +878,7 @@ function _qbench_pull_sample_import($dbc, $rec)
 		// } catch (Exception $e) {
 			// Sometimes this fails because of duplicated GUID values which we don't allow.
 			// Would need to move one to a -0 and then update the new one to be -1
-		// 	echo "\nInventory Lot: {$rec['@id']} = {$rec['@lot_guid']}\n";
+		// 	echo "\nInventory Lot: {$rec['@id']} = {$rec['@inventory_guid']}\n";
 		// 	echo $e->getMessage();
 		// 	echo "\n";
 
