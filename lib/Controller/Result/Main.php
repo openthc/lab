@@ -165,7 +165,7 @@ class Main extends \OpenTHC\Lab\Controller\Base
 			$x = $rec['stat'];
 			switch ($x) {
 			case -1:
-			case 400:
+			case Lab_Result::STAT_FAIL:
 			case '/failed':
 			case 'completed/failed':
 				$stat[] = '<i class="fas fa-check-square" style="color: var(--bs-red);"></i>';
@@ -176,12 +176,12 @@ class Main extends \OpenTHC\Lab\Controller\Base
 				$stat[] = '<i class="fas fa-check-square" style="color: var(--bs-red);"></i>';
 				break;
 			case 1:
-			case 200:
+			case Lab_Result::STAT_PASS:
 			case 'completed/passed':
 				$stat[] = '<i class="far fa-check-square" style="color: var(--bs-green);"></i>';
 				break;
-			case 100:
-			case 102:
+			case Lab_Result::STAT_OPEN:
+			case Lab_Result::STAT_WAIT:
 			case 'in_progress/':
 				$stat[] = '<i class="fa-regular fa-hourglass" title="Processing"></i>';
 				break;

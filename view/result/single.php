@@ -40,9 +40,9 @@ use OpenTHC\Lab\UOM;
 				<?php
 				switch ($data['Lab_Result']['stat']) {
 					case 0:
-					case 100:
-					case 102:
-					case 200:
+					case Lab_Result::STAT_OPEN:
+					case Lab_Result::STAT_WAIT:
+					case Lab_Result::STAT_PASS:
 						if (0 == ($data['Lab_Result']['flag'] & Lab_Result::FLAG_LOCK)) {
 							echo '<button class="btn btn-primary" name="a" value="lab-result-commit"><i class="fa-solid fa-flag-checkered"></i> Commit</button>';
 							printf('<a class="btn btn-secondary" href="/result/%s/update"><i class="far fa-edit"></i> Edit</a>', $data['Lab_Result']['id']);

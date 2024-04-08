@@ -434,14 +434,14 @@ function _qbench_pull_result_import($dbc, $rec) : int
 	// State Mapper
 	switch (strtoupper($rec['state'])) {
 		case 'NOT STARTED':
-			$rec['@stat'] = 100; // Lab_Result::STAT_OPEN;
+			$rec['@stat'] = Lab_Result::STAT_OPEN;
 			break;
 		case 'BEING TESTED':
 		case 'NEEDS GC DATA':
 		case 'NEEDS LC DATA':
 		case 'IN DATA REVIEW':
 		case 'WAITING ON MORE SAMPLE':
-			$rec['@stat'] = 102;
+			$rec['@stat'] = Lab_Result::STAT_WAIT;
 			break;
 		case 'RETEST - CONFIRMATION':
 		case 'RETEST - DILUTION REQUIRED':
@@ -455,7 +455,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			$rec['@stat'] = 307;
 			break;
 		case 'COMPLETED':
-			$rec['@stat'] = 200; // Lab_Result::STAT_DONE;
+			$rec['@stat'] = Lab_Result::STAT_PASS;
 			break;
 		default:
 			var_dump($rec);
@@ -643,7 +643,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 
 			$lrm1 = [
 				'id' => _ulid()
-				, 'stat' => 200 // Evaluate the Pass/Fail == FAIL=400 and Pass=200
+				, 'stat' => Lab_Result_Metric::STAT_PASS
 				, 'lab_result_id' => $lr0['id']
 				, 'lab_metric_id' => $lm0['id']
 				, 'qom' => $val

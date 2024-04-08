@@ -263,7 +263,7 @@ class Update extends \OpenTHC\Lab\Controller\Result\View
 
 				$dbc_user->query('COMMIT');
 
-				Session::flash('info', _('Lab Result has been flagged for resynchronisation'));
+				Session::flash('info', _('Lab Result has been flagged for resynchronisation at next interval'));
 				return $RES->withRedirect($_SERVER['HTTP_REFERER']);
 
 				break;
