@@ -34,7 +34,7 @@ class Metric extends \OpenTHC\Lab\Controller\Base
 		JOIN lab_metric_type ON lab_metric.lab_metric_type_id = lab_metric_type.id
 		ORDER BY lab_metric_type.sort, lab_metric.sort
 		SQL;
-		$res = $dbc->fetchAll('SELECT * FROM lab_metric ORDER BY type, sort, name');
+		$res = $dbc->fetchAll('SELECT * FROM lab_metric ORDER BY type, sort, name, stat');
 		foreach ($res as $m) {
 			$m['meta'] = json_decode($m['meta'], true);
 			$metric_list[] = $m;
@@ -95,6 +95,12 @@ class Metric extends \OpenTHC\Lab\Controller\Base
 
 		$Lab_Metric = $dbc->fetchRow('SELECT * FROM lab_metric WHERE id = :lm0', [ ':lm0' => $_GET['id'] ]);
 		$Lab_Metric['meta'] = json_decode($Lab_Metric['meta'], true);
+
+		$cfg_file = sprintf('%s/vendor/openthc/api/etc/lab-metric/%s.yaml', APP_ROOT, $Lab_Metric['id']);
+		if (is_file($cfg_file)) {
+				$cfg_data = yaml_parse_file($cfg_file);
+				$Lab_Metric['cfg'] = $cfg_data;
+		}
 
 		$data = $this->loadSiteData();
 		$data['Page']['title'] = 'Config :: Metric :: Update';
