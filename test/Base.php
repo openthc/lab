@@ -5,72 +5,26 @@
 
 namespace OpenTHC\Lab\Test;
 
-class Base extends \OpenTHC\Test\Base
-{
+class Base extends \OpenTHC\Test\Base {
+
 	protected $httpClient; // API Guzzle Client
-
-	protected $_pid;
-	protected $_tmp_file = '/tmp/test-data-pass.json';
-
-	public function __construct($name = null, array $data = [], $dataName = '')
-	{
-		parent::__construct($name, $data, $dataName);
-		$this->_pid = getmypid();
-	}
 
 	protected function setUp() : void
 	{
 		$this->httpClient = $this->_api();
 	}
 
-
-	/**
-	 * Intends to become an assert wrapper for a bunch of common response checks
-	 * @param $res, Response Object
-	 * @return void
-	 */
-	function assertValidResponse($res, $code=200, $dump=null)
-	{
-		$this->raw = $res->getBody()->getContents();
-
-		$hrc = $res->getStatusCode();
-
-		if (empty($dump)) {
-			if ($code != $hrc) {
-				$dump = "HTTP $hrc != $code";
-			}
-		}
-
-		if (!empty($dump)) {
-			echo "\n<<< $dump <<< $hrc <<<\n{$this->raw}\n###\n";
-		}
-
-		$this->assertEquals($code, $res->getStatusCode());
-		$type = $res->getHeaderLine('content-type');
-		$type = strtok($type, ';');
-		$this->assertEquals('application/json', $type);
-
-		$ret = \json_decode($this->raw, true);
-
-		$this->assertIsArray($ret);
-		// $this->assertArrayHasKey('data', $ret);
-		// $this->assertArrayHasKey('meta', $ret);
-
-		$this->assertArrayNotHasKey('status', $ret);
-		$this->assertArrayNotHasKey('result', $ret);
-
-		return $ret;
-	}
-
 	/**
 	*/
 	protected function _api()
 	{
+		// $c = $this->getGuzzleClient(OPENTHC_TEST_ORIGIN);
+
 		// create our http client (Guzzle)
 		$c = new \GuzzleHttp\Client(array(
 			'base_uri' => OPENTHC_TEST_ORIGIN,
 			'allow_redirects' => false,
-			'debug' => TEST_HTTP_DEBUG,
+			'debug' => defined('OPENTHC_TEST_HTTP_DEBUG'),
 			'request.options' => array(
 				'exceptions' => false,
 			),
@@ -84,15 +38,39 @@ class Base extends \OpenTHC\Test\Base
 
 	/**
 	*/
-	protected function auth(string $p = null, string $c = null, string $l = null)
-	{
-		$res = $this->httpClient->post('/auth/open', $body = [
-			'form_params' => [
-				'service' => $p ?: OPENTHC_TEST_SERVICE_A,
-				'company' => $c ?: OPENTHC_TEST_COMPANY_A,
-				'license' => $l ?: OPENTHC_TEST_LICENSE_A,
-			],
-		]);
+	protected function auth(string $p = null, string $c = null, string $l = null) {
+
+		$res = $this->httpClient->get('/auth/open');
+		$this->assertEquals(302, $res->getStatusCode());
+		$this->assertNotEmpty($res->getHeaderLine('location'));
+		$loc = $res->getHeaderLine('location');
+
+		$res = $this->httpClient->get($loc);
+		$this->assertEquals(302, $res->getStatusCode());
+		$this->assertNotEmpty($res->getHeaderLine('location'));
+		$loc = $res->getHeaderLine('location');
+
+		$res = $this->httpClient->get($loc);
+		$this->assertEquals(200, $res->getStatusCode());
+
+		$res_html = $this->assertValidResponse($res, 200, 'text/html');
+
+		$res = $this->httpClient->post($loc, [ 'form_params' => [
+			'CSRF' => (preg_match('/CSRF.+/', $res_html, $m) ? $m[1] : ''),
+			'username' => OPENTHC_TEST_CONTACT_A_USERNAME,
+			'password' => OPENTHC_TEST_CONTACT_A_PASSWORD,
+			'a' => 'account-open',
+		]]);
+
+		// var_dump($res);
+		// exit;
+		// , $body = [
+		// 	'form_params' => [
+		// 		'service' => $p ?: OPENTHC_TEST_SERVICE_A,
+		// 		'company' => $c ?: OPENTHC_TEST_COMPANY_A,
+		// 		'license' => $l ?: OPENTHC_TEST_LICENSE_A,
+		// 	],
+		// ]);
 
 		$this->assertValidResponse($res);
 
@@ -122,26 +100,6 @@ class Base extends \OpenTHC\Test\Base
 	{
 		$res = $this->httpClient->post($u, [ 'json' => $a ]);
 		return $res;
-	}
-
-
-	/**
-	*/
-	protected function _data_stash_get()
-	{
-		if (is_file($this->_tmp_file)) {
-			$x = file_get_contents($this->_tmp_file);
-			$x = json_decode($x, true);
-			return $x;
-		}
-	}
-
-
-	/**
-	*/
-	protected function _data_stash_put($d)
-	{
-		file_put_contents($this->_tmp_file, json_encode($d));
 	}
 
 }
