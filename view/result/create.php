@@ -47,7 +47,7 @@ HTML;
 	<div class="row">
 		<div class="col-md-4">
 			<div class="input-group mb-2">
-				<div class="input-group-text">Lot:</div>
+				<div class="input-group-text">Inventory:</div>
 				<input class="form-control" readonly value="<?= __h($data['Lot']['guid']) ?>">
 			</div>
 		</div>

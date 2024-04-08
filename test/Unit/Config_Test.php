@@ -7,18 +7,29 @@ namespace OpenTHC\Lab\Test\Unit;
 
 class Config_Test extends \OpenTHC\Lab\Test\Base
 {
-	function test_sso()
+	function test_config()
 	{
-		$cfg = \OpenTHC\Config::get('openthc/sso');
-
 		$key_list = [
-			'origin',
-			'public',
-			'secret',
+			'database/auth/hostname',
+			'database/auth/username',
+			'database/auth/password',
+			'database/auth/database',
+			'database/main/hostname',
+			'database/main/username',
+			'database/main/password',
+			'database/main/database',
+			'openthc/dir/origin',
+			'openthc/lab/origin',
+			'openthc/lab/public',
+			'openthc/lab/secret',
+			// 'openthc/pipe/origin',
+			'openthc/pub/origin',
+			'openthc/pub/public',
 		];
 
 		foreach ($key_list as $k) {
-			$this->assertArrayHasKey($k, $cfg, "SSO '$k' not set");
+			$chk = \OpenTHC\Config::get($k);
+			$this->assertNotEmpty($chk, "Config '$k' not set");
 		}
 
 	}

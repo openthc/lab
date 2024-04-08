@@ -4,7 +4,7 @@
 <h1>Configure Intake Stuff Here</h1>
 
 <h2>Web Portal Link</h2>
-<div class="form-group">
+<div class="mb-2">
 	<input class="form-control form-control-lg" readonly type="text" value="<?= $data['intake_link'] ?>">
 </div>
 
@@ -20,7 +20,7 @@
 
 <!--
 <h2>Private via Email Only</h2>
-<div class="form-group">
+<div class="mb-2">
 
 </div>
  -->
