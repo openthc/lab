@@ -51,8 +51,8 @@ use OpenTHC\Lab\UOM;
 				}
 				?>
 				<button class="btn btn-danger" name="a" value="lab-report-delete"><i class="fa-solid fa-trash"></i> DELETE</button>
+				<!--
 				<button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"><i class="fas fa-download"></i></button>
-				<!-- <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button"></button> -->
 				<ul class="dropdown-menu dropdown-menu-lg-end">
 					<li class="dropdown-item d-flex justify-content-between">
 						<?php
@@ -86,11 +86,12 @@ use OpenTHC\Lab\UOM;
 							<button class="btn btn-clipcopy" data-clipboard-text="<?= $link_pub ?>" type="button" ><i class="fa-regular fa-clipboard"></i></button>
 						</div>
 					</li>
-					<!-- <a class="dropdown-item" href="<?= $link ?>?f=png%2Bcoa"><i class="fas fa-download"></i> Download COA (PNG/QR)</a> -->
-					<!-- <a class="dropdown-item" href="<?= $link ?>?f=csv"><i class="fas fa-download"></i> Download CSV</a> -->
-					<!-- <a class="dropdown-item" href="<?= $link ?>?f=json"><i class="fas fa-download"></i> Download JSON</a> -->
-					<!-- <a class="dropdown-item" href="<?= $link ?>?f=png"><i class="fas fa-download"></i> Download PNG</a> -->
+					< ! -- <a class="dropdown-item" href="<?= $link ?>?f=png%2Bcoa"><i class="fas fa-download"></i> Download COA (PNG/QR)</a> - - >
+					< ! -- <a class="dropdown-item" href="<?= $link ?>?f=csv"><i class="fas fa-download"></i> Download CSV</a> - - >
+					< ! -- <a class="dropdown-item" href="<?= $link ?>?f=json"><i class="fas fa-download"></i> Download JSON</a> - - >
+					< ! -- <a class="dropdown-item" href="<?= $link ?>?f=png"><i class="fas fa-download"></i> Download PNG</a> - - >
 				</ul>
+				-->
 			</div>
 
 			<div class="btn-group">
@@ -165,21 +166,16 @@ if ( ! empty($data['lab_report_file_list'])) {
 		?>
 		<td class="r">
 		<div class="btn-group btn-group-sm">
+			<a class="btn btn-outline-secondary" download href="<?= $int_link ?>"><i class="fas fa-download"></i></a>
 			<?php
 			if (empty($pub_link['link'])) {
-				echo '<button class="btn btn-outline-secondary disabled"><i class="fa-solid fa-ban"></i></button>';
+				echo '<button class="btn btn-outline-secondary disabled"><i class="fa-regular fa-share-from-square"></i></button>';
+				echo '<button class="btn btn-outline-secondary disabled"><i class="fa-regular fa-clipboard"></i></button>';
 			} else {
-				echo sprintf('<a class="btn btn-sm btn-primary" href="%s" target="_blank"><i class="fa-regular fa-share-from-square"></i></a>', $pub_link['link'], $pub_link['name']);
+				echo sprintf('<a class="btn btn-primary" href="%s" target="_blank"><i class="fa-regular fa-share-from-square"></i></a>', $pub_link['link'], $pub_link['name']);
+				echo sprintf('<button class="btn btn-outline-secondary btn-clipcopy" data-clipboard-text="%s" title="Copy Link"><i class="fa-regular fa-clipboard"></i></button>', $pub_link['link']);
 			}
 			?>
-			<a class="btn btn-outline-secondary" download href="<?= $int_link ?>"><i class="fas fa-download"></i></a>
-			<button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
-			<ul class="dropdown-menu dropdown-menu-end">
-				<li><button class="dropdown-item btn-clipcopy"
-						data-clipboard-text="<?= $link ?>"
-						title="Copy Link"><i class="fa-regular fa-clipboard"></i> Copy Link</button>
-				</li>
-			</ul>
 		</div>
 		</td>
 		</tr>

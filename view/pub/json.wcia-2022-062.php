@@ -11,7 +11,7 @@ $lab_result_metric = $data['Lab_Result_Metric_list'];
 $wcia = [
 	'document_name' => 'WCIA Lab Result Schema',
 	'document_schema_version' => '2.0.0',
-	'document_origin' => '',
+	'document_origin' => null,
 	'lab_name' => null, // Company.name
 	'lab_ubi_license' => null, // Company.guid
 	'lab_ccrs_license' => null, // License.guid
@@ -29,7 +29,7 @@ $wcia = [
 		'expires_at' => $data['Lab_Result']['expires_at'],
 	],
 	'status' => 'pass',
-	'coa' => '',
+	'coa' => null,
 	'release_date' => $data['Lab_Result']['approved_at'],
 	'amended_date' => null, // ?? Have we seen this one?
 	'expire_date' => $data['Lab_Result']['expires_at'],

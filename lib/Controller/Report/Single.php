@@ -99,7 +99,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 					// Find the COA
 					// Find the WCIA
 					$pub_link_list = [];
-					foreach ($lab_report_file_list as $lrf) {
+					foreach ($lab_report_file_list as $key => $lrf) {
 
 						$req_path = [];
 						$req_path[] = 'lab';
@@ -112,30 +112,25 @@ class Single extends \OpenTHC\Lab\Controller\Base
 						} elseif (preg_match('/\w{26}\-WCIA.json/', $lrf['name'])) {
 							$req_path[] = 'wcia.json';
 							$pub_link_list['wcia'] = implode('/', $req_path);
-						} elseif (('application/pdf' == $lrf['type']) && (preg_match('/\d+\.pdf$/', $lrf['name']))) {
+						} elseif (('application/pdf' == $lrf['type'])
+								&& (
+										(preg_match('/^\w{26}\.pdf$/', $lrf['name'])
+										|| preg_match('/\d+\.pdf$/', $lrf['name']))
+									)
+								) {
 							$req_path[] = 'coa.pdf';
 							$pub_link_list['coa'] = implode('/', $req_path);
+						} else {
+							$req_path[] = $lrf['name'];
 						}
+
+						$lab_report_file_list[$key]['pub_path'] = implode('/', $req_path);
 
 					}
 
 					foreach ($lab_report_file_list as $lrf) {
 
-						// Re-maps Path
-						$req_path = [];
-						$req_path[] = 'lab';
-						$req_path[] = $Lab_Report['id'];
-						// Custom Shit Here
-						if (preg_match('/\w{26}\-CCRS.csv$/', $lrf['name'])) {
-							$req_path[] = 'ccrs.csv';
-						} elseif (preg_match('/\w{26}\-WCIA.json/', $lrf['name'])) {
-							$req_path[] = 'wcia.json';
-						} elseif (('application/pdf' == $lrf['type']) && (preg_match('/\d+\.pdf$/', $lrf['name']))) {
-							$req_path[] = 'coa.pdf';
-						} else {
-							$req_path[] = $lrf['name'];
-						}
-						$req_path = implode('/', $req_path);
+						$req_path = $lrf['pub_path'];
 
 						$lrf_body = $dbc_user->fetchOne('SELECT body FROM lab_report_file WHERE id = :lrf0', [
 							':lrf0' => $lrf['id']
@@ -146,24 +141,31 @@ class Single extends \OpenTHC\Lab\Controller\Base
 						// Rewrite the Origin and COA Links
 						if ('application/json' == $req_type) {
 							$req_body = json_decode($req_body, true);
-							if ( ! empty($req_body['document_origin'])) {
-								$req_body['document_origin'] = $pub_service->getURL($pub_link_list['wcia']);
-							}
-							if ( ! empty($req_body['coa'])) {
-								$req_body['coa'] = $pub_service->getURL($pub_link_list['coa']);
+							if ( ( ! empty($req_body['document_name'])) && ('WCIA Lab Result Schema' == $req_body['document_name']) ) {
+								if ( ! empty($pub_link_list['wcia'])) {
+									$req_body['document_origin'] = $pub_service->getURL($pub_link_list['wcia']);
+								}
+								if ( ! empty($pub_link_list['coa'])) {
+									$req_body['coa'] = $pub_service->getURL($pub_link_list['coa']);
+								}
 							}
 							$req_body = json_encode($req_body, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
 						}
 
-						$pub_service->put($req_path, $req_body, $req_type);
-						var_dump($res);
-						if ( ! empty($res['data'])) {
-							$url = $res['data'];
-							$Lab_Report_Meta['public_link_list'][ $lrf['id'] ] = [
-								'link' => $url,
-								'name' => $lrf['name'],
-							];
+						$res = $pub_service->put($req_path, $req_body, $req_type);
+						switch ($res['code']) {
+						case 200:
+							if ( ! empty($res['data'])) {
+								$url = $res['data'];
+								$Lab_Report_Meta['public_link_list'][ $lrf['id'] ] = [
+									'link' => $url,
+									'name' => $lrf['name'],
+								];
+							}
+							break;
+						default:
+							Session::flash('warn', 'Failed to Publish ' . $lrf['name']);
+							break;
 						}
 
 					}
@@ -177,8 +179,8 @@ class Single extends \OpenTHC\Lab\Controller\Base
 
 				// Publish (eg CRE, Qbench)
 				// @todo Should be Webhook
-				$who_service = new \OpenTHC\Lab\Facade\Webhook();
-				$who_service->post('/lab/report/publish', $data);
+				// $who_service = new \OpenTHC\Lab\Facade\Webhook();
+				// $who_service->post('/lab/report/published', $data);
 
 				$cmd = [];
 				$cmd[] = sprintf('%s/bin/qbench-export.php', APP_ROOT);
