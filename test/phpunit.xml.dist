@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	OpenTHC PHPUnit Configuration File
+-->
+<phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+	backupGlobals="false"
+	backupStaticAttributes="false"
+	bootstrap="boot.php"
+	cacheResult="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	processIsolation="false"
+	stopOnError="true"
+	stopOnFailure="true"
+	stopOnRisky="true"
+	timeoutForSmallTests="1"
+	timeoutForMediumTests="10"
+	timeoutForLargeTests="60"
+	verbose="false"
+	>
+
+	<coverage />
+
+	<php>
+
+		<const name="OPENTHC_TEST_ORIGIN" value="https://lab.openthc.example.com" />
+		<const name="TEST_HTTP_DEBUG" value="0" />
+
+		<const name="OPENTHC_TEST_SERVICE_A" value="" />
+		<const name="OPENTHC_TEST_COMPANY_A" value="" />
+		<const name="OPENTHC_TEST_LICENSE_A" value="" />
+
+		<const name="USER_A_USERNAME" value="test@openthc.example.com" />
+		<const name="USER_A_PASSWORD" value="passweed" />
+		<const name="USER_A_PASSWORD_FAIL" value="password" />
+
+
+		<const name="TEST_BROWSERSTACK_USER" value=""/>
+		<const name="TEST_BROWSERSTACK_AUTH" value=""/>
+		<const name="TEST_BROWSERSTACK_BASE" value="hub-cloud.browserstack.com"/>
+
+
+	</php>
+
+	<testsuites>
+		<testsuite name="All">
+			<file>Unit/System_Test.php</file>
+			<file>Unit/Config_Test.php</file>
+			<file>Unit/Pub_Facade_Test.php</file>
+			<directory>.</directory>
+		</testsuite>
+	</testsuites>
+
+	<logging>
+		<junit outputFile="../webroot/test-output/output.xml" />
+	</logging>
+
+</phpunit>

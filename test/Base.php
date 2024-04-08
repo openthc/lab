@@ -68,7 +68,7 @@ class Base extends \OpenTHC\Test\Base
 	{
 		// create our http client (Guzzle)
 		$c = new \GuzzleHttp\Client(array(
-			'base_uri' => sprintf('https://%s', TEST_HOST),
+			'base_uri' => OPENTHC_TEST_ORIGIN,
 			'allow_redirects' => false,
 			'debug' => TEST_HTTP_DEBUG,
 			'request.options' => array(
@@ -88,9 +88,9 @@ class Base extends \OpenTHC\Test\Base
 	{
 		$res = $this->httpClient->post('/auth/open', $body = [
 			'form_params' => [
-				'service' => $p ?: $_ENV['api-service-a'],
-				'company' => $c ?: $_ENV['api-company-a'],
-				'license' => $l ?: $_ENV['api-license-a'],
+				'service' => $p ?: OPENTHC_TEST_SERVICE_A,
+				'company' => $c ?: OPENTHC_TEST_COMPANY_A,
+				'license' => $l ?: OPENTHC_TEST_LICENSE_A,
 			],
 		]);
 
