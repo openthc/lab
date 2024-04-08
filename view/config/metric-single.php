@@ -13,13 +13,22 @@
 <h1><a href="/config">Config</a> :: <a href="/config/metric">Metric</a> :: Update</h1>
 
 <div class="row">
-	<div class="col-md-4 mb-2">
+	<div class="col-md-6 mb-2">
 		<div class="input-group">
 			<div class="input-group-text">Name:</div>
 			<input class="form-control" name="lod" value="<?= __h($data['Lab_Metric']['name']) ?>">
 		</div>
 	</div>
-	<div class="col-md-8 mb-2">
+	<div class="col-md-6 mb-2">
+		<div class="input-group">
+			<div class="input-group-text">CAS:</div>
+			<input class="form-control" name="lab-metric-cas" readonly value="<?= __h($data['Lab_Metric']['cfg']['cas']) ?>">
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12 mb-2">
 		<div class="input-group">
 			<div class="input-group-text">Note:</div>
 			<input class="form-control" name="lod" value="<?= __h($data['Lab_Metric']['note']) ?>">
@@ -94,9 +103,15 @@ if (false) {
 }
 ?>
 
-<div class="form-actions">
+<div class="form-actions mt-4">
 	<button class="btn btn-primary" name="a" type="submit" value="lab-metric-single-update"><i class="fa-solid fa-save"></i> Save</button>
 </div>
+
+<!--
+<?php
+var_dump($data['Lab_Metric']);
+?>
+-->
 
 </div>
 </form>
