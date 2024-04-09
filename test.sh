@@ -38,7 +38,6 @@ vendor/openthc/common/test/phpstan.sh || true
 #
 # PHPUnit
 vendor/openthc/common/test/phpunit.sh "$@" || true
-vendor/openthc/common/test/phpunit-xml2html.php ./webroot/test-output/phpunit.xml ./webroot/test-output/phpunit.html
 
 #
 # Final Output

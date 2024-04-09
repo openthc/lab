@@ -9,7 +9,6 @@ class A_Search_Test extends \OpenTHC\Lab\Test\Base
 {
 	function test_single()
 	{
-		// @todo Find Real one that SHOULD exist
 		$res = $this->get('/result/four_zero_four');
 		$res = $this->assertValidResponse($res, 404);
 		// $this->assertTrue(false, 'Not Implemented');
@@ -17,8 +16,8 @@ class A_Search_Test extends \OpenTHC\Lab\Test\Base
 
 	function test_single_403()
 	{
-		// $res = $this->get('/result/four_zero_four');
-		// $res = $this->assertValidResponse($res, 403);
+		$res = $this->get('/result/four_zero_four');
+		$res = $this->assertValidResponse($res, 403);
 		$this->assertTrue(false, 'Not Implemented');
 	}
 
