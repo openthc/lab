@@ -1982,12 +1982,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/openthc/common.git",
-                "reference": "63c932f50c4c4677b2944a2b7d379c1d1db367f9"
+                "reference": "94b42a654939c1c1bc30408454683269b27c07fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/openthc/common/zipball/63c932f50c4c4677b2944a2b7d379c1d1db367f9",
-                "reference": "63c932f50c4c4677b2944a2b7d379c1d1db367f9",
+                "url": "https://api.github.com/repos/openthc/common/zipball/94b42a654939c1c1bc30408454683269b27c07fb",
+                "reference": "94b42a654939c1c1bc30408454683269b27c07fb",
                 "shasum": ""
             },
             "require": {
@@ -2010,11 +2010,10 @@
                 "twig/twig": "2.15.6"
             },
             "require-dev": {
-                "behat/behat": "3.12.0",
-                "php-webdriver/webdriver": "1.14.0",
-                "phpmd/phpmd": "2.13.0",
-                "phpstan/phpstan": "1.10.5",
-                "phpunit/phpunit": "9.6.17"
+                "php-webdriver/webdriver": "1.15.1",
+                "phpmd/phpmd": "2.15.0",
+                "phpstan/phpstan": "1.10.66",
+                "phpunit/phpunit": "9.6.18"
             },
             "default-branch": true,
             "type": "library",
@@ -2041,7 +2040,7 @@
                 "issues": "https://github.com/openthc/common/issues",
                 "source": "https://github.com/openthc/common/tree/master"
             },
-            "time": "2024-04-05T21:09:16+00:00"
+            "time": "2024-04-09T03:15:34+00:00"
         },
         {
             "name": "openthc/cre-adapter",
@@ -2049,12 +2048,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/openthc/cre-adapter.git",
-                "reference": "2e8ee7a6aa5b524ec36802febc7f27184703ef51"
+                "reference": "157f2fef6d2c0b0e8a557ec9d48e902b81ea8811"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/openthc/cre-adapter/zipball/2e8ee7a6aa5b524ec36802febc7f27184703ef51",
-                "reference": "2e8ee7a6aa5b524ec36802febc7f27184703ef51",
+                "url": "https://api.github.com/repos/openthc/cre-adapter/zipball/157f2fef6d2c0b0e8a557ec9d48e902b81ea8811",
+                "reference": "157f2fef6d2c0b0e8a557ec9d48e902b81ea8811",
                 "shasum": ""
             },
             "require": {
@@ -2088,7 +2087,7 @@
                 "issues": "https://github.com/openthc/cre-adapter/issues",
                 "source": "https://github.com/openthc/cre-adapter/tree/master"
             },
-            "time": "2024-04-03T17:39:18+00:00"
+            "time": "2024-04-08T21:50:41+00:00"
         },
         {
             "name": "paragonie/random_compat",
