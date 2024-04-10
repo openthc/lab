@@ -30,7 +30,7 @@ if (empty($data['Lab_Sample']['name'])) {
 	<div class="mb-2">
 		<div class="input-group">
 			<div class="input-group-text">Source License:</div>
-			<input name="license-name" class="form-control license-autocomplete" value="<?= __h($data['Source_License']['name']) ?>">
+			<input name="source-license-name" class="form-control license-autocomplete" value="<?= __h($data['Source_License']['name']) ?>">
 			<input class="autocomplete-data-id" id="license-id" name="license-id" type="hidden" value="<?= __h($data['Source_License']['id']) ?>">
 			<button class="btn btn-outline-secondary btn-autocomplete-hint" type="button"><i class="fas fa-sync"></i></button>
 		</div>
@@ -38,7 +38,7 @@ if (empty($data['Lab_Sample']['name'])) {
 
 	<div class="mb-2">
 		<div class="input-group">
-			<div class="input-group-text">Source Lot ID:</div>
+			<div class="input-group-text">Source Inventory ID:</div>
 			<input name="source-lot-guid" class="form-control" value="<?= __h($data['Source_Lot']['guid']) ?>">
 			<input name="source-lot-id" type="hidden" value="<?= __h($data['Source_Lot']['id']) ?>">
 		</div>
@@ -81,7 +81,7 @@ if (empty($data['Lab_Sample']['name'])) {
 
 	<div class="mb-2">
 		<div class="input-group">
-			<div class="input-group-text">QTY:</div>
+			<div class="input-group-text">Quantity:</div>
 			<input name="qty" class="form-control r" type="number" step="0.0001" value="<?= sprintf('%0.2f', $data['Source_Lot']['qty']) ?>">
 			<div class="input-group-append">
 				<?php
