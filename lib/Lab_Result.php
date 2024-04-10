@@ -31,16 +31,16 @@ class Lab_Result extends \OpenTHC\SQL\Record
 	function getMetrics()
 	{
 		$sql = <<<SQL
-SELECT lab_result_metric.*
-, lab_metric.name AS lab_metric_name
-, lab_metric.type AS lab_metric_type
-, lab_metric.lab_metric_type_id AS lab_metric_type_id
-, lab_metric.meta AS lab_metric_meta
-FROM lab_result_metric
-JOIN lab_metric ON lab_result_metric.lab_metric_id = lab_metric.id
-WHERE lab_result_metric.lab_result_id = :lr0
-ORDER BY lab_metric.type, lab_metric.sort, lab_metric.name
-SQL;
+		SELECT lab_result_metric.*
+			, lab_metric.name AS lab_metric_name
+			, lab_metric.type AS lab_metric_type
+			, lab_metric.lab_metric_type_id AS lab_metric_type_id
+			, lab_metric.meta AS lab_metric_meta
+		FROM lab_result_metric
+		JOIN lab_metric ON lab_result_metric.lab_metric_id = lab_metric.id
+		WHERE lab_result_metric.lab_result_id = :lr0
+		ORDER BY lab_metric.type, lab_metric.sort, lab_metric.name
+		SQL;
 
 		$arg = [
 			':lr0' => $this->_data['id']
@@ -413,8 +413,8 @@ SQL;
 
 		// Update
 		$sql = <<<SQL
-		INSERT INTO lab_result_metric (lab_result_id, lab_metric_id, qom, uom)
-		VALUES (:lr0, :lm0, :q0, :u0)
+		INSERT INTO lab_result_metric (lab_result_id, lab_metric_id, stat, qom, uom)
+		VALUES (:lr0, :lm0, 200, :q0, :u0)
 		ON CONFLICT (lab_result_id, lab_metric_id)
 		DO UPDATE SET qom = :q0, uom = :u0
 		SQL;
