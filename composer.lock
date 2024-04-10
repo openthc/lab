@@ -1982,12 +1982,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/openthc/common.git",
-                "reference": "94b42a654939c1c1bc30408454683269b27c07fb"
+                "reference": "694294e1fcd6357f9ca2d43545dc81d5410d7aef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/openthc/common/zipball/94b42a654939c1c1bc30408454683269b27c07fb",
-                "reference": "94b42a654939c1c1bc30408454683269b27c07fb",
+                "url": "https://api.github.com/repos/openthc/common/zipball/694294e1fcd6357f9ca2d43545dc81d5410d7aef",
+                "reference": "694294e1fcd6357f9ca2d43545dc81d5410d7aef",
                 "shasum": ""
             },
             "require": {
@@ -2040,7 +2040,7 @@
                 "issues": "https://github.com/openthc/common/issues",
                 "source": "https://github.com/openthc/common/tree/master"
             },
-            "time": "2024-04-09T03:15:34+00:00"
+            "time": "2024-04-10T16:33:37+00:00"
         },
         {
             "name": "openthc/cre-adapter",
