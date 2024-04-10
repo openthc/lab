@@ -15,7 +15,7 @@ cd "$d"
 
 declare -rx OUTPUT_BASE="webroot/test-output"
 declare -rx OUTPUT_MAIN="${OUTPUT_BASE}/index.html"
-declare -rx SOURCE_LIST="boot.php api/ bin/ controller/ lib/ sbin/ test/ view/"
+declare -rx SOURCE_LIST="boot.php api/ bin/ lib/ sbin/ test/ view/"
 
 mkdir -p "${OUTPUT_BASE}"
 

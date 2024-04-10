@@ -12,28 +12,29 @@ class Auth_Test extends \OpenTHC\Lab\Test\Base {
 	 */
 	function open()
 	{
-		$res = $this->auth();
+		$res = $this->authViaSSO(OPENTHC_TEST_CONTACT_A_USERNAME, OPENTHC_TEST_CONTACT_A_PASSWORD, OPENTHC_TEST_COMPANY_A);
+
+		return $this->httpClient;
 	}
 
 	/**
 	 * @test
 	 * @depends open
 	 */
-	function view_some_pages()
+	function view_some_pages($authClient)
 	{
-		$res = $this->auth();
-
-		$res = $this->httpClient->get('/sample');
+		// Doesn't Keep the Session from Before?
+		$res = $authClient->get('/sample');
 		$this->assertValidResponse($res, 200, 'text/html');
 
-		$res = $this->httpClient->get('/result');
+		$res = $authClient->get('/result');
 		$this->assertValidResponse($res, 200, 'text/html');
 
-		$res = $this->httpClient->get('/report');
+		$res = $authClient->get('/report');
 		$this->assertValidResponse($res, 200, 'text/html');
 
-		$res = $this->httpClient->get('/api/sample/four_zero_four');
-		$this->assertValidResponse($res, 400, 'text/html');
+		$res = $authClient->get('/api/sample/four_zero_four');
+		$this->assertValidResponse($res, 404, 'text/html');
 
 	}
 
