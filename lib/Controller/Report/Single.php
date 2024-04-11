@@ -274,13 +274,18 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		// $Lab_Report->setFLag(Lab_Report::FLAG_OUTPUT_HTML);
 
 		// Generate the CSV/CCRS
+		$out_name = sprintf('%s-CCRS.csv', $data['Lab_Report']['id']);
 		$res1 = $RES->withBody(new \Slim\Http\Body(fopen('php://temp', 'r+')));
 		$res1 = $subC->csv_ccrs($res1, $ARG, $data);
 		$out_body = $res1->getBody();
 		$out_body->rewind();
+		$tmp_name = $res1->getHeaderLine('content-disposition');
+		if (preg_match('/filename="(.+?)"/', $tmp_name, $m)) {
+			$out_name = $m[1];
+		}
 		$this->_commit_insert_file($dbc_user
 			, $Lab_Report['id']
-			, sprintf('%s-CCRS.csv', $data['Lab_Report']['id'])
+			, $out_name
 			, $out_body->getSize()
 			, 'text/csv'
 			, $out_body->getContents()
