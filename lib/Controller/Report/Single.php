@@ -155,6 +155,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 						$res = $pub_service->put($req_path, $req_body, $req_type);
 						switch ($res['code']) {
 						case 200:
+						case 201:
 							if ( ! empty($res['data'])) {
 								$url = $res['data'];
 								$Lab_Report_Meta['public_link_list'][ $lrf['id'] ] = [
@@ -164,7 +165,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 							}
 							break;
 						default:
-							Session::flash('warn', 'Failed to Publish ' . $lrf['name']);
+							Session::flash('warn', sprintf('[CRS-168] Failed to Publish "%s"; Response %d', $lrf['name'], $res['code']));
 							break;
 						}
 
