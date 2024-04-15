@@ -98,7 +98,7 @@ switch ($cli_args['--object']) {
 		// $pub->setName('wcia.json');
 		// $url = $pub->getURL();
 
-		$url = _openthc_pub_path(sprintf('lab/%s/wcia.json', $lab_report['id']));
+		$url = $pub_service->getURL(sprintf('lab/%s/wcia.json', $lab_report['id']));
 		var_dump($url);
 
 		$res = $qbc->post(sprintf('/api/v1/sample/%s', $lab_sample['meta']['id']), [
