@@ -791,9 +791,7 @@ function _qbench_pull_sample_import($dbc, $rec)
 {
 
 	if (empty($rec['order_id'])) {
-		throw new \Exception('Missing Order ID on Sample [BIQ-807]');
-		echo "\nMissing Order ID on Sample {$rec['@id']}\n";
-		return 0;
+		throw new \Exception(sprintf('Missing Order ID on Sample "%s" [BIQ-807]', $rec['@id']));
 	}
 
 	$rec['@id'] = sprintf('qbench:%s', $rec['id']);
@@ -1012,12 +1010,12 @@ function _qbench_b2b_import($dbc, $qbc)
 
 
 	$dt0 = new DateTime('2000-01-01');
-	// $chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/b2b/timestamp'");
-	// $chk = json_decode($chk, true);
-	// if ( ! empty($chk)) {
-	// 	$dt0 = new DateTime($chk);
-	// 	$dt0->sub(new DateInterval('P14D'));
-	// }
+	$chk = $dbc->fetchOne("SELECT val FROM base_option WHERE key = 'sync/b2b/timestamp'");
+	$chk = json_decode($chk, true);
+	if ( ! empty($chk)) {
+		$dt0 = new DateTime($chk);
+		$dt0->sub(new DateInterval('P14D'));
+	}
 
 	printf("_qbench_b2b_import(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
 
@@ -1175,12 +1173,22 @@ function _qbench_sync_b2b_incoming_import($dbc, $rec) : int
 function _qbench_b2b_import_wcia(string $url) : ?array
 {
 	// @todo use \OpenTHC\CRE\WCIA::get()
+	if ( ! preg_match('/^http.+/', $url)) {
+		return null;
+	}
+
 
 	$req = _curl_init($url);
 	$res = curl_exec($req);
 	$inf = curl_getinfo($req);
+	if (200 != $inf['http_code']) {
+		return null;
+	}
 
 	$ret = json_decode($res, true);
+	if (empty($ret)) {
+		return null;
+	}
 
 	if ('WCIA Transfer Schema' == $ret['document_name']) {
 		$ret['@context'] = 'https://cannabisintegratorsalliance.com/v2021/b2b';
