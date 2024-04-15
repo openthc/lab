@@ -65,6 +65,10 @@ switch ($cli_args['--object']) {
 		$lab_sample = $dbc->fetchRow('SELECT * FROM lab_sample WHERE id = :ls0', [
 			':ls0' => $cli_args['--object-id']
 		]);
+		if (empty($lab_sample['id'])) {
+			echo "Lab Sample Not Found\n";
+			exit(1);
+		}
 		$lab_sample['meta'] = json_decode($lab_sample['meta'], true);
 
 		$url = $pub_service->getURL(sprintf('lab/%s/wcia.json', $lab_report['id']));
@@ -81,25 +85,21 @@ switch ($cli_args['--object']) {
 	case 'lab-report':
 
 		// Works Perfect
-		$lab_report = $dbc->fetchRow('SELECT * FROM lab_report WHERE id = :ls0', [
-			':ls0' => $cli_args['--object-id']
+		$lab_report = $dbc->fetchRow('SELECT * FROM lab_report WHERE id = :lr0', [
+			':lr0' => $cli_args['--object-id']
 		]);
-		// $lab_report['meta'] = json_decode($lab_sample['meta'], true);
-		// var_dump($lab_report);
+		if (empty($lab_report['id'])) {
+			echo "Lab Report Not Found\n";
+			exit(1);
+		}
+		// $lab_report['meta'] = json_decode($lab_report['meta'], true);
 
 		$lab_sample = $dbc->fetchRow('SELECT * FROM lab_sample WHERE id = :ls0', [
 			':ls0' => $lab_report['lab_sample_id']
 		]);
 		$lab_sample['meta'] = json_decode($lab_sample['meta'], true);
 
-		// $cfg = [];
-		// $pub = new \OpenTHC\Service\Pub($cfg);
-		// $pub->setPath(sprintf('/lab/...?'));
-		// $pub->setName('wcia.json');
-		// $url = $pub->getURL();
-
 		$url = $pub_service->getURL(sprintf('lab/%s/wcia.json', $lab_report['id']));
-		var_dump($url);
 
 		$res = $qbc->post(sprintf('/api/v1/sample/%s', $lab_sample['meta']['id']), [
 			'WCIAdataLINK' => $url,
