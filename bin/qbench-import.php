@@ -341,7 +341,7 @@ function _qbench_pull_result($dbc, $qbc)
 		$oid = $_ENV['object-id'];
 
 		// Update Object Hash in Database to '-' so it will re-pull
-		$dbc->query("UPDATE lab_result SET hash = '-' WHERE id = :lr0", [ ':lr0' => $oid ]);
+		$dbc->query("UPDATE lab_result SET hash = 'SYNC' WHERE id = :lr0", [ ':lr0' => $oid ]);
 		// DELETE lab_result_metric for this lab_result so it's clean for import
 		$dbc->query("DELETE FROM lab_result_metric WHERE lab_result_id = :lr0", [ ':lr0' => $oid ]);
 

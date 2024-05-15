@@ -59,17 +59,15 @@ class View extends \OpenTHC\Lab\Controller\Base
 					':ls0' => $Lab_Sample['id'],
 				]);
 
-				Session::flash('info', _('Lab Sample &amp; Results have been flagged for resynchronisation'));
+				Session::flash('info', _('Lab Sample &amp; Results have been triggered for resynchronisation'));
 
 				// Call the Sync Script?
 				$cmd = [];
-				$cmd[] = sprintf('%s/bin/import-qbench.php', APP_ROOT);
+				$cmd[] = sprintf('%s/bin/qbench-import.php', APP_ROOT);
 				$cmd[] = sprintf('--company=%s', $_SESSION['Company']['id']);
 				$cmd[] = sprintf('--license=%s', $_SESSION['License']['id']);
 				$cmd[] = '--object=sample,result';
-				// $cmd[] = sprintf('--object-id=%s', escapeshellarg($Lab_Sample['id']));
-				// $cmd[] = '>/dev/null';
-				$cmd[] = sprintf('>/tmp/qbench-sync-%s.log', _ulid());
+				$cmd[] = sprintf('>%s/var/qbench-sync-%s.log', APP_ROOT, _ulid());
 				$cmd[] = '2>&1';
 				$cmd[] = '&';
 				$cmd = implode(' ', $cmd);
