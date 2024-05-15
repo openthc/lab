@@ -125,8 +125,6 @@ if (in_array('result', $opt['--object'])) {
 // $res = $qbc->get('/api/v1/report/sample/33535/info');
 // var_dump($res);
 
-//  exit;
-
 // Get the Tests (an actual Test)
 
 // foreach ($res['data'] as $rec) {
@@ -174,7 +172,6 @@ function _qbench_pull_license($dbc, $qbc)
 
 			// $obj = \OpenTHC\CRE\QBench\License::convert($rec);
 
-
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 			$rec['customer_name'] = trim($rec['customer_name']);
 			$rec['license_number'] = trim($rec['license_number']);
@@ -192,7 +189,7 @@ function _qbench_pull_license($dbc, $qbc)
 			]);
 			if ( ! empty($lic0['id']) && ($rec['@hash'] == $lic0['hash'])) {
 				$hit++;
-				echo '.';
+				syslog(LOG_NOTICE, "License {$lic0['id']} Unchanged");
 				continue;
 			}
 
@@ -215,7 +212,7 @@ function _qbench_pull_license($dbc, $qbc)
 
 				$dbc->insert('license', $lic0);
 
-				echo '+';
+				syslog(LOG_NOTICE, "License {$lic0['id']} Created");
 
 			} else {
 
@@ -230,7 +227,7 @@ function _qbench_pull_license($dbc, $qbc)
 				$filter['id'] = $lic0['id'];
 				$dbc->update('license', $update, $filter);
 
-				echo '^';
+				syslog(LOG_NOTICE, "License {$lic0['id']} Updated");
 
 			}
 
@@ -470,7 +467,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		':g1' => $rec['@lab_result_id']
 	]);
 	if ( ! empty($lr0['id']) && ($lr0['hash'] == $rec['@hash'])) {
-		echo '.';
+		syslog(LOG_NOTICE, "Lab Result {$lr0['id']} Unchanged");
 		return(1);
 	}
 
@@ -537,7 +534,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		$dbc->insert('lab_result', $lr1);
 		$lr0 = new Lab_Result($dbc, $lr1);
 
-		echo '+';
+		syslog(LOG_NOTICE, "Lab Result {$lr0['id']} Created");
 
 	} else {
 
@@ -552,7 +549,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		$lr0['meta'] = json_encode($rec);
 		$lr0->save('Lab/Result Updated via Import');
 
-		echo '^';
+		syslog(LOG_NOTICE, "Lab Result {$lr0['id']} Updated");
 
 	}
 
@@ -810,7 +807,7 @@ function _qbench_pull_sample_import($dbc, $rec)
 	}
 	$rec['@hash'] = CRE_Base::recHash($rec);
 
-	// echo "Lab Sample: {$rec['@id']} / {$rec['@inventory_guid']} / {$rec['custom_formatted_id']}\n";
+	syslog(LOG_NOTICE, "Lab Sample: {$rec['@id']} / {$rec['@inventory_guid']} / {$rec['custom_formatted_id']}");
 
 	// Lookup Record
 	$lab_sample = $dbc->fetchRow('SELECT id, hash FROM lab_sample WHERE id = :i0 OR name = :i0', [
@@ -818,7 +815,6 @@ function _qbench_pull_sample_import($dbc, $rec)
 	]);
 
 	if ( ! empty($lab_sample['id']) && ($rec['@hash'] == $lab_sample['hash'])) {
-		echo '.';
 		return 1;
 	}
 
@@ -827,26 +823,17 @@ function _qbench_pull_sample_import($dbc, $rec)
 	]);
 	if (empty($b2b)) {
 		print_r($rec);
-		echo "\nMissing Order '{$rec['@order_id']}' on Sample {$rec['@id']}\n";
+		syslog(LOG_NOTICE, "Lab Sample: {$rec['@id']} Missing Order '{$rec['@order_id']}'");
 		return 0;
 	}
 
 	// Need to Create an Inventory Lot Here
-	$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE id = :g0', [ ':g0' => $rec['@id'] ]);
+	$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE guid = :g0', [ ':g0' => $rec['@inventory_guid'] ]);
 	if (empty($inv['id'])) {
-		$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE guid = :g0', [ ':g0' => $rec['@inventory_guid'] ]);
+		$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE id = :g0', [ ':g0' => $rec['@id'] ]);
 	}
 	if (empty($inv['id'])) {
-
-		// See if anyone has the same GUID as me, then increment mine
-		// $chk_guid = $dbc->fetchOne('SELECT id FROM inventory WHERE guid = :g0', [
-		// 	':g0' => $rec['@inventory_guid']
-		// ]);
-		// if ( ! empty($chk_guid)) {
-		// 	$rec['@lot_name'] = $rec['@inventory_guid'];
-		// 	$rec['@inventory_guid'] = sprintf('%s-%s', $rec['@inventory_guid'], $rec['@id']);
-		// }
-
+		syslog(LOG_NOTICE, "Lab Sample: {$rec['@id']} Create Inventory {$rec['@inventory_guid']}");
 		$inv = [
 			'id' => $rec['@id'],
 			'guid' => $rec['@inventory_guid'],
@@ -861,26 +848,6 @@ function _qbench_pull_sample_import($dbc, $rec)
 			'stat' => 200
 		];
 		$dbc->insert('inventory', $inv);
-
-	} else {
-
-		$update = [];
-		$update['guid'] = $rec['@inventory_guid'];
-
-		// Update Status
-		$filter = [];
-		$filter['id'] = $rec['@id'];
-
-		// try {
-			$dbc->update('inventory', $update, $filter);
-		// } catch (Exception $e) {
-			// Sometimes this fails because of duplicated GUID values which we don't allow.
-			// Would need to move one to a -0 and then update the new one to be -1
-		// 	echo "\nInventory Lot: {$rec['@id']} = {$rec['@inventory_guid']}\n";
-		// 	echo $e->getMessage();
-		// 	echo "\n";
-
-		// }
 
 	}
 
@@ -902,7 +869,7 @@ function _qbench_pull_sample_import($dbc, $rec)
 		$lab_sample['meta'] = json_encode($rec);
 
 		$dbc->insert('lab_sample', $lab_sample);
-		syslog(LOG_NOTICE, "Lab_Sample Created {$rec['@id']}");
+		syslog(LOG_NOTICE, "Lab Sample {$rec['@id']} Created");
 
 	} else {
 
@@ -933,7 +900,7 @@ function _qbench_pull_sample_import($dbc, $rec)
 
 		try {
 			$dbc->update('lab_sample', $update, $filter);
-			syslog(LOG_NOTICE, "Lab_Sample Updated {$rec['@id']}");
+			syslog(LOG_NOTICE, "Lab Sample {$rec['@id']} Updated");
 		} catch (Exception $e) {
 			// Sometimes this fails because of duplicated GUID values which we don't allow.
 			// Would need to move one to a -0 and then update the new one to be -1
