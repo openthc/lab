@@ -29,6 +29,7 @@ class Lab_Sample extends \OpenTHC\SQL\Record
 	const FLAG_DEAD = 0x08000000;
 
 	const STAT_OPEN = 100;
+	const STAT_PROC = 102;
 	const STAT_LIVE = 200;
 	const STAT_WAIT = 203;
 	const STAT_DONE = 302;
@@ -121,6 +122,9 @@ class Lab_Sample extends \OpenTHC\SQL\Record
 			// case 0:
 			case self::STAT_OPEN:
 				return 'Open';
+				break;
+			case self::STAT_PROC:
+				return 'Processing';
 				break;
 			case self::STAT_LIVE:
 				return 'Live';
