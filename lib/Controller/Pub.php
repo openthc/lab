@@ -177,13 +177,6 @@ class Pub extends \OpenTHC\Lab\Controller\Base
 		case 'html':
 			break;
 		case 'text/csv+ccrs':
-			// No Session but needs Session Data
-			// $chk = $dbc_main->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $data['Lab_Sample']['license_id']]);
-			// $data['License_Laboratory'] = [
-			// 	'id' => $chk['id'],
-			// 	'code' => $chk['guid'],
-			// 	'name' => $chk['name'],
-			// ];
 			require_once(APP_ROOT . '/view/pub/csv-ccrs.php');
 			exit(0);
 			break;

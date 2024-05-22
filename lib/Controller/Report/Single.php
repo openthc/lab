@@ -438,6 +438,14 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$data['License_Laboratory'] = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [
 			':l0' => $data['Lab_Report']['license_id']
 		]);
+		$data['Laboratory'] = [];
+		$data['Laboratory']['License'] = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [
+			':l0' => $data['Lab_Report']['license_id']
+		]);
+		$data['Laboratory']['Company'] = $_SESSION['Company'];
+		// $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [
+		// 	':l0' => $data['Lab_Report']['license_id']
+		// ]);
 
 		$data['Source_License'] = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [
 			':l0' => $data['Lab_Sample']['license_id_source']
