@@ -187,7 +187,7 @@ class Download extends \OpenTHC\Lab\Controller\Report\Single
 		// }
 
 		$dbc = $this->_container->DBC_User;
-		$C0 = new \OpenTHC\Company($dbc, $_SESSON['Company']['id']);
+		$C0 = new \OpenTHC\Company($dbc, $_SESSION['Company']['id']);
 		$data['License_Laboratory']['address_line_1'] = $C0->getOption('coa/address/line/1');
 		$data['License_Laboratory']['address_line_2'] = $C0->getOption('coa/address/line/2');
 		$data['License_Laboratory']['email'] =   $C0->getOption('coa/email');
