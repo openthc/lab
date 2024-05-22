@@ -300,6 +300,11 @@ class Download extends \OpenTHC\Lab\Controller\Result\View
 		$data['License_Laboratory'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
 			':l0' => $data['Lab_Result']['license_id']
 		]);
+		$data['Laboratory'] = [];
+		$data['Laboratory']['License'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
+				':l0' => $data['Lab_Result']['license_id']
+		]);
+		$data['Laboratory']['Company'] = $_SESSION['Company'];
 
 		$data['Source_License'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
 			':l0' => $data['Lab_Sample']['license_id_source']
