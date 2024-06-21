@@ -189,7 +189,7 @@ function _qbench_pull_license($dbc, $qbc)
 			]);
 			if ( ! empty($lic0['id']) && ($rec['@hash'] == $lic0['hash'])) {
 				$hit++;
-				syslog(LOG_NOTICE, "License {$lic0['id']} Unchanged");
+				syslog(LOG_NOTICE, "License {$lic0['id']} STABLE");
 				continue;
 			}
 
@@ -212,7 +212,7 @@ function _qbench_pull_license($dbc, $qbc)
 
 				$dbc->insert('license', $lic0);
 
-				syslog(LOG_NOTICE, "License {$lic0['id']} Created");
+				syslog(LOG_NOTICE, "License {$lic0['id']} CREATE");
 
 			} else {
 
@@ -227,7 +227,7 @@ function _qbench_pull_license($dbc, $qbc)
 				$filter['id'] = $lic0['id'];
 				$dbc->update('license', $update, $filter);
 
-				syslog(LOG_NOTICE, "License {$lic0['id']} Updated");
+				syslog(LOG_NOTICE, "License {$lic0['id']} UPDATE");
 
 			}
 
@@ -467,7 +467,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		':g1' => $rec['@lab_result_id']
 	]);
 	if ( ! empty($lr0['id']) && ($lr0['hash'] == $rec['@hash'])) {
-		syslog(LOG_NOTICE, "Lab Result {$lr0['id']} Unchanged");
+		syslog(LOG_NOTICE, "Lab Result {$lr0['id']} STABLE");
 		return(1);
 	}
 
@@ -534,7 +534,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		$dbc->insert('lab_result', $lr1);
 		$lr0 = new Lab_Result($dbc, $lr1);
 
-		syslog(LOG_NOTICE, "Lab Result {$lr0['id']} Created");
+		syslog(LOG_NOTICE, "Lab Result {$lr0['id']} CREATE");
 
 	} else {
 
@@ -549,7 +549,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		$lr0['meta'] = json_encode($rec);
 		$lr0->save('Lab/Result Updated via Import');
 
-		syslog(LOG_NOTICE, "Lab Result {$lr0['id']} Updated");
+		syslog(LOG_NOTICE, "Lab Result {$lr0['id']} UPDATE");
 
 	}
 
@@ -830,12 +830,9 @@ function _qbench_pull_sample_import($dbc, $rec)
 	// Need to Create an Inventory Lot Here
 	$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE guid = :g0', [ ':g0' => $rec['@inventory_guid'] ]);
 	if (empty($inv['id'])) {
-		$inv = $dbc->fetchRow('SELECT id, guid, name FROM inventory WHERE id = :g0', [ ':g0' => $rec['@id'] ]);
-	}
-	if (empty($inv['id'])) {
-		syslog(LOG_NOTICE, "Lab Sample: {$rec['@id']} Create Inventory {$rec['@inventory_guid']}");
+		syslog(LOG_NOTICE, "Lab Sample: {$rec['@id']} Inventory {$rec['@inventory_guid']} CREATE");
 		$inv = [
-			'id' => $rec['@id'],
+			'id' => _ulid(), // $rec['@id'],
 			'guid' => $rec['@inventory_guid'],
 			'name' => sprintf('%s - IMPORT-875', $rec['@inventory_guid']),
 			'license_id' => $_SESSION['License']['id'],
@@ -869,7 +866,7 @@ function _qbench_pull_sample_import($dbc, $rec)
 		$lab_sample['meta'] = json_encode($rec);
 
 		$dbc->insert('lab_sample', $lab_sample);
-		syslog(LOG_NOTICE, "Lab Sample {$rec['@id']} Created");
+		syslog(LOG_NOTICE, "Lab Sample: {$rec['@id']} CREATE");
 
 	} else {
 
@@ -877,6 +874,7 @@ function _qbench_pull_sample_import($dbc, $rec)
 		$update = [];
 		$update['hash'] = $rec['@hash'];
 		$update['meta'] = json_encode($rec);
+		$update['lot_id'] = $inv['id'];
 		$update['updated_at'] = date(\DateTime::RFC3339, $rec['last_updated']);
 
 		switch ($rec['status']) {
@@ -900,7 +898,7 @@ function _qbench_pull_sample_import($dbc, $rec)
 
 		try {
 			$dbc->update('lab_sample', $update, $filter);
-			syslog(LOG_NOTICE, "Lab Sample {$rec['@id']} Updated");
+			syslog(LOG_NOTICE, "Lab Sample: {$rec['@id']} UPDATE");
 		} catch (Exception $e) {
 			// Sometimes this fails because of duplicated GUID values which we don't allow.
 			// Would need to move one to a -0 and then update the new one to be -1
