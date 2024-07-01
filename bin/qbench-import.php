@@ -1113,7 +1113,7 @@ function _qbench_sync_b2b_incoming_import($dbc, $rec) : int
 		$update['updated_at'] = date(\DateTime::RFC3339, $rec['last_updated']);
 
 		$filter = [];
-		$filter['id'] = $b2b0['@id'];
+		$filter['id'] = $b2b0['id'];
 
 		$dbc->update('b2b_incoming', $update, $filter);
 
