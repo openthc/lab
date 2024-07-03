@@ -24,7 +24,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$dbc_user = $this->_container->DBC_User;
 		$Lab_Report = new Lab_Report($dbc_user, $ARG['id']);
 		if (empty($Lab_Report['id'])) {
-			_exit_html_warn('<h1>Lab Report Not Found [CRS-030]', 404);
+			_exit_html_warn('<h1>Lab Report Not Found [CRS-030]</h1>', 404);
 		}
 
 		// $data['Page'] = [ 'title' => 'Lab Reports' ];
@@ -44,7 +44,7 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$dbc_user = $this->_container->DBC_User;
 		$Lab_Report = new Lab_Report($dbc_user, $ARG['id']);
 		if (empty($Lab_Report['id'])) {
-			_exit_html_warn('<h1>Lab Report Not Found [CRS-044]', 404);
+			_exit_html_warn('<h1>Lab Report Not Found [CRS-044]</h1>', 404);
 		}
 
 		switch ($_POST['a']) {
