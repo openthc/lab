@@ -20,14 +20,14 @@
 		"grpc/grpc": "1.42.0",
 		"league/oauth2-client": "2.7.0",
 		"openthc/api": "dev-main",
-		"openthc/common": "dev-master",
-		"openthc/cre-adapter": "dev-master",
+		"openthc/common": "dev-main",
+		"openthc/cre-adapter": "dev-main",
 		"pear/net_smtp": "1.10.0",
 		"tecnickcom/tcpdf": "6.7.4"
 	},
 	"require-dev": {
 		"phpmd/phpmd": "2.15.0",
-		"phpstan/phpstan": "1.10.66",
-		"phpunit/phpunit": "9.6.18"
+		"phpstan/phpstan": "1.11.8",
+		"phpunit/phpunit": "9.6.20"
 	}
 }
