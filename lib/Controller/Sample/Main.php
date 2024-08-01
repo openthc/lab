@@ -82,14 +82,18 @@ class Main extends \OpenTHC\Lab\Controller\Base
 		// ORDER
 		$sql_order = '';
 		switch ($_GET['sort']) {
-			case 'license-origin':
-				$sql_order = 'ORDER BY license.name %s, lab_sample.name ASC';
-				break;
-			case 'sample-id':
-				$sql_order = 'ORDER BY lab_sample.name %s';
-				break;
-			default:
-				$sql_order = 'ORDER BY lab_sample.created_at %s, lab_sample.name ASC';
+		case 'license-origin':
+			$sql_order = 'ORDER BY license.name %s, lab_sample.name ASC';
+			break;
+		case 'sample-id':
+			$sql_order = 'ORDER BY lab_sample.name %s';
+			break;
+		default:
+			$sql_order = 'ORDER BY lab_sample.created_at %s, lab_sample.name ASC';
+			if (empty($_GET['sort-dir'])) {
+				$_GET['sort-dir'] = 'desc';
+			}
+			break;
 		}
 		$sql_order = sprintf($sql_order, ($_GET['sort-dir'] == 'desc' ? 'desc' : 'asc'));
 		$sql = str_replace('{ORDER}', $sql_order, $sql);
