@@ -351,7 +351,9 @@ function _qbench_pull_result($dbc, $qbc)
 		try {
 			$x = _qbench_pull_result_import($dbc, $rec);
 		} catch (\Exception $e) {
-			echo "Failed to import: $oid\n";
+			echo "Failed to import Result: $oid\n";
+			echo $e->getMessage();
+			echo "\n";
 		}
 
 		return $x;
@@ -569,7 +571,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 
 			switch ($lm0['id']) {
 				case '018NY6XC00LM00000000000000':
-					// echo "SKIP: $metric_key\n";
+					// echo "Lab/Metric/Ignore: $metric_key\n";
 					continue 2;
 					break;
 			}
@@ -728,7 +730,9 @@ function _qbench_pull_sample($dbc, $qbc)
 		try {
 			$x = _qbench_pull_sample_import($dbc, $rec);
 		} catch (\Exception $e) {
-			echo "Failed to import: $oid\n";
+			echo "Failed to import Sample: $oid\n";
+			echo $e->getMessage();
+			echo "\n";
 		}
 
 		return $x;
@@ -966,7 +970,9 @@ function _qbench_b2b_import($dbc, $qbc)
 		try {
 			$x = _qbench_sync_b2b_incoming_import($dbc, $rec);
 		} catch (\Exception $e) {
-			echo "Failed to import: $oid\n";
+			echo "Failed to import B2B Incoming: $oid\n";
+			echo $e->getMessage();
+			echo "\n";
 		}
 
 		return $x;
@@ -1039,7 +1045,7 @@ function _qbench_sync_b2b_incoming_import($dbc, $rec) : int
 
 	// Hash Match
 	if ( ! empty($chk['id']) && ($rec['@hash'] == $chk['hash'])) {
-		syslog(LOG_INFO, "B2B/Incoming sync {$rec['@id']} hash-match");
+		syslog(LOG_INFO, "B2B/Incoming {$rec['@id']} STABLE");
 		return 1;
 	}
 
@@ -1645,6 +1651,10 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'thiophanate_methyl' => '018NY6XC008N5MR09YY8T1HRMR'
 		, 'toluene' => '018NY6XC00LMGG9JR3SM0MEDGQ'
 		, 'total_aflatoxins' => '018NY6XC00LMR9PB7SNBP97DAS' // Calculated?
+		, 'total_cannabinoids_percent' => '018NY6XC00SAE8Q4JSMF40YSZ3'
+		, 'total_cannabinoids_mg_g' => '018NY6XC00LM00000000000000'
+		, 'total_cannabinoids_mg_ml' => '018NY6XC00LM00000000000000'
+		, 'total_cannabinoids_serving' => '018NY6XC00LM00000000000000'
 		, 'total_cbd_mg_g' => '018NY6XC00LM00000000000000'
 		, 'total_cbd_mg_ml' => '018NY6XC00LM00000000000000'
 		, 'total_cbd_mg_serving' => '018NY6XC00LM00000000000000'
