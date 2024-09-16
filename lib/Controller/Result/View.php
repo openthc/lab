@@ -179,17 +179,17 @@ class View extends \OpenTHC\Lab\Controller\Base
 		// Get authoriative lab result metrics
 		// Over-Writes the ones Above
 		$sql = <<<SQL
-SELECT lab_result_metric.*
-	, lab_result_metric.id AS lab_result_metric_id
-	, lab_metric.type
-	, lab_metric.sort
-	, lab_metric.name
-	, lab_metric.meta
-FROM lab_metric
-JOIN lab_result_metric ON lab_metric.id = lab_result_metric.lab_metric_id
-WHERE lab_result_metric.lab_result_id = :lr0
-ORDER BY lab_metric.type, lab_metric.sort, lab_metric.stat, lab_metric.name
-SQL;
+		SELECT lab_result_metric.*
+			, lab_result_metric.id AS lab_result_metric_id
+			, lab_metric.type
+			, lab_metric.sort
+			, lab_metric.name
+			, lab_metric.meta
+		FROM lab_metric
+		JOIN lab_result_metric ON lab_metric.id = lab_result_metric.lab_metric_id
+		WHERE lab_result_metric.lab_result_id = :lr0
+		ORDER BY lab_metric.type, lab_metric.sort, lab_metric.stat, lab_metric.name
+		SQL;
 		$arg = [
 			':lr0' => $Lab_Result['id']
 		];
@@ -476,9 +476,6 @@ SQL;
 		require_once(APP_ROOT . '/etc/coa/template-b.php');
 		// require_once(APP_ROOT . '/view/result/coa.php');
 		$html = ob_get_clean();
-
-		// Render from Twig Template?
-		// $html = _twig(path/to/user/provided/twig/template.twig.html);
 
 		// Or Trap HTML, write to file then call /bin/print-coa.php
 		// Or directly use right in this code to make a PDF w/o shelling out to PHP (which itself shellout to chromium)

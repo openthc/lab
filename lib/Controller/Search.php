@@ -37,13 +37,13 @@ class Search extends \OpenTHC\Lab\Controller\Base
 			}
 
 			$sql = <<<SQL
-SELECT id, 'lab_sample' AS type FROM lab_sample WHERE id LIKE :q0
-UNION ALL
-SELECT id, 'lab_result' AS type FROM lab_result WHERE id LIKE :q0
--- UNION ALL
--- SELECT id, 'transfer' FROM transfer WHERE id LIKE :q0
-LIMIT 10
-SQL;
+			SELECT id, 'lab_sample' AS type FROM lab_sample WHERE id LIKE :q0
+			UNION ALL
+			SELECT id, 'lab_result' AS type FROM lab_result WHERE id LIKE :q0
+			-- UNION ALL
+			-- SELECT id, 'transfer' FROM transfer WHERE id LIKE :q0
+			LIMIT 10
+			SQL;
 
 			$arg = [
 				':q0' => sprintf('%%%s%%', $q)

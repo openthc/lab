@@ -421,7 +421,13 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		$data['Lab_Report'] = $Lab_Report->toArray();
 		$data['Lab_Report']['meta'] = __json_decode($Lab_Report['meta']);
 
-		$res = $dbc_user->fetchAll('SELECT id, flag, stat, name, size, type FROM lab_report_file WHERE lab_report_id = :lr0', [
+		$sql = <<<SQL
+		SELECT id, flag, stat, name, size, type
+		FROM lab_report_file
+		WHERE lab_report_id = :lr0
+		ORDER BY id
+		SQL;
+		$res = $dbc_user->fetchAll($sql, [
 			':lr0' => $Lab_Report['id']
 		]);
 		$data['lab_report_file_list'] = $res;
