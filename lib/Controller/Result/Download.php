@@ -151,7 +151,42 @@ class Download extends \OpenTHC\Lab\Controller\Result\View
 
 	function json($RES, $ARG)
 	{
-		__exit_text('Dump as JSON', 501);
+		$dbc = $this->_container->DBC_User;
+
+		$Lab_Result = new Lab_Result($dbc, $ARG['id']);
+		if (empty($Lab_Result['id'])) {
+				return $RES->withJSON([
+						'data' => null,
+						'meta' => [ 'note' => 'Lab Result Not Found [CRD-161]' ]
+				], 404);
+		}
+
+		$Lab_Sample = new Lab_Sample($dbc, $Lab_Result['lab_sample_id']);
+		if (empty($Lab_Sample['id'])) {
+				return $RES->withJSON([
+						'data' => null,
+						'meta' => [ 'note' => 'Lab Sample Not Found [CRD-161]' ]
+				], 404);
+		}
+
+		$data = $this->load_lab_result_full($Lab_Result['id']);
+
+		$data['Inventory'] = $dbc->fetchRow('SELECT * FROM inventory WHERE id = :i0', [
+				':i0' => $Lab_Sample['lot_id']
+		]);
+		unset($data['Lot']);
+
+		$data['License_Laboratory'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
+				':l0' => $data['Lab_Sample']['license_id']
+		]);
+		$data['Source_License'] = $dbc->fetchRow('SELECT * FROM license WHERE id = :l0', [
+				':l0' => $data['Lab_Sample']['license_id_source']
+		]);
+
+		$json = require_once(APP_ROOT . '/view/pub/json.php');
+
+		return $RES->withJSON($json, 200, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
 	}
 
 	/**

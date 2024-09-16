@@ -225,7 +225,7 @@ $wcia['metric_list']['General']['metrics'] = $lmg;
 $wcia['metric_list'] = array_values($wcia['metric_list']);
 
 
-return($wcia);
+return $wcia;
 
 /**
  * Little Output Array Helper
