@@ -8,7 +8,6 @@
 namespace OpenTHC\Lab\Controller\Report;
 
 use OpenTHC\Lab\Lab_Report;
-use OpenTHC\Lab\UI\Pager;
 
 class Main extends \OpenTHC\Lab\Controller\Base
 {
@@ -33,15 +32,10 @@ class Main extends \OpenTHC\Lab\Controller\Base
 	{
 		$dbc = $this->_container->DBC_User;
 
-		$sql_limit  = 100;
-		$sql_offset = 0;
+		$sql_limit = 100;
+		$sql_offset = $this->getPageOffset($sql_limit);
 
-		if ( ! empty($_GET['p'])) {
-			$p = intval($_GET['p']) - 1;
-			if ('ALL' == $_GET['p']) $p = 0;
-			$sql_offset = $p * $sql_limit;
-		}
-
+		// Base Query
 		$sql = <<<SQL
 		SELECT lab_report.id, lab_report.name, lab_report.flag, lab_report.stat, lab_report.created_at
 		  , lab_sample.id AS lab_sample_id, lab_sample.name AS lab_sample_guid
@@ -51,8 +45,8 @@ class Main extends \OpenTHC\Lab\Controller\Base
 		JOIN lab_sample ON lab_report.lab_sample_id = lab_sample.id
 		JOIN inventory ON lab_sample.lot_id = inventory.id
 		JOIN license ON lab_report.license_id_client = license.id
-		WHERE {WHERE}
-		ORDER BY {ORDER_BY}
+		{WHERE}
+		{ORDER_BY}
 		OFFSET $sql_offset
 		LIMIT $sql_limit
 		SQL;
@@ -83,6 +77,7 @@ class Main extends \OpenTHC\Lab\Controller\Base
 			];
 		}
 
+		// Where Filter Merge
 		$arg = [];
 		$tmp = [];
 		foreach ($sql_filter as $i => $f) {
@@ -90,7 +85,7 @@ class Main extends \OpenTHC\Lab\Controller\Base
 			$arg = array_merge($arg, $f['arg']);
 		}
 		$tmp = implode(' AND ', $tmp);
-		$sql = str_replace('{WHERE}', $tmp, $sql);
+		$sql = str_replace('{WHERE}', sprintf('WHERE %s', $tmp), $sql);
 
 		// Sorting
 		$sql_sortby = [
@@ -107,13 +102,15 @@ class Main extends \OpenTHC\Lab\Controller\Base
 			}
 		}
 		$tmp = implode(', ', $sql_sortby);
-		$sql = str_replace('{ORDER_BY}', $tmp, $sql);
+		$sql = str_replace('{ORDER_BY}', sprintf('ORDER BY %s', $tmp), $sql);
 
 		// Undo Limits when ALL
 		if ('ALL' === $_GET['p']) {
 			$sql = preg_replace('/OFFSET \d+/', '', $sql);
 			$sql = preg_replace('/LIMIT \d+/', '', $sql);
 		}
+
+		// $Pager = $this->convertSearchToPager($dbc, $sql, $arg, $_GET['p'], $sql_limit);
 
 		// Query
 		$res = $dbc->fetchAll($sql, $arg);

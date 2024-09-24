@@ -8,7 +8,6 @@
 namespace OpenTHC\Lab\Controller\Result;
 
 use OpenTHC\Lab\Lab_Result;
-use OpenTHC\Lab\UI\Pager;
 
 class Main extends \OpenTHC\Lab\Controller\Base
 {
@@ -17,30 +16,29 @@ class Main extends \OpenTHC\Lab\Controller\Base
 	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
-		$dbc = $this->_container->DBC_User;
-		if (empty($dbc)) {
-			_exit_text('Invalid Session [CRH-014]', 500);
-		}
-
 		$data = array(
 			'Page' => array('title' => 'Lab Results'),
 			'result_list' => array(),
 		);
 		$data = $this->loadSiteData($data);
 		$data = $this->loadSearchPageData($data);
+		$data = $this->get_result_list($data);
+
+		return $RES->write( $this->render('result/main.php', $data) );
+
+	}
+
+	/**
+	 *
+	 */
+	function get_result_list($data)
+	{
+		$dbc = $this->_container->DBC_User;
 
 		$sql_limit = 100;
-		$sql_offset = 0;
+		$sql_offset = $this->getPageOffset($sql_limit);
 
-		if (!empty($_GET['p'])) {
-
-			$p = intval($_GET['p']) - 1;
-			if ('ALL' == $_GET['p']) $p = 0;
-			$sql_offset = $p * 100;
-		}
-
-
-		// Stuff my Company is linked to?
+		// Base Query
 		$sql = <<<SQL
 		SELECT lab_result.*
 			, lab_sample.id AS lab_sample_id
@@ -50,8 +48,8 @@ class Main extends \OpenTHC\Lab\Controller\Base
 		FROM lab_result
 		JOIN lab_sample ON lab_result.lab_sample_id = lab_sample.id
 		JOIN inventory ON lab_sample.lot_id = inventory.id
-		WHERE {WHERE}
-		ORDER BY {SORTBY}
+		{WHERE}
+		{ORDER_BY}
 		OFFSET $sql_offset
 		LIMIT $sql_limit
 		SQL;
@@ -64,11 +62,7 @@ class Main extends \OpenTHC\Lab\Controller\Base
 		//      ];
 		// }
 
-		if ('ALL' === $_GET['p']) {
-			$sql = preg_replace('/OFFSET \d+/', '', $sql);
-			$sql = preg_replace('/LIMIT \d+/', '', $sql);
-		}
-
+		// License Filter
 		$sql_filter = [];
 		$sql_filter[] = [
 			'sql' => 'lab_result.license_id = :l0',
@@ -77,6 +71,7 @@ class Main extends \OpenTHC\Lab\Controller\Base
 			]
 		];
 
+		// A General Search Query
 		if ( ! empty($_GET['q'])) {
 			$_GET['q'] = trim($_GET['q']);
 			$sql_filter[] = [
@@ -95,6 +90,7 @@ class Main extends \OpenTHC\Lab\Controller\Base
 			];
 		}
 
+		// Where Filter Merge
 		$arg = [];
 		$tmp = [];
 		foreach ($sql_filter as $i => $f) {
@@ -102,7 +98,7 @@ class Main extends \OpenTHC\Lab\Controller\Base
 			$arg = array_merge($arg, $f['arg']);
 		}
 		$tmp = implode(' AND ', $tmp);
-		$sql = str_replace('{WHERE}', $tmp, $sql);
+		$sql = str_replace('{WHERE}', sprintf('WHERE %s', $tmp), $sql);
 
 		// Sorting
 		$sql_sortby = [
@@ -119,9 +115,15 @@ class Main extends \OpenTHC\Lab\Controller\Base
 			}
 		}
 		$tmp = implode(', ', $sql_sortby);
-		$sql = str_replace('{SORTBY}', $tmp, $sql);
+		$sql = str_replace('{ORDER_BY}', sprintf('ORDER BY %s', $tmp), $sql);
 
-		// Query
+		// If ALL then No OFFSET or LIMIT
+		if ('ALL' === $_GET['p']) {
+			$sql = preg_replace('/OFFSET \d+/', '', $sql);
+			$sql = preg_replace('/LIMIT \d+/', '', $sql);
+		}
+
+		// Execute
 		$res = $dbc->fetchAll($sql, $arg);
 
 		foreach ($res as $rec) {
@@ -210,18 +212,11 @@ class Main extends \OpenTHC\Lab\Controller\Base
 
 		}
 
-		// Get Matching Record Counts
-		$sql_count = preg_replace('/SELECT.+FROM /ms', 'SELECT count(*) FROM ', $sql);
-		$sql_count = preg_replace('/LIMIT.+$/ms', null, $sql_count);
-		$sql_count = preg_replace('/OFFSET.+$/ms', null, $sql_count);
-		$sql_count = preg_replace('/ORDER BY.+$/ms', null, $sql_count);
-
-		$res = $dbc->fetchOne($sql_count, $arg);
-		$Pager = new Pager($res, $sql_limit, $_GET['p']);
+		$Pager = $this->convertSearchToPager($dbc, $sql, $arg, $_GET['p'], $sql_limit);
 
 		$data['page_list_html'] = $Pager->getHTML();
 
-		return $RES->write( $this->render('result/main.php', $data) );
+		return $data;
 
 	}
 }

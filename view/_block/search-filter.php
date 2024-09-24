@@ -23,7 +23,6 @@ if (empty($data['search_field_list'])) {
 	display: flex;
 	flex-grow: 1;
 	margin: 0;
-	padding: 0.25rem;
 }
 .lab-search-filter-wrap .btn-outline-secondary {
 	color: var(--light);
@@ -32,8 +31,8 @@ if (empty($data['search_field_list'])) {
 
 <form autocomplete="off">
 
-<div class="lab-search-filter-wrap">
-	<div class="input-group-wrap" style="flex: 1 1 auto; width: 100%;">
+<div class="mb-2 lab-search-filter-wrap">
+	<div class="w-100">
 		<div class="input-group">
 			<button class="btn btn-outline-secondary dropdown-toggle"
 				data-bs-toggle="dropdown"

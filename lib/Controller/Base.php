@@ -21,6 +21,8 @@
 
 namespace OpenTHC\Lab\Controller;
 
+use OpenTHC\Lab\UI\Pager;
+
 class Base extends \OpenTHC\Controller\Base
 {
 	/**
@@ -121,6 +123,37 @@ class Base extends \OpenTHC\Controller\Base
 		}
 
 		return $menu;
+
+	}
+
+	function convertSearchToPager($dbc, $sql, $arg, $page, $page_size)
+	{
+		// Get Matching Record Counts
+		$sql_count = preg_replace('/SELECT.+FROM /ms', 'SELECT count(*) FROM ', $sql);
+		$sql_count = preg_replace('/LIMIT.+$/ms', null, $sql_count);
+		$sql_count = preg_replace('/OFFSET.+$/ms', null, $sql_count);
+		$sql_count = preg_replace('/ORDER BY.+$/ms', null, $sql_count);
+
+		$res = $dbc->fetchOne($sql_count, $arg);
+		$Pager = new Pager($res, $page_size, $page);
+
+		return $Pager;
+	}
+
+	function getPageOffset($item_count)
+	{
+		if (empty($_GET['p'])) {
+			return 0;
+		}
+
+		if ('ALL' == $_GET['p']) {
+			return 0;
+		}
+
+		$p = intval($_GET['p']) - 1;
+		$p = max($p, 0);
+
+		return ($p * $item_count);
 
 	}
 

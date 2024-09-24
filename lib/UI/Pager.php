@@ -72,7 +72,7 @@ class Pager
 
 
 		// Previous and First Pages
-		echo '<div class="btn-group mr-2">';
+		echo '<div class="btn-group me-2">';
 		if ($page_cur > $this->page_min) {
 			echo $this->getLink($page_cur - 1, $page_prev_html, 'btn-outline-secondary');
 		} else {
@@ -85,7 +85,7 @@ class Pager
 
 
 		// Number Page Group List
-		echo '<div class="btn-group mr-2">';
+		echo '<div class="btn-group me-2">';
 		for ($page_idx = $out_min; $page_idx <= $out_max; $page_idx++) {
 
 			$t = null;
@@ -106,7 +106,7 @@ class Pager
 		echo '</div>';
 
 		// Draw Last & Next Buttons
-		echo '<div class="btn-group mr-2">';
+		echo '<div class="btn-group me-2">';
 		if ($out_max < $this->page_max) {
 			echo $this->getLink($this->page_max, sprintf('&raquo;&raquo;%d', $this->page_max), 'btn-outline-secondary');
 		}
