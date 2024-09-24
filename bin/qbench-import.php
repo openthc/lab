@@ -26,6 +26,8 @@ require_once(APP_ROOT . '/vendor/openthc/cre-adapter/lib/QBench.php');
 
 openlog('openthc-lab', LOG_ODELAY | LOG_PERROR | LOG_PID, LOG_LOCAL0);
 
+define('LAB_METRIC_SKIP', '018NY6XC00LM00000000000000');
+
 // Company ID from Arg?
 $opt = _cli_options();
 
@@ -280,8 +282,10 @@ function _qbench_pull_contact($dbc, $qbc)
 
 			$rec['@id'] = sprintf('qbench:%s', $rec['id']);
 
+			// What Am I trying to do here? /djb 2024-07-31
 			if ( ! empty($rec['email'])) {
 				var_dump($rec);
+				throw new \Exception('Invalid Contact, Missing Email');
 			}
 
 			// Pending Record?
@@ -487,7 +491,7 @@ function _qbench_pull_result_import($dbc, $rec) : int
 		':g1' => $rec['@lab_sample_id']
 	]);
 	if (empty ($ls0['id'])) {
-		throw new \Exception(sprintf('Invalid Sample on Result %s [BIQ-483]', $rec['@id']));
+		throw new \Exception(sprintf('Invalid Sample "%s" on Result "%s" [BIQ-483]', $rec['@lab_sample_id'], $rec['@id']));
 	}
 	// Inventory Data
 	$inv = $dbc->fetchRow('SELECT id, guid FROM inventory WHERE id = :g1', [
@@ -570,10 +574,10 @@ function _qbench_pull_result_import($dbc, $rec) : int
 			$lm0['meta'] = json_decode($lm0['meta'], true);
 
 			switch ($lm0['id']) {
-				case '018NY6XC00LM00000000000000':
-					// echo "Lab/Metric/Ignore: $metric_key\n";
-					continue 2;
-					break;
+			case LAB_METRIC_SKIP:
+				// echo "Lab/Metric/Ignore: $metric_key\n";
+				continue 2;
+				break;
 			}
 
 			// Patch the Metric Values to Real Shit
@@ -1295,22 +1299,24 @@ function _qbench_pull_report($dbc, $qbc)
  */
 function _qbench_map_metric($dbc, $metric_key) : array
 {
+
+
 	static $metric_map = [
 		  'a_bisabolol_percent' => '018NY6XC00LMQW96F7VFGSCTYK'
-		, 'a_bisabolol' => '018NY6XC00LM00000000000000'
-		, 'a_bisabolol_ug_g' => '018NY6XC00LM00000000000000'
-		, 'a_humulene' => '018NY6XC00LM00000000000000'
+		, 'a_bisabolol_ug_g' => LAB_METRIC_SKIP
+		, 'a_bisabolol' => LAB_METRIC_SKIP
 		, 'a_humulene_percent' => '018NY6XC00LMQF9D59E5T0QA0A'
-		, 'a_humulene_ug_g' => '018NY6XC00LM00000000000000'
+		, 'a_humulene_ug_g' => LAB_METRIC_SKIP
+		, 'a_humulene' => LAB_METRIC_SKIP
 		, 'a_pinene_percent' => '018NY6XC00LMCG3GPPN8QDAGAQ'
-		, 'a_pinene' => '018NY6XC00LM00000000000000'
-		, 'a_pinene_ug_g' => '018NY6XC00LM00000000000000'
+		, 'a_pinene_ug_g' => LAB_METRIC_SKIP
+		, 'a_pinene' => LAB_METRIC_SKIP
 		, 'a_terpinene_percent' => '01EEE1HSDKCQ1GP18N74BZ3KGE'
-		, 'a_terpinene' => '018NY6XC00LM00000000000000'
-		, 'a_terpinene_ug_g' => '018NY6XC00LM00000000000000'
-		, 'a_terpineol' => '018NY6XC00LMMQ4V3VTBQ83QWW'
+		, 'a_terpinene_ug_g' => LAB_METRIC_SKIP
+		, 'a_terpinene' => LAB_METRIC_SKIP
 		, 'a_terpineol_percent' => '018NY6XC00LMMQ4V3VTBQ83QWW'
 		, 'a_terpineol_ug_g' => '018NY6XC00LMMQ4V3VTBQ83QWW'
+		, 'a_terpineol' => '018NY6XC00LMMQ4V3VTBQ83QWW'
 		, 'abamectin_b1a' => '01EDPT1CHZJTASPX5X38PWWP3Y'
 		, 'acephate' => '018NY6XC00LMME2KAJD5CJZCFC'
 		, 'acequinocyl' => '018NY6XC00LMB7TEPP64SS0VXD'
@@ -1321,124 +1327,132 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'aldicarb_sulfone' => '018NY6XC00KRBFY2AHKHRXN58B'
 		, 'aldicarb' => '018NY6XC00LME4KJM6Y8XP8WGA'
 		, 'aminocarb' => '018NY6XC00X9FKBQTRMMT9CWYB'
+		, 'arsenic_action_limit' => LAB_METRIC_SKIP
+		, 'arsenic_lod' => LAB_METRIC_SKIP
+		, 'arsenic_loq' => LAB_METRIC_SKIP
+		, 'arsenic_mrl' => LAB_METRIC_SKIP
 		, 'arsenic_ug_g' => '018NY6XC00LM4E4T6EPA7WPHDK'
 		, 'arsenic' => '018NY6XC00LM4E4T6EPA7WPHDK'
-		, 'atrazine' => '018NY6XC009VDNXYVCFJ88GVF5'
 		, 'atrazine_gc' => '018NY6XC009VDNXYVCFJ88GVF5' // @dedupe
 		, 'atrazine_lc' => '018NY6XC009VDNXYVCFJ88GVF5' // @dedupe
+		, 'atrazine' => '018NY6XC009VDNXYVCFJ88GVF5'
 		, 'azoxystrobin' => '018NY6XC00KKW13KEN6JWKZNJF'
-		, 'b_caryophyllene' => '018NY6XC00LM00000000000000'
 		, 'b_caryophyllene_percent' => '018NY6XC00LM9QSV7PQDRB1VEY'
 		, 'b_caryophyllene_ug_g' => '018NY6XC00LM9QSV7PQDRB1VEY'
-		, 'b_myrcene' => '018NY6XC00LM00000000000000'
+		, 'b_caryophyllene' => LAB_METRIC_SKIP
 		, 'b_myrcene_percent' => '018NY6XC00LM0Q5E8PYHY9WQ57'
 		, 'b_myrcene_ug_g' => '018NY6XC00LM0Q5E8PYHY9WQ57'
-		, 'b_pinene' => '018NY6XC00LM00000000000000'
+		, 'b_myrcene' => LAB_METRIC_SKIP
 		, 'b_pinene_percent' => '018NY6XC00LM733KQWC064C0X8'
 		, 'b_pinene_ug_g' => '018NY6XC00LM733KQWC064C0X8'
+		, 'b_pinene' => LAB_METRIC_SKIP
 		, 'benalaxyl' => '018NY6XC00JR79FV9HVKHWW5HQ'
 		, 'benzene' => '018NY6XC00LMT7VRMWMXMH59Y5'
 		, 'bifenazate' => '018NY6XC00LMKCE4E30P3R72SK'
-		, 'bifenthrin' => '018NY6XC00LMPH4K88KC1PKJVJ'
 		, 'bifenthrin_gc' => '018NY6XC00LMPH4K88KC1PKJVJ'
 		, 'bifenthrin_lc' => '018NY6XC00LMPH4K88KC1PKJVJ'
+		, 'bifenthrin' => '018NY6XC00LMPH4K88KC1PKJVJ'
 		, 'bile_tolerant' => '018NY6XC00LM638QCGB50ZKYKJ'
 		, 'boron' => '018NY6XC000WMQVN35HCPYPW8W'
-		, 'boscalid' => '018NY6XC00LM3P767WQ0KSFARZ'
 		, 'boscalid_gc' => '018NY6XC00LM3P767WQ0KSFARZ' // @dedupe
 		, 'boscalid_lc' => '018NY6XC00LM3P767WQ0KSFARZ' // @dedupe
-		, 'bot_name' => '018NY6XC00LM00000000000000'    // Ignore Unsure what this is
+		, 'boscalid' => '018NY6XC00LM3P767WQ0KSFARZ'
+		, 'bot_name' => LAB_METRIC_SKIP    // Ignore Unsure what this is
 		, 'butafenacil' => '018NY6XC00QVEKQ8JCMP68DFJ7'
 		, 'butane' => '018NY6XC00LMSTBW55VFR0QG56'
+		, 'cadmium_action_limit' => LAB_METRIC_SKIP
+		, 'cadmium_lod' => LAB_METRIC_SKIP
+		, 'cadmium_loq' => LAB_METRIC_SKIP
+		, 'cadmium_mrl' => LAB_METRIC_SKIP
 		, 'cadmium_ug_g' => '018NY6XC00LMGNGNEW1XMNRS8S'
 		, 'cadmium' => '018NY6XC00LMGNGNEW1XMNRS8S'
 		, 'calcium' => '018NY6XC006SBTBXZ7J54HFQ0R'
-		, 'camphene' => '018NY6XC00LM00000000000000'
 		, 'camphene_percent' => '018NY6XC00LM5RP8VV8TQAJ92A'
 		, 'camphene_ug_g' => '018NY6XC00LM5RP8VV8TQAJ92A'
+		, 'camphene' => LAB_METRIC_SKIP
 		, 'carbaryl' => '018NY6XC00LMZP42VJGA642TEB'
 		, 'carbetamide' => '018NY6XC00MZ1K5XFDNA5BDGEP'
 		, 'carbofuran' => '018NY6XC00LM7N4CCX5ZRVADDN'
 		, 'carboxin' => '018NY6XC00VZJ24PN2VPPXX6P2'
 		, 'carfentrazone_ethyl_nh4' => '018NY6XC00XFEAWWREZRVF68PE'
-		, 'caryophyllene_oxide' => '018NY6XC00LM00000000000000'
 		, 'caryophyllene_oxide_percent' => '018NY6XC002GH0MJ4KFFBE79WN'
 		, 'caryophyllene_oxide_ug_g' => '018NY6XC002GH0MJ4KFFBE79WN'
-		, 'cbc_l' => '018NY6XC00LM00000000000000'
-		, 'cbc_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbc_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbc_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'caryophyllene_oxide' => LAB_METRIC_SKIP
+		, 'cbc_l' => LAB_METRIC_SKIP
+		, 'cbc_mg_g' => LAB_METRIC_SKIP
+		, 'cbc_mg_ml' => LAB_METRIC_SKIP
+		, 'cbc_mg_serving' => LAB_METRIC_SKIP
 		, 'cbc_percent' => '018NY6XC00LM50KG4SS3BDPAGX'
-		, 'cbca_l' => '018NY6XC00LM00000000000000'
-		, 'cbca_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbca_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbca_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbca_l' => LAB_METRIC_SKIP
+		, 'cbca_mg_g' => LAB_METRIC_SKIP
+		, 'cbca_mg_ml' => LAB_METRIC_SKIP
+		, 'cbca_mg_serving' => LAB_METRIC_SKIP
 		, 'cbca_percent' => '018NY6XC00LM74YZAGG90X06MC'
-		, 'cbd_l' => '018NY6XC00LM00000000000000'
-		, 'cbd_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbd_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbd_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbd_l' => LAB_METRIC_SKIP
+		, 'cbd_mg_g' => LAB_METRIC_SKIP
+		, 'cbd_mg_ml' => LAB_METRIC_SKIP
+		, 'cbd_mg_serving' => LAB_METRIC_SKIP
 		, 'cbd_percent' => '018NY6XC00LMK7KHD3HPW0Y90N'
-		, 'cbda_l' => '018NY6XC00LM00000000000000'
-		, 'cbda_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbda_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbda_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbda_l' => LAB_METRIC_SKIP
+		, 'cbda_mg_g' => LAB_METRIC_SKIP
+		, 'cbda_mg_ml' => LAB_METRIC_SKIP
+		, 'cbda_mg_serving' => LAB_METRIC_SKIP
 		, 'cbda_percent' => '018NY6XC00LMENDHEH2Y32X903'
-		, 'cbdv_l' => '018NY6XC00LM00000000000000'
-		, 'cbdv_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbdv_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbdv_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbdv_l' => LAB_METRIC_SKIP
+		, 'cbdv_mg_g' => LAB_METRIC_SKIP
+		, 'cbdv_mg_ml' => LAB_METRIC_SKIP
+		, 'cbdv_mg_serving' => LAB_METRIC_SKIP
 		, 'cbdv_percent' => '018NY6XC00LMZGPEH1Z4VY04RJ'
-		, 'cbdva_l' => '018NY6XC00LM00000000000000'
-		, 'cbdva_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbdva_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbdva_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbdva_l' => LAB_METRIC_SKIP
+		, 'cbdva_mg_g' => LAB_METRIC_SKIP
+		, 'cbdva_mg_ml' => LAB_METRIC_SKIP
+		, 'cbdva_mg_serving' => LAB_METRIC_SKIP
 		, 'cbdva_percent' => '018NY6XC00M27M46SED0ZZCSQZ'
-		, 'cbg_l' => '018NY6XC00LM00000000000000'
-		, 'cbg_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbg_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbg_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbg_l' => LAB_METRIC_SKIP
+		, 'cbg_mg_g' => LAB_METRIC_SKIP
+		, 'cbg_mg_ml' => LAB_METRIC_SKIP
+		, 'cbg_mg_serving' => LAB_METRIC_SKIP
 		, 'cbg_percent' => '018NY6XC00LMXRFMR5NJ35ZBAX'
-		, 'cbga_l' => '018NY6XC00LM00000000000000'
-		, 'cbga_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbga_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbga_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbga_l' => LAB_METRIC_SKIP
+		, 'cbga_mg_g' => LAB_METRIC_SKIP
+		, 'cbga_mg_ml' => LAB_METRIC_SKIP
+		, 'cbga_mg_serving' => LAB_METRIC_SKIP
 		, 'cbga_percent' => '018NY6XC00LMAKFJY80QDMWF7F'
-		, 'cbl_l' => '018NY6XC00LM00000000000000'
-		, 'cbl_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbl_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbl_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbl_l' => LAB_METRIC_SKIP
+		, 'cbl_mg_g' => LAB_METRIC_SKIP
+		, 'cbl_mg_ml' => LAB_METRIC_SKIP
+		, 'cbl_mg_serving' => LAB_METRIC_SKIP
 		, 'cbl_percent' => '018NY6XC00LMZZ776J7YTKR49R'
-		, 'cbla_l' => '018NY6XC00LM00000000000000'
-		, 'cbla_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbla_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbla_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbla_l' => LAB_METRIC_SKIP
+		, 'cbla_mg_g' => LAB_METRIC_SKIP
+		, 'cbla_mg_ml' => LAB_METRIC_SKIP
+		, 'cbla_mg_serving' => LAB_METRIC_SKIP
 		, 'cbla_percent' => '018NY6XC00T2ZJXXZA3HHXW6N3'
-		, 'cbn_l' => '018NY6XC00LM00000000000000'
-		, 'cbn_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbn_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbn_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbn_l' => LAB_METRIC_SKIP
+		, 'cbn_mg_g' => LAB_METRIC_SKIP
+		, 'cbn_mg_ml' => LAB_METRIC_SKIP
+		, 'cbn_mg_serving' => LAB_METRIC_SKIP
 		, 'cbn_percent' => '018NY6XC00LM3W3G1ERAF2QEF5'
-		, 'cbna_l' => '018NY6XC00LM00000000000000'
-		, 'cbna_mg_g' => '018NY6XC00LM00000000000000'
-		, 'cbna_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'cbna_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'cbna_l' => LAB_METRIC_SKIP
+		, 'cbna_mg_g' => LAB_METRIC_SKIP
+		, 'cbna_mg_ml' => LAB_METRIC_SKIP
+		, 'cbna_mg_serving' => LAB_METRIC_SKIP
 		, 'cbna_percent' => '018NY6XC00LMA46E79SNHBKR6H'
 		, 'chlorantraniliprole' => '018NY6XC00WHBFGHPDBB756NTZ'
 		, 'chlorfenapyr' => '018NY6XC00LMR0FZPVYAEJ8JET'
 		, 'chloroform' => '018NY6XC00LMAA8QXZ8CD0QQMW'
 		, 'chlorotoluron' => '018NY6XC00N5KT44W546GPVM5W'
 		, 'chloroxuron' => '018NY6XC00BESMYZ2TS1G77DYH'
-		, 'chlorpyrifos' => '018NY6XC00LMXCM3VG0XGR6KAH'
 		, 'chlorpyrifos_gc' => '018NY6XC00LMXCM3VG0XGR6KAH' // @dedupe
 		, 'chlorpyrifos_lc' => '018NY6XC00LMXCM3VG0XGR6KAH' // @dedupe
-		, 'cis_nerolidol' => '018NY6XC00LM00000000000000'
+		, 'chlorpyrifos' => '018NY6XC00LMXCM3VG0XGR6KAH'
 		, 'cis_nerolidol_percent' => '018NY6XC004NQKFWGHH2V2HPDT'
 		, 'cis_nerolidol_ug_g' => '018NY6XC004NQKFWGHH2V2HPDT'
+		, 'cis_nerolidol' => LAB_METRIC_SKIP
 		, 'clofentezine' => '018NY6XC00LM230ECKQSRFZ2BE'
 		, 'clothianidin' => '018NY6XC00E31T3XNT16BPBNN7'
 		, 'coliform' => '018NY6XC00LMTMR8TN8WE86JVY'
-		, 'comments' => '018NY6XC00LM00000000000000'
+		, 'comments' => LAB_METRIC_SKIP
 		, 'copper' => '018NY6XC00JB22ZVQ47CBPZCMZ'
 		, 'cyazofamid' => '018NY6XC001PN891J5H1HMQMWG'
 		, 'cyclohexane' => '018NY6XC00LM6QHYX79AXVVRH1'
@@ -1447,14 +1461,14 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'cypermethrin' => '018NY6XC00LM7CX800BM0FSGJR'
 		, 'daminozide' => '018NY6XC00LM8H6MET0WJ2YCV1'
 		, 'ddvp' => '018NY6XC00LMXVVJP95SCEWYMJ' // Dichlorvos
-		, 'delta_8_thc_l' => '018NY6XC00LM00000000000000'
-		, 'delta_8_thc_mg_g' => '018NY6XC00LM00000000000000'
-		, 'delta_8_thc_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'delta_8_thc_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'delta_8_thc_l' => LAB_METRIC_SKIP
+		, 'delta_8_thc_mg_g' => LAB_METRIC_SKIP
+		, 'delta_8_thc_mg_ml' => LAB_METRIC_SKIP
+		, 'delta_8_thc_mg_serving' => LAB_METRIC_SKIP
 		, 'delta_8_thc_percent' => '018NY6XC00LM877GAKMFPK7BMC'
-		, 'delta_three_carene' => '018NY6XC00LM00000000000000'
 		, 'delta_three_carene_percent' => '018NY6XC00LMJ8HWPTK92118TJ'
 		, 'delta_three_carene_ug_g' => '018NY6XC00LMJ8HWPTK92118TJ'
+		, 'delta_three_carene' => LAB_METRIC_SKIP
 		, 'diazinon' => '018NY6XC00LM1FYB8674M2X435'
 		, 'dichloromethane' => '018NY6XC00LM7D70QAKTR6WM30'
 		, 'dicrotophos' => '018NY6XC00FB8JT1PA317Z2MND'
@@ -1472,10 +1486,10 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'ethyl_ether' => '018NY6XC00Z9M20PRDYBB5EXG3'
 		, 'etofenprox' => '018NY6XC00LMJHEQ07C7YKJBFM'
 		, 'etoxazole' => '018NY6XC00LMNPCTGHS6PVWKS3'
-		, 'eucalyptol' => '018NY6XC00LM00000000000000'
 		, 'eucalyptol_percent' => '018NY6XC00LM2E59R89FKZEVY8'
 		, 'eucalyptol_ug_g' => '018NY6XC00LM2E59R89FKZEVY8'
-		, 'extr_distill' => '018NY6XC00LM00000000000000' // Ignore
+		, 'eucalyptol' => LAB_METRIC_SKIP
+		, 'extr_distill' => LAB_METRIC_SKIP // Ignore
 		, 'fenamidone' => '018NY6XC00C9ETHT8V2SDPXVZ5'
 		, 'fenazaquin' => '018NY6XC0083TN9WFAX9CKABRV'
 		, 'fenoxycarb' => '018NY6XC00LMGN496XNG04YCKA'
@@ -1493,21 +1507,21 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'fuberidazole' => '018NY6XC00BXDN38RRQFM83K2C'
 		, 'furalaxyl' => '018NY6XC0015HX2C5EYMXAJ9SN'
 		, 'furathiocarb' => '018NY6XC00YD57JR2J0QD9S2ZB'
-		, 'gamma_terpinene' => '018NY6XC00LM00000000000000'
 		, 'gamma_terpinene_percent' => '018NY6XC00QJQVPK47XK0HMYGT'
 		, 'gamma_terpinene_ug_g' => '018NY6XC00QJQVPK47XK0HMYGT'
-		, 'geraniol' => '018NY6XC00LM00000000000000'
+		, 'gamma_terpinene' => LAB_METRIC_SKIP
 		, 'geraniol_percent' => '018NY6XC00LM1FFPX84N11Y960'
 		, 'geraniol_ug_g' => '018NY6XC00LM1FFPX84N11Y960'
-		, 'guaiol' => '018NY6XC00LM00000000000000'
+		, 'geraniol' => LAB_METRIC_SKIP
 		, 'guaiol_percent' => '018NY6XC00LMQQDFGS8QBAKJ3J'
 		, 'guaiol_ug_g' => '018NY6XC00LMQQDFGS8QBAKJ3J'
+		, 'guaiol' => LAB_METRIC_SKIP
 		, 'heptane' => '018NY6XC00LM50MYZZY71MQ7BE'
 		, 'hexane' => '018NY6XC00LM7EC335XECKPV3X'
 		, 'hexythiazox' => '018NY6XC00LMADJX0GMMS5MXVB'
 		, 'hydroxycarbofuran' => '018NY6XC000Z35NGMQK82PF009'
 		, 'hydroxymitragynine_mg_g' => '018NY6XC00HKGZD7C613RNE0Z0'
-		, 'hydroxymitragynine' => '018NY6XC00LM00000000000000'
+		, 'hydroxymitragynine' => LAB_METRIC_SKIP
 		, 'imazalil' => '018NY6XC00LMX1R3RFFRFZS8T4'
 		, 'imidacloprid' => '018NY6XC00LMR9Z32S7WHPBZP9'
 		, 'indoxacarb' => '018NY6XC00NWYNHMA169GDYEP2'
@@ -1516,29 +1530,37 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'isobutane' => '018NY6XC00LMPTJEH2SHH45155'
 		, 'isoprocarb' => '018NY6XC00J1J81N2749EYCRGF'
 		, 'isoproturon' => '018NY6XC00KQAY3ND99X6GTJS7'
-		, 'isopulegol' => '018NY6XC00LM00000000000000'
 		, 'isopulegol_percent' => '018NY6XC00LMFG9ZMJNQJ9AE5F'
 		, 'isopulegol_ug_g' => '018NY6XC00LMFG9ZMJNQJ9AE5F'
+		, 'isopulegol' => LAB_METRIC_SKIP
 		, 'kresoxym_methyl' => '018NY6XC00LM4VRHKTYTJJRDPW' // Spelled Wrong
-		, 'l_fenchone' => '018NY6XC00LM00000000000000'
-		, 'l_fenchone_percent' => '018NY6XC00LM00000000000000'
-		, 'l_fenchone_ug_g' => '018NY6XC00LM00000000000000'
+		, 'l_fenchone_percent' => LAB_METRIC_SKIP
+		, 'l_fenchone_ug_g' => LAB_METRIC_SKIP
+		, 'l_fenchone' => LAB_METRIC_SKIP
+		, 'lead_action_limit' => LAB_METRIC_SKIP
+		, 'lead_lod' => LAB_METRIC_SKIP
+		, 'lead_loq' => LAB_METRIC_SKIP
+		, 'lead_mrl' => LAB_METRIC_SKIP
 		, 'lead_ug_g' => '018NY6XC00LM6YBP4J5ASBWVNR'
 		, 'lead' => '018NY6XC00LM6YBP4J5ASBWVNR'
-		, 'limonene' => '018NY6XC00LM00000000000000'
 		, 'limonene_percent' => '018NY6XC00LM6J8FQHSXARDVMZ'
 		, 'limonene_ug_g' => '018NY6XC00LM6J8FQHSXARDVMZ'
-		, 'linalool' => '018NY6XC00LM00000000000000'
+		, 'limonene' => LAB_METRIC_SKIP
 		, 'linalool_percent' => '018NY6XC00LMK42ZVHZYKNQ1P0'
 		, 'linalool_ug_g' => '018NY6XC00LMK42ZVHZYKNQ1P0'
-		, 'lod' => '018NY6XC00LM00000000000000'
-		, 'loq' => '018NY6XC00LM00000000000000'
+		, 'linalool' => LAB_METRIC_SKIP
+		, 'lod' => LAB_METRIC_SKIP
+		, 'loq' => LAB_METRIC_SKIP
 		, 'magnesium' => '018NY6XC00665Q9X4K5GYHCMKA'
 		, 'malathion' => '018NY6XC00LMEN8F7VNXYV7HCS'
 		, 'mandipropamid' => '018NY6XC00SNPZ5RJVW2VGGSHW'
 		, 'manganese' => '018NY6XC00F9TF4KHN8Q31HX1Q'
 		, 'mefenacet' => '018NY6XC00B7Q87QDXQH9VS5VP'
 		, 'mepronil' => '018NY6XC00M8V4J6PX1J33YM3E'
+		, 'mercury_action_limit' => LAB_METRIC_SKIP
+		, 'mercury_lod' => LAB_METRIC_SKIP
+		, 'mercury_loq' => LAB_METRIC_SKIP
+		, 'mercury_mrl' => LAB_METRIC_SKIP
 		, 'mercury_ug_g' => '018NY6XC00LM10ZPAN42R490W3'
 		, 'mercury' => '018NY6XC00LM10ZPAN42R490W3'
 		, 'metalaxyl' => '018NY6XC00LMMFPYJ25XC5QTTQ'
@@ -1554,7 +1576,7 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		// But only puts one into QBench so we put it all in Isomer1
 		, 'mgk_264' => '018NY6XC00LMCQ7DX02S94RMM7'
 		, 'mitragynine_mg_g' => '018NY6XC00V3M3MSYQMV9RCMCE'
-		, 'mitragynine' => '018NY6XC00LM00000000000000'
+		, 'mitragynine' => LAB_METRIC_SKIP
 		, 'moisture' => '018NY6XC00LM0PXPG4592M8J14'
 		, 'molybdenum' => '018NY6XC00H5A6PZTZZPH4S5Y1'
 		, 'monocrotophos' => '018NY6XC00QVVXQP061W2CPV05'
@@ -1563,29 +1585,29 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'nitenpyram' => '018NY6XC00H4N32NPA0CS61N92'
 		// , 'ochratoxin_a' => '01EDPTGHG0NDY33JDVXVPEWYXN' // Our is A +H
 		, 'ochratoxin_a' => '018NY6XC00LMK15566W1G0ZH5X'
-		, 'ocimene_1' => '018NY6XC00LM00000000000000'
 		, 'ocimene_1_percent' => '018NY6XC00LMPS11DW5VC5ZDF6'
 		, 'ocimene_1_ug_g' => '018NY6XC00LMPS11DW5VC5ZDF6'
+		, 'ocimene_1' => LAB_METRIC_SKIP
 		, 'omethoate' => '018NY6XC00DBBXM932467MEQRD'
-		, 'other_comments' => '018NY6XC00LM00000000000000'
+		, 'other_comments' => LAB_METRIC_SKIP
 		, 'oxadixyl' => '018NY6XC00Z3253X3QJKK494CH'
 		, 'oxamyl' => '018NY6XC00LM83VNPJMHTKX5F0'
-		, 'p_cymene' => '018NY6XC00LM00000000000000'
 		, 'p_cymene_percent' => '018NY6XC00LMQW6Q8FE142912R'
 		, 'p_cymene_ug_g' => '018NY6XC00LMQW6Q8FE142912R'
+		, 'p_cymene' => LAB_METRIC_SKIP
 		, 'paclobutrazol' => '018NY6XC00LMV3YF9F83621G84'
 		, 'parathion_methyl' => '018NY6XC00LM4N6RPDAC97NM9V' // '01G0HSPKX1C4MX26E0RJGECRQB' // Evaluate?
 		, 'pentane' => '018NY6XC00LM68678PK1SAVVR5'
 		, 'permethrin_nh4' => '018NY6XC00LMXSM3QAXV8HQD5F'
-		, 'phosmet' => '018NY6XC00LMZ95MW0N3JPZ056'
 		, 'permethrins' => '018NY6XC00LM3ZJH23WAKV7JEB'
+		, 'phosmet' => '018NY6XC00LMZ95MW0N3JPZ056'
 		, 'phosphorus' => '018NY6XC00GMSF4B6WEDX137VG'
 		, 'picoxystrobin' => '018NY6XC00R5ETKRJAG59TFRJX'
 		, 'piperonyl_butoxide' => '018NY6XC00LM6VF2D0V998AY9Q'
 		, 'pirimicarb' => '018NY6XC00TZW1AB3MDBJYNA2Q'
-		, 'plus_cedrol' => '018NY6XC00LM00000000000000'
-		, 'plus_cedrol_percent' => '018NY6XC00LM00000000000000'
-		, 'plus_cedrol_ug_g' => '018NY6XC00LM00000000000000'
+		, 'plus_cedrol_percent' => LAB_METRIC_SKIP
+		, 'plus_cedrol_ug_g' => LAB_METRIC_SKIP
+		, 'plus_cedrol' => LAB_METRIC_SKIP
 		, 'potassium' => '018NY6XC004RHQ7NBP8K4VE4AN'
 		, 'prallethrin' => '018NY6XC00LMKX28NVG7PJT5WJ'
 		, 'prometon' => '018NY6XC00HEVERTDA65N8HCGV'
@@ -1598,8 +1620,8 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'pymetrozine' => '018NY6XC0076C9C0V96ETDQH3E'
 		, 'pyracarbolid' => '018NY6XC00KVC18KHKD7NVBET0'
 		, 'pyraclostrobin' => '018NY6XC00E5NEVSFCR2AC8H1B'
-		, 'pyrethrin_i' => '018NY6XC00A4CC4C21KRAMGQE0'
 		, 'pyrethrin_i_gc' => '018NY6XC00A4CC4C21KRAMGQE0'
+		, 'pyrethrin_i' => '018NY6XC00A4CC4C21KRAMGQE0'
 		, 'pyrethrin_ii' => '018NY6XC00FE5KW2ZCRY7ED5WG'
 		, 'pyrethrins_lc' => '018NY6XC00LMWSMH35NX5PQQKT'
 		, 'pyridaben' => '018NY6XC00LMH66XZD64ZDTHZW'
@@ -1607,9 +1629,9 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'quinoxyfen' => '018NY6XC003PXZ5PXNTVK0Z1VG'
 		, 'rotenone' => '018NY6XC00P9BP9K9YZRC3009W'
 		, 'salmonella' => '018NY6XC00LMS96WE6KHKNP52T'
-		, 'sample_density' => '018NY6XC00LM00000000000000'
-		, 'sample_mass' => '018NY6XC00LM00000000000000'
-		, 'sample_volume' => '018NY6XC00LM00000000000000'
+		, 'sample_density' => LAB_METRIC_SKIP
+		, 'sample_mass' => LAB_METRIC_SKIP
+		, 'sample_volume' => LAB_METRIC_SKIP
 		, 'sodium' => '018NY6XC00E5ZT93DF9ANMG29K'
 		, 'spinosad_a' => '018NY6XC00LMMYVTVKPR0V8C0F'
 		, 'spinosad_d' => '018NY6XC00LMPNZXG9Z9YNFFX9'
@@ -1617,33 +1639,33 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'spiromesifen' => '018NY6XC00LMT9BF2M636RZBZX'
 		, 'spirotetramat' => '018NY6XC00LMWDVDHEYRS6058S'
 		, 'spiroxamine' => '018NY6XC00LMQ6AM5TE0FYPN2R'
-		, 'stems_comments' => '018NY6XC00LM00000000000000'
+		, 'stems_comments' => LAB_METRIC_SKIP
 		, 'sulfur' => '018NY6XC000ZP3Q6CWW9AQ6224'
 		, 'tebuconazole' => '018NY6XC00LMT8QJD3BG6CNXA8'
 		, 'tebufenozide' => '018NY6XC005BCZ2QCXPDT081G9'
 		, 'tebuthiuron' => '018NY6XC00RQKY5AYGVY554DRK'
-		, 'terpinolene' => '018NY6XC00LM00000000000000'
 		, 'terpinolene_percent' => '018NY6XC00LMBFR51SFFGQJXRF'
 		, 'terpinolene_ug_g' => '018NY6XC00LMBFR51SFFGQJXRF'
-		, 'thc_l' => '018NY6XC00LM00000000000000'
-		, 'thc_mg_g' => '018NY6XC00LM00000000000000'
-		, 'thc_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'thc_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'terpinolene' => LAB_METRIC_SKIP
+		, 'thc_l' => LAB_METRIC_SKIP
+		, 'thc_mg_g' => LAB_METRIC_SKIP
+		, 'thc_mg_ml' => LAB_METRIC_SKIP
+		, 'thc_mg_serving' => LAB_METRIC_SKIP
 		, 'thc_percent' => '018NY6XC00LM49CV7QP9KM9QH9'
-		, 'thca_l' => '018NY6XC00LM00000000000000'
-		, 'thca_mg_g' => '018NY6XC00LM00000000000000'
-		, 'thca_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'thca_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'thca_l' => LAB_METRIC_SKIP
+		, 'thca_mg_g' => LAB_METRIC_SKIP
+		, 'thca_mg_ml' => LAB_METRIC_SKIP
+		, 'thca_mg_serving' => LAB_METRIC_SKIP
 		, 'thca_percent' => '018NY6XC00LMB0JPRM2SF8F9F2'
-		, 'thcv_l' => '018NY6XC00LM00000000000000'
-		, 'thcv_mg_g' => '018NY6XC00LM00000000000000'
-		, 'thcv_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'thcv_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'thcv_l' => LAB_METRIC_SKIP
+		, 'thcv_mg_g' => LAB_METRIC_SKIP
+		, 'thcv_mg_ml' => LAB_METRIC_SKIP
+		, 'thcv_mg_serving' => LAB_METRIC_SKIP
 		, 'thcv_percent' => '018NY6XC00LMEXWB3ENZ1MK7R4'
-		, 'thcva_l' => '018NY6XC00LM00000000000000'
-		, 'thcva_mg_g' => '018NY6XC00LM00000000000000'
-		, 'thcva_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'thcva_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'thcva_l' => LAB_METRIC_SKIP
+		, 'thcva_mg_g' => LAB_METRIC_SKIP
+		, 'thcva_mg_ml' => LAB_METRIC_SKIP
+		, 'thcva_mg_serving' => LAB_METRIC_SKIP
 		, 'thcva_percent' => '018NY6XC00LMWV6T4FB28F9JMH'
 		, 'thiacloprid' => '018NY6XC00LMMFQB5HBHJBQ9BS'
 		, 'thiamethoxam' => '018NY6XC00LMCH7YXS32M4PNZF'
@@ -1651,31 +1673,31 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'thiophanate_methyl' => '018NY6XC008N5MR09YY8T1HRMR'
 		, 'toluene' => '018NY6XC00LMGG9JR3SM0MEDGQ'
 		, 'total_aflatoxins' => '018NY6XC00LMR9PB7SNBP97DAS' // Calculated?
+		, 'total_cannabinoids_mg_g' => LAB_METRIC_SKIP
+		, 'total_cannabinoids_mg_ml' => LAB_METRIC_SKIP
 		, 'total_cannabinoids_percent' => '018NY6XC00SAE8Q4JSMF40YSZ3'
-		, 'total_cannabinoids_mg_g' => '018NY6XC00LM00000000000000'
-		, 'total_cannabinoids_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'total_cannabinoids_serving' => '018NY6XC00LM00000000000000'
-		, 'total_cbd_mg_g' => '018NY6XC00LM00000000000000'
-		, 'total_cbd_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'total_cbd_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'total_cannabinoids_serving' => LAB_METRIC_SKIP
+		, 'total_cbd_mg_g' => LAB_METRIC_SKIP
+		, 'total_cbd_mg_ml' => LAB_METRIC_SKIP
+		, 'total_cbd_mg_serving' => LAB_METRIC_SKIP
 		, 'total_cbd_percent' => '018NY6XC00DEEZ41QBXR2E3T97'
-		, 'total_terpenes' => '018NY6XC00LM00000000000000'
-		, 'total_terpenes_percent' => '018NY6XC00LM00000000000000'
-		, 'total_terpenes_ug_g' => '018NY6XC00LM00000000000000'
-		, 'total_thc_mg_g' => '018NY6XC00LM00000000000000'
-		, 'total_thc_mg_ml' => '018NY6XC00LM00000000000000'
-		, 'total_thc_mg_serving' => '018NY6XC00LM00000000000000'
+		, 'total_terpenes_percent' => LAB_METRIC_SKIP
+		, 'total_terpenes_ug_g' => LAB_METRIC_SKIP
+		, 'total_terpenes' => LAB_METRIC_SKIP
+		, 'total_thc_mg_g' => LAB_METRIC_SKIP
+		, 'total_thc_mg_ml' => LAB_METRIC_SKIP
+		, 'total_thc_mg_serving' => LAB_METRIC_SKIP
 		, 'total_thc_percent' => '018NY6XC00PXG4PH0TXS014VVW'
-		, 'total_unit_serving' => '018NY6XC00LM00000000000000'
-		, 'trans_nerolidol' => '018NY6XC00LM00000000000000'
+		, 'total_unit_serving' => LAB_METRIC_SKIP
 		, 'trans_nerolidol_percent' => '018NY6XC00LMJ3HV06KJXPR9F3'
 		, 'trans_nerolidol_ug_g' => '018NY6XC00LMJ3HV06KJXPR9F3'
+		, 'trans_nerolidol' => LAB_METRIC_SKIP
 		, 'tricyclazole' => '018NY6XC00EFCPDSJZ8XM6591M'
 		, 'trifloxystrobin' => '018NY6XC00LMRG0A40VCNVW3YX'
 		, 'triflumizole' => '018NY6XC00H7A0GKSCJ1PKN9NE'
 		, 'uniconazole' => '018NY6XC00T7NND9V8G2Q3G095'
-		, 'unit_weight' => '018NY6XC00LM00000000000000'
-		, 'units' => '018NY6XC00LM00000000000000'
+		, 'unit_weight' => LAB_METRIC_SKIP
+		, 'units' => LAB_METRIC_SKIP
 		, 'vamidothion' => '018NY6XC00E2EHRX8HHRQ5KDDX'
 		, 'water_activity' => '018NY6XC00LMHF4266DN94JPPX'
 		, 'xylene' => '018NY6XC00LMW1FC0RA14FZ3PF'
@@ -1691,11 +1713,11 @@ function _qbench_map_metric($dbc, $metric_key) : array
 	if (empty($metric_ulid)) {
 		// Ignore the Pass/Failers
 		if (preg_match('/_pf$/', $metric_key)) {
-			$metric_ulid = '018NY6XC00LM00000000000000';
+			$metric_ulid = LAB_METRIC_SKIP;
 		}
 	}
 
-	if ('018NY6XC00LM00000000000000' == $metric_ulid) {
+	if (LAB_METRIC_SKIP == $metric_ulid) {
 		return [
 			'id' => $metric_ulid,
 			'name' => '-skip-',
