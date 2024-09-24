@@ -68,7 +68,15 @@ class Main extends \OpenTHC\Lab\Controller\Base
 		if ( ! empty($_GET['q'])) {
 			$_GET['q'] = trim($_GET['q']);
 			$sql_filter[] = [
-				'sql' => '(lab_report.id LIKE :q69 OR lab_report.name LIKE :q69 OR lab_sample.id LIKE :q69 OR lab_sample.name LIKE :q69)',
+				'sql' => <<<SQL
+				(
+					lab_report.id LIKE :q69
+					OR lab_report.name LIKE :q69
+					OR lab_sample.id LIKE :q69
+					OR lab_sample.name LIKE :q69
+					OR inventory.guid LIKE :q69
+				)
+				SQL,
 				'arg' => [
 					':q69' => sprintf('%%%s%%', $_GET['q'])
 				]
