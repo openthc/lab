@@ -21,6 +21,8 @@ use OpenTHC\Lab\Lab_Report;
 	]
 ]); ?>
 
+<div class="mb-2"><?= $data['page_list_html'] ?></div>
+
 <table class="table table-sm">
 <thead class="table-dark">
 	<tr>

@@ -26,6 +26,8 @@
 	]
 ]); ?>
 
+<div class="mb-2"><?= $data['page_list_html'] ?></div>
+
 <!-- <p>A List of all Active and Recent Results, use Filters or Search to find old stuff.</p> -->
 
 <table class="table table-sm">

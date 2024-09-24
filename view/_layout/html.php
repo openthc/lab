@@ -235,8 +235,7 @@ if ( ! empty($x)) {
 	$x = str_replace('</div>', '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>', $x);
 
 	if ( ! empty($x)) {
-		// var_dump($x);
-		echo $x;
+		echo sprintf('<div class="container-fluid my-4">%s</div>', $x);
 	}
 
 }

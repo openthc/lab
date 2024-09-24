@@ -26,7 +26,7 @@ use OpenTHC\Lab\Lab_Sample
 	]
 ]); ?>
 
-<div><?= $data['page_list_html'] ?></div>
+<div class="mb-2"><?= $data['page_list_html'] ?></div>
 
 <table class="table table-sm">
 <thead class="table-dark">
