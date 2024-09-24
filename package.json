@@ -1,6 +1,6 @@
 {
   "name": "@openthc/lab",
-  "version": "420.22.207",
+  "version": "420.24.268",
   "description": "OpenTHC Laboratory Module",
   "main": "main.js",
   "directories": {
@@ -8,12 +8,12 @@
     "test": "test"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "6.4.2",
-    "bootstrap": "5.3.2",
-    "clipboard": "^2.0.11",
+    "@fortawesome/fontawesome-free": "6.6.0",
+    "bootstrap": "5.3.3",
+    "clipboard": "2.0.11",
     "jquery": "3.7.1",
-    "jquery-ui": "1.13.2",
-    "puppeteer": "21.5.2"
+    "jquery-ui": "1.14.0",
+    "puppeteer": "23.4.0"
   },
   "scripts": {
     "test": "test.js"

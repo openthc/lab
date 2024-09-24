@@ -16,7 +16,7 @@ if (empty($data['search_field_list'])) {
 ?>
 
 <style>
-.lab-result-filter-wrap {
+.lab-search-filter-wrap {
 	background-color: var(--gray-dark);
 	border: 1px solid var(--gray);
 	border-radius: 0.25rem;
@@ -25,14 +25,14 @@ if (empty($data['search_field_list'])) {
 	margin: 0;
 	padding: 0.25rem;
 }
-.lab-result-filter-wrap .btn-outline-secondary {
+.lab-search-filter-wrap .btn-outline-secondary {
 	color: var(--light);
 }
 </style>
 
 <form autocomplete="off">
 
-<div class="lab-result-filter-wrap">
+<div class="lab-search-filter-wrap">
 	<div class="input-group-wrap" style="flex: 1 1 auto; width: 100%;">
 		<div class="input-group">
 			<button class="btn btn-outline-secondary dropdown-toggle"
@@ -43,27 +43,25 @@ if (empty($data['search_field_list'])) {
 			<div class="dropdown-menu" id="sf-menu-history">
 				...
 			</div>
-			<div class="form-control" id="sf-filter">
-				<div id="sf-filter-list"></div>
-				<div class="dropdown">
-					<input class="dropdown-toggle" data-bs-toggle="dropdown" id="lab-result-filter" name="q" style="border: none;" type="text" value="<?= __h($_GET['q']) ?>">
-					<div class="dropdown-menu">
-						<?php
-						foreach ($data['search_field_list'] as $k => $v) {
-							printf('<button class="dropdown-item" type="button">%s</button>', $v);
-						}
-						?>
-						<button class="dropdown-item" type="button">Lot ID</button>
-						<button class="dropdown-item" type="button">Sample ID</button>
-						<button class="dropdown-item" type="button">Result ID</button>
-						<button class="dropdown-item" type="button">Variety</button>
-						<button class="dropdown-item" type="button">Origin</button>
-						<button class="dropdown-item" type="button">THC</button>
-						<button class="dropdown-item" type="button">CBD</button>
-						<button class="dropdown-item" type="button">Status</button>
-					</div>
-				</div>
-			</div>
+			<input class="dropdown form-control" data-bs-toggle="dropdown" id="lab-search-filter" name="q" type="text" value="<?= __h($_GET['q']) ?>">
+			<!-- <div class="form-control" id="sf-filter"> -->
+				<!-- <div id="sf-filter-list"></div> -->
+			<!-- <div class="dropdown-menu">
+				<?php
+				foreach ($data['search_field_list'] as $k => $v) {
+					printf('<button class="dropdown-item" type="button">%s</button>', $v);
+				}
+				?>
+				<button class="dropdown-item" data-field-name="" type="button">Lot ID</button>
+				<button class="dropdown-item" data-field-name="" type="button">Sample ID</button>
+				<button class="dropdown-item" data-field-name="" type="button">Result ID</button>
+				<button class="dropdown-item" data-field-name="" type="button">Variety</button>
+				<button class="dropdown-item" data-field-name="" type="button">Origin</button>
+				<button class="dropdown-item" data-field-name="" type="button">THC</button>
+				<button class="dropdown-item" data-field-name="" type="button">CBD</button>
+				<button class="dropdown-item" data-field-name="" type="button">Status</button>
+			</div> -->
+			<!-- </div> -->
 			<button class="btn btn-outline-secondary" name="a" type="submit" value="search"><i class="fas fa-search"></i></button>
 		</div>
 	</div>
@@ -72,7 +70,7 @@ if (empty($data['search_field_list'])) {
 			<div class="btn-group btn-group-sort" style="width: 10em;">
 				<button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" type="button">Sort Options</button>
 				<ul class="dropdown-menu">
-					<li><button class="dropdown-item" name="sort" type="button" value="result-id">Result ID</button></li>
+					<!-- <li><button class="dropdown-item" name="sort" type="button" value="result-id">Result ID</button></li> -->
 					<li><button class="dropdown-item" name="sort" type="button" value="sample-id">Sample ID</button></li>
 					<!-- <li><button class="dropdown-item" name="sort" type="button" value="variety">Variety</button></li> -->
 					<li><button class="dropdown-item" name="sort" type="button" value="created-at">Created Date</button></li>
@@ -149,10 +147,12 @@ $(function() {
 
 	// Set the Text to the Right Value
 	var txt = $(`button[value="<?= $_GET['sort'] ?>"]`).text();
-	$('.btn-group-sort .dropdown-toggle').html( txt );
+	if (txt) {
+		$('.btn-group-sort .dropdown-toggle').html( txt );
+	}
 
 	//
-	$('#lab-result-filter').on('keyup', function() {
+	$('#lab-search-filter').on('keyup', function() {
 		// Start Filtering the Table?
 		// Ajax Query?
 		// Filter Table Rows and Hide Some?

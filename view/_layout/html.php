@@ -5,6 +5,11 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+// $doc = new HTML();
+// $doc->addHead($head);
+// $doc->addBody($body);
+// $doc->addScript();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,13 +20,13 @@
 <meta name="theme-color" content="#069420">
 
 <!-- OG -->
-<meta property="og:image" content="https://cdn.openthc.com/img/icon.png">
+<meta property="og:image" content="https://openthc.org/img/icon.png">
 <meta property="og:title" content="<?= strip_tags($data['Page']['title']) ?: 'OpenTHC Lab' ?>">
 <meta property="og:description" content="OpenTHC Lab Data Portal">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous" referrerpolicy="no-referrer">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" referrerpolicy="no-referrer">
-<link rel="stylesheet" href="https://cdn.openthc.com/bootstrap/5.1.3/bootstrap.min.css" integrity="sha256-YvdLHPgkqJ8DVUxjjnGVlMMJtNimJ6dYkowFFvp4kKs=" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="/vendor/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" href="/vendor/jquery/jquery-ui.min.css">
 <link rel="stylesheet" href="https://cdn.openthc.com/css/www/0.0.3/www.css">
 <style>
 .form-control::placeholder {
@@ -245,9 +250,9 @@ if ( ! empty($x)) {
 <?= $this->block('footer-zero.php') ?>
 
 <!-- Library Deps -->
-<script src="https://cdn.openthc.com/jquery/3.4.1/jquery.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-<script src="https://cdn.openthc.com/jqueryui/1.12.1-custom/jquery-ui.min.js" integrity="sha256-ComsX7C0zMiJupTpYuHb0QYhmRDmTnuxzgAY+7rcFMc=" crossorigin="anonymous"></script>
-<script src="https://cdn.openthc.com/bootstrap/5.1.3/bootstrap.bundle.min.js" integrity="sha256-9SEPo+fwJFpMUet/KACSwO+Z/dKMReF9q4zFhU/fT9M=" crossorigin="anonymous"></script>
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script src="/vendor/jquery/jquery-ui.min.js"></script>
+<script src="/vendor/bootstrap/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 <script>
 $(function() {

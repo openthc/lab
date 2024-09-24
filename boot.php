@@ -24,7 +24,8 @@ use OpenTHC\Sodium;
 
 define('APP_ROOT', __DIR__);
 define('APP_SALT', sha1('$PUT_YOUR_SECRET_VALUE_HERE'));
-define('APP_BUILD', '420.24.095');
+define('APP_BUILD', '420.24.268');
+define('APP_VERSION', '420.24.268');
 
 openlog('openthc-lab', LOG_ODELAY|LOG_PID, LOG_LOCAL0);
 
