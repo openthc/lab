@@ -13,8 +13,6 @@
 		}
 	},
 	"require": {
-		"edoceo/lowline": "2022.0.280",
-		"edoceo/radix": "2021.0.0",
 		"endroid/qr-code": "4.4.9",
 		"google/protobuf": "3.21.1",
 		"grpc/grpc": "1.42.0",
