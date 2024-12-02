@@ -7,9 +7,9 @@
 	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
 	backupGlobals="false"
 	backupStaticAttributes="false"
-	bootstrap="boot.php"
+	bootstrap="../boot.php"
 	cacheResult="false"
-	colors="true"
+	colors="false"
 	convertErrorsToExceptions="true"
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
@@ -17,32 +17,27 @@
 	stopOnError="true"
 	stopOnFailure="true"
 	stopOnRisky="true"
-	timeoutForSmallTests="1"
-	timeoutForMediumTests="10"
-	timeoutForLargeTests="60"
+	timeoutForSmallTests="2"
+	timeoutForMediumTests="8"
+	timeoutForLargeTests="32"
 	verbose="false"
 	>
 
-	<coverage />
-
 	<php>
 
-		<const name="OPENTHC_TEST_ORIGIN" value="https://lab.openthc.example.com" />
-		<const name="TEST_HTTP_DEBUG" value="0" />
+		<env name="OPENTHC_TEST_ORIGIN" value="https://lab.openthc.example.com" />
 
-		<const name="OPENTHC_TEST_SERVICE_A" value="" />
-		<const name="OPENTHC_TEST_COMPANY_A" value="" />
-		<const name="OPENTHC_TEST_LICENSE_A" value="" />
+		<!-- If defined, it will spew debug -->
+		<!-- <env name="OPENTHC_TEST_HTTP_DEBUG" value="0" /> -->
 
-		<const name="USER_A_USERNAME" value="test@openthc.example.com" />
-		<const name="USER_A_PASSWORD" value="passweed" />
-		<const name="USER_A_PASSWORD_FAIL" value="password" />
+		<!-- Depends on a Service, Contact, Company and License to exist  -->
+		<env name="OPENTHC_TEST_SERVICE_A" value="" />
+		<env name="OPENTHC_TEST_COMPANY_A" value="" />
+		<env name="OPENTHC_TEST_LICENSE_A" value="" />
 
-
-		<const name="TEST_BROWSERSTACK_USER" value=""/>
-		<const name="TEST_BROWSERSTACK_AUTH" value=""/>
-		<const name="TEST_BROWSERSTACK_BASE" value="hub-cloud.browserstack.com"/>
-
+		<env name="USER_A_USERNAME" value="test@openthc.example.com" />
+		<env name="USER_A_PASSWORD" value="passweed" />
+		<env name="USER_A_PASSWORD_FAIL" value="password" />
 
 	</php>
 
@@ -55,8 +50,6 @@
 		</testsuite>
 	</testsuites>
 
-	<logging>
-		<junit outputFile="../webroot/test-output/output.xml" />
-	</logging>
+	<coverage />
 
 </phpunit>
