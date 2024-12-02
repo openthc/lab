@@ -16,7 +16,6 @@
 		"endroid/qr-code": "4.4.9",
 		"google/protobuf": "3.21.1",
 		"grpc/grpc": "1.42.0",
-		"league/oauth2-client": "2.7.0",
 		"openthc/api": "dev-main",
 		"openthc/common": "dev-main",
 		"openthc/cre-adapter": "dev-main",
