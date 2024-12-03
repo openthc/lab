@@ -1317,7 +1317,7 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'a_terpineol_percent' => '018NY6XC00LMMQ4V3VTBQ83QWW'
 		, 'a_terpineol_ug_g' => '018NY6XC00LMMQ4V3VTBQ83QWW'
 		, 'a_terpineol' => '018NY6XC00LMMQ4V3VTBQ83QWW'
-		, 'abamectin_b1a' => '01EDPT1CHZJTASPX5X38PWWP3Y'
+		, 'abamectin_b1a' => '018NY6XC00LMA5GGMB8GXE0SJW'
 		, 'acephate' => '018NY6XC00LMME2KAJD5CJZCFC'
 		, 'acequinocyl' => '018NY6XC00LMB7TEPP64SS0VXD'
 		, 'acetamiprid' => '018NY6XC00LMHPJYYDQT7FCM8P'
@@ -1597,7 +1597,7 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'p_cymene' => LAB_METRIC_SKIP
 		, 'paclobutrazol' => '018NY6XC00LMV3YF9F83621G84'
 		, 'parathion_methyl' => '018NY6XC00LM4N6RPDAC97NM9V' // '01G0HSPKX1C4MX26E0RJGECRQB' // Evaluate?
-		, 'pentane' => '018NY6XC00LM68678PK1SAVVR5'
+		, 'pentane' => '01FRK0CC1G0SMZT4RW3WR8QBA1'
 		, 'permethrin_nh4' => '018NY6XC00LMXSM3QAXV8HQD5F'
 		, 'permethrins' => '018NY6XC00LM3ZJH23WAKV7JEB'
 		, 'phosmet' => '018NY6XC00LMZ95MW0N3JPZ056'
@@ -1623,7 +1623,7 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'pyrethrin_i_gc' => '018NY6XC00A4CC4C21KRAMGQE0'
 		, 'pyrethrin_i' => '018NY6XC00A4CC4C21KRAMGQE0'
 		, 'pyrethrin_ii' => '018NY6XC00FE5KW2ZCRY7ED5WG'
-		, 'pyrethrins_lc' => '018NY6XC00LMWSMH35NX5PQQKT'
+		, 'pyrethrins_lc' => '01FRK0CC1G0SMZT4RW3WR8QB9W'
 		, 'pyridaben' => '018NY6XC00LMH66XZD64ZDTHZW'
 		, 'pyripoxyfen' => '018NY6XC0032DMCC1E0SQAGB8V' // Actually Spelled: Pyriproxyfen
 		, 'quinoxyfen' => '018NY6XC003PXZ5PXNTVK0Z1VG'
