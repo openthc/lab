@@ -145,7 +145,7 @@ function _qbench_pull_license($dbc, $qbc)
 	$chk = json_decode($chk, true);
 	if ( ! empty($chk)) {
 		$dt0 = new DateTime($chk);
-		$dt0->sub(new DateInterval('P7D'));
+		$dt0->sub(new DateInterval('P30D'));
 	}
 
 	printf("_qbench_pull_license(%s)\n", $dt0->format(\DateTimeInterface::RFC3339));
@@ -1348,7 +1348,7 @@ function _qbench_map_metric($dbc, $metric_key) : array
 		, 'b_pinene' => LAB_METRIC_SKIP
 		, 'benalaxyl' => '018NY6XC00JR79FV9HVKHWW5HQ'
 		, 'benzene' => '018NY6XC00LMT7VRMWMXMH59Y5'
-		, 'bifenazate' => '018NY6XC00LMKCE4E30P3R72SK'
+		, 'bifenazate' => '018NY6XC001CR4C8SJEZQE1NYD'
 		, 'bifenthrin_gc' => '018NY6XC00LMPH4K88KC1PKJVJ'
 		, 'bifenthrin_lc' => '018NY6XC00LMPH4K88KC1PKJVJ'
 		, 'bifenthrin' => '018NY6XC00LMPH4K88KC1PKJVJ'
