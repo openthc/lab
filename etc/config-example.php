@@ -37,8 +37,8 @@ $cfg['openthc'] = [
 	],
 	'sso' => [
 		'origin' => 'https://sso.openthc.example',
-		'oauth-client-id' => '/* LAB SERVICE ULID */',
-		'oauth-client-sk' => '/* LAB SERVICE CLIENT KEY */',
+		'client-id' => '/* LAB SERVICE ULID */',
+		'client-sk' => '/* LAB SERVICE CLIENT KEY */',
 	],
 ];
 
