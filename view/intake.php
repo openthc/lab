@@ -1,14 +1,18 @@
 <?php
 /**
  * Incoming Data Portal
+ * Turn this into two steps
+ *  1) Origin Information + Data File
+ *  2a) if Data File confirm Sample Data
+ *  2b) No Data File input/create Sample Data
  *
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
 $variety_package_list = [];
 $variety_package_list[] = [
-	'id' => '1'
-	, 'name' => 'Test'
+	'id' => '1',
+	'name' => 'Test'
 ];
 
 ?>
@@ -63,10 +67,11 @@ $variety_package_list[] = [
 <hr>
 
 <h2>Sample Data</h2>
-
+<p>Enter the Sample information here,
 <table class="table">
 <thead class="table-dark">
 	<tr>
+		<td>Inventory ID</td>
 		<td>Product Type</td>
 		<td>Product</td>
 		<td>Variety</td>
@@ -80,6 +85,9 @@ $variety_package_list[] = [
 foreach ($variety_package_list as $i => $p) {
 ?>
 	<tr>
+		<td>
+			<input class="form-control" name="inventory-id[]" placeholder="Inventory Lot Serial Number">
+		</td>
 		<td>
 			<!-- @todo Data List -->
 			<!-- <input class="form-control" name="product_type[]" placeholder="- product type -" value="<?= h($p['product_type']) ?>"> -->
@@ -133,8 +141,25 @@ foreach ($variety_package_list as $i => $p) {
 </tbody>
 </table>
 
-
 <div>
+	<h2>File Attachments / Links</h2>
+	<p>Add any file attachments, or data links here</p>
+
+	<!-- <div>Drop Zone?</div> -->
+	<div class="input-group">
+		<div class="input-group-text">File:</div>
+		<input class="form-control" name="data-file"  type="file">
+	</div>
+
+	<div class="input-group">
+		<div class="input-group-text">Link:</div>
+		<input class="form-control" name="data-link" type="url">
+	</div>
+
+</div>
+
+
+<div class="form-actions mt-4">
 	<button class="btn btn-primary" name="a" type="submit" value="lab-intake-save"><i class="fas fa-save"></i> Save / Upload</button>
 </div>
 

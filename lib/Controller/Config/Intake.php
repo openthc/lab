@@ -1,6 +1,8 @@
 <?php
 /**
- * Configure Metrics
+ * Sample Intake Portal
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
  */
 
 namespace OpenTHC\Lab\Controller\Config;
@@ -9,13 +11,15 @@ use OpenTHC\Lab\Lab_Metric;
 
 class Intake extends \OpenTHC\Lab\Controller\Base
 {
+	/**
+	 *
+	 */
 	function __invoke($REQ, $RES, $ARG)
 	{
 		$data = $this->loadSiteData();
-		$data['menu'] = $this->_container->view['menu'];
 		$data['Page']['title'] = 'Config :: Intake';
 
-		$data['intake_link'] = sprintf('https://%s/intake?c=%s&amp;l=%s'
+		$data['intake_link'] = sprintf('https://%s/intake?c=%s&l=%s'
 			, $_SERVER['SERVER_NAME']
 			, $_SESSION['Company']['id']
 			, $_SESSION['License']['id']
