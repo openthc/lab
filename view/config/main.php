@@ -1,5 +1,7 @@
 
-<div class="container">
+<div class="container mt-2">
+<h1>Config</h1>
+
 <div class="config-wrap">
 
 	<div class="config-card">

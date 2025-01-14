@@ -51,17 +51,21 @@ function _draw_select_uom($id, $uom_want)
 <h1><a href="/config">Config</a> :: Metrics</h1>
 <p>Configure which metrics are used with which product classes.</p>
 
-<form autocomplete="off" method="post">
 <table class="table table-sm table-bordered table-hover table-metric">
 <?php
 foreach ($this->data['metric_list'] as $m) {
 
+	if ($m['stat'] == 308) {
+		continue;
+	}
+
+
 	if ($m['type'] != $type_x) {
 	?>
-		<tr class="thead-dark">
+		<tr>
 			<th colspan="7"><h3><?= h($m['type']) ?></h3></th>
 		</tr>
-		<tr class="thead-dark">
+		<tr class="table-dark">
 			<th>Name</th>
 			<th>UOM</th>
 			<th>LOD</th>
@@ -74,18 +78,18 @@ foreach ($this->data['metric_list'] as $m) {
 	}
 
 ?>
-	<tr>
-		<td><?= h($m['name']) ?></td>
+	<tr data-lab-metric-id="<?= $m['id'] ?>">
+		<td><?= __h($m['name']) ?></td>
 		<?php
 		if (308 == $m['stat']) {
 			printf('<td colspan="5">goto:%s</td>', $m['meta']['goto']);
 		} else {
 		?>
-		<td><?= __h($m['meta']['uom']) ?></td>
-		<td class="r"><?= __h($m['meta']['lod']) ?></td>
-		<td class="r"><?= h($m['meta']['loq-lb']) ?></td>
-		<td class="r"><?= h($m['meta']['loq-lb']) ?></td>
-		<td class="r"><?= h($m['meta']['max']['val']) ?></td>
+			<td><?= __h($m['meta']['uom']) ?></td>
+			<td class="r"><?= __h($m['meta']['lod']) ?></td>
+			<td class="r"><?= __h($m['meta']['loq-lb']) ?></td>
+			<td class="r"><?= __h($m['meta']['loq-ub']) ?></td>
+			<td class="r"><?= __h($m['meta']['max']['val']) ?></td>
 		<?php
 		}
 		?>
@@ -119,11 +123,6 @@ foreach ($this->data['metric_list'] as $m) {
 }
 ?>
 </table>
-
-<div class="form-actions">
-	<button class="btn btn-primary" name="a" value="save"><i class="fas fa-save"></i> Save</button>
-</div>
-</form>
 
 </div>
 

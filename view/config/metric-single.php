@@ -16,7 +16,7 @@
 	<div class="col-md-6 mb-2">
 		<div class="input-group">
 			<div class="input-group-text">Name:</div>
-			<input class="form-control" name="lod" value="<?= __h($data['Lab_Metric']['name']) ?>">
+			<input class="form-control" name="lab-metric-name" value="<?= __h($data['Lab_Metric']['name']) ?>">
 		</div>
 	</div>
 	<div class="col-md-6 mb-2">
