@@ -156,7 +156,7 @@ if ( ! empty($data['lab_report_file_list'])) {
 		$pub_link = $public_link_list[ $f['id'] ];
 		$int_link = sprintf('/report/%s/download/%s', $data['Lab_Report']['id'], $f['id']);
 		?>
-		<tr>
+		<tr data-lab-result-file-id="<?= __h($f['id']) ?>">
 		<td><a href="<?= $int_link ?>"><?= __h($f['name']) ?></a></td>
 		<?php
 		printf('<td>%s</td>', __h($f['type']));
