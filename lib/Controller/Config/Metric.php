@@ -29,12 +29,20 @@ class Metric extends \OpenTHC\Lab\Controller\Base
 
 		$metric_list = [];
 		$sql = <<<SQL
-		SELECT lab_metric.id, lab_metric.name, lab_metric.meta
+		SELECT lab_metric.id
+			, lab_metric.name
+			, lab_metric.meta
+			, lab_metric.sort
+			, lab_metric.stat
 		FROM lab_metric
 		JOIN lab_metric_type ON lab_metric.lab_metric_type_id = lab_metric_type.id
-		ORDER BY lab_metric_type.sort, lab_metric.sort
+		-- ORDER BY lab_metric_type.sort, lab_metric.sort, lab_metric.stat
+		ORDER BY lab_metric.type, lab_metric.sort, lab_metric.name, lab_metric.stat
 		SQL;
-		$res = $dbc->fetchAll('SELECT * FROM lab_metric ORDER BY type, sort, name, stat');
+
+		$sql = 'SELECT * FROM lab_metric ORDER BY type, sort, name, stat';
+
+		$res = $dbc->fetchAll($sql);
 		foreach ($res as $m) {
 			$m['meta'] = json_decode($m['meta'], true);
 			$metric_list[] = $m;
@@ -78,16 +86,23 @@ class Metric extends \OpenTHC\Lab\Controller\Base
 		switch ($_POST['a']) {
 			case 'lab-metric-single-update':
 
+				// __exit_text($_POST);
+
 				$Lab_Metric = new Lab_Metric($dbc, $_GET['id']);
+				$Lab_Metric['name'] = $_POST['lab-metric-name'];
+
 				$meta = $Lab_Metric->getMeta();
 				$meta['uom'] = $_POST['uom'];
 				$meta['lod'] = $_POST['lod'];
 				$meta['loq'] = $_POST['loq-lb'];
+				$meta['loq-lb'] = $_POST['loq-lb'];
+				$meta['loq-ub'] = $_POST['loq-ub'];
 				$meta['max']['val'] = $_POST['lof'];
 
-				// var_dump($meta);
 				$Lab_Metric['meta'] = json_encode($meta);
 				$Lab_Metric->save('Lab_Metric/Update by User');
+
+				Session::flash('info', 'Lab Metric Updated');
 
 				break;
 
