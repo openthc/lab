@@ -37,13 +37,6 @@ class View extends \OpenTHC\Lab\Controller\Base
 
 		}
 
-		$lr_meta = $Lab_Result->getMeta();
-		if ( ! empty($lr_meta['global_id'])) {
-			if (preg_match('/^WA.+\.LR.+$/', $lr_meta['global_id'])) {
-				// Fucking Leaf Data
-			}
-		}
-
 		$data = $this->load_lab_result_full($id);
 
 		// Data
@@ -63,40 +56,9 @@ class View extends \OpenTHC\Lab\Controller\Base
 				$data['Lab_Result']['coa_file'] = null;
 			}
 		}
-		// if (empty($data['Lab_Result']['coa_file'])) {
-		// 	$coa_hash1 = implode('/', str_split(sprintf('%08x', crc32($data['Lab_Result']['guid'])), 2));
-		// 	$coa_file1 = sprintf('%s/coa/%s/%s.pdf', APP_ROOT, $coa_hash1, $data['Lab_Result']['guid']);
-		// 	$data['Lab_Result']['coa_file'] = $coa_file1;
-		// 	$data['Lab_Result']['coa_file1'] = $coa_file1;
-		// }
 
-		$data['Result_Metric_Group_list'] = $Lab_Result->getMetrics_Grouped();
-
-		// if (!empty($LR['license_id_lab'])) {
-		// 	$x = \OpenTHC\License::findByGUID($LR['license_id_lab']);
-		// 	if ($x) {
-		// 		$data['Laboratory'] = $x->toArray();
-		// 	}
-		// }
-
-		// // @todo whats the difference?
-		// if (!empty($LR['license_id']))
-		// {
-		// 	$x = new \OpenTHC\License($dbc, $LR['license_id']);
-		// 	if (!empty($x)) {
-		// 		$data['License'] = $x->toArray();
-		// 		$data['License']['phone'] = _phone_nice($data['License']['phone']);
-		// 	}
-		// }
-
-		// if (!empty($Lab_Result['license_id_lab'])) {
-		// 	$x = \OpenTHC\License::findByGUID($Lab_Result['license_id_lab']);
-		// 	if ($x) {
-		// 		$data['Laboratory'] = $x->toArray();
-		// 	}
-		// }
-
-		// @todo use dbc_auth and create an auth_context_ticket
+		// @todo use dbc_auth and create an auth_context_ticket?
+		// Use Redis, with Timelimit
 		$data['coa_upload_hash'] = _encrypt(json_encode(array(
 			'a' => 'coa-upload',
 			'r' => $data['Lab_Result']['id'],
@@ -113,13 +75,13 @@ class View extends \OpenTHC\Lab\Controller\Base
 			return $this->_postHandler($REQ, $RES, $Lab_Result, $data);
 		}
 
-		if ('dump' == $_GET['_dump']) {
-			__exit_text($data);
-		}
-
 		$x = $data['Lab_Result']->getMeta();
 		$data['Lab_Result'] = $data['Lab_Result']->toArray();
 		$data['Lab_Result']['meta'] = $x;
+
+		if ('dump' == $_GET['_dump']) {
+			__exit_text($data);
+		}
 
 		return $RES->write( $this->render('result/single.php', $data) );
 
@@ -139,7 +101,7 @@ class View extends \OpenTHC\Lab\Controller\Base
 			_exit_html_fail('<h1>Lab Result Not Found [CRV-106]</h1>', 404);
 		}
 
-		// Load Sample (or Lot)
+		// Load Sample (or Inventory)
 		// @note should ALWAYS have a proper Lab_Sample record, if not it needs a data-patch /djb 20220222
 		$Lab_Sample = new Lab_Sample();
 		if ( ! empty($Lab_Result['lab_sample_id'])) {
@@ -154,24 +116,22 @@ class View extends \OpenTHC\Lab\Controller\Base
 		// 	$Lab_Sample = new Lab_Sample(null, $chk);
 		}
 
-		$Lot = $dbc_user->fetchRow('SELECT id, product_id, variety_id FROM inventory WHERE id = :i0', [ ':i0' => $Lab_Sample['inventory_id'] ?: $Lab_Sample['lot_id'] ]);
-		$Product = $dbc_user->fetchRow('SELECT * FROM product WHERE id = ?', [ $Lot['product_id'] ]);
+		$Inventory = $dbc_user->fetchRow('SELECT id, product_id, variety_id FROM inventory WHERE id = :i0', [ ':i0' => $Lab_Sample['inventory_id'] ?: $Lab_Sample['lot_id'] ]);
+		$Product = $dbc_user->fetchRow('SELECT * FROM product WHERE id = ?', [ $Inventory['product_id'] ]);
 		$ProductType = $dbc_user->fetchRow('SELECT * FROM product_type WHERE id = ?', [ $Product['product_type_id'] ]);
-		$Variety = $dbc_user->fetchRow('SELECT * FROM variety WHERE id = ?', [ $Lot['variety_id'] ]);
+		$Variety = $dbc_user->fetchRow('SELECT * FROM variety WHERE id = ?', [ $Inventory['variety_id'] ]);
 
-		// $meta = json_decode($Lab_Result['meta'], true);
-		// $Lab_Result->getMetrics();
-
-		// Get authoriative lab metrics
+		// Get base lab metrics
 		$lab_result_metric_list = [];
 		$sql = <<<SQL
-		SELECT id AS lab_metric_id, type, sort, name, meta, meta->>'uom' AS uom
+		SELECT id AS lab_metric_id, lab_metric_type_id, type, sort, name, meta
 		FROM lab_metric
 		WHERE stat = 200
 		ORDER BY sort, name
 		SQL;
 		$res = $dbc_user->fetchAll($sql);
 		foreach ($res as $rec) {
+			$rec['@source'] = 'lab_metric';
 			$rec['meta'] = json_decode($rec['meta'], true);
 			$lab_result_metric_list[ $rec['lab_metric_id'] ] = $rec;
 		}
@@ -181,10 +141,11 @@ class View extends \OpenTHC\Lab\Controller\Base
 		$sql = <<<SQL
 		SELECT lab_result_metric.*
 			, lab_result_metric.id AS lab_result_metric_id
+			, lab_metric.lab_metric_type_id
 			, lab_metric.type
 			, lab_metric.sort
 			, lab_metric.name
-			, lab_metric.meta
+			, lab_metric.meta AS lab_metric_meta
 		FROM lab_metric
 		JOIN lab_result_metric ON lab_metric.id = lab_result_metric.lab_metric_id
 		WHERE lab_result_metric.lab_result_id = :lr0
@@ -195,18 +156,20 @@ class View extends \OpenTHC\Lab\Controller\Base
 		];
 		$res = $dbc_user->fetchAll($sql, $arg);
 		foreach ($res as $rec) {
+			$rec['@source'] = 'lab_result_metric';
 			$rec['meta'] = json_decode($rec['meta'], true);
+			$rec['lab_metric_meta'] = json_decode($rec['lab_metric_meta'], true);
 			$lab_result_metric_list[ $rec['lab_metric_id'] ] = $rec;
 		}
 
 		$Lab_Metric = new Lab_Metric($dbc_user);
 
 		// $data['License'] = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id'] ]);
-		// $dbc_main = $this->_container->DBC_Main;
 		$Source_License = $dbc_user->fetchRow('SELECT * FROM license WHERE id = :l0', [ ':l0' => $Lab_Sample['license_id_source'] ]);
 
 		return [
-			'Lot' => $Lot,
+			'Lot' => $Inventory,
+			'Inventory' => $Inventory,
 			'Lab_Sample' => $Lab_Sample,
 			'Lab_Result' => $Lab_Result,
 			'Lab_Result_Metric_list' => $lab_result_metric_list,

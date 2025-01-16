@@ -282,6 +282,7 @@ class View extends \OpenTHC\Lab\Controller\Base
 			SELECT lab_result_metric.*
 			  , lab_metric.lab_metric_type_id
 			  , lab_metric.sort
+			--   , lab_metric.meta AS lab_metric_meta
 			FROM lab_result_metric
 			JOIN lab_metric ON lab_result_metric.lab_metric_id = lab_metric.id
 			WHERE lab_result_metric.lab_result_id = :lr0
@@ -290,8 +291,14 @@ class View extends \OpenTHC\Lab\Controller\Base
 				':lr0' => $x
 			]);
 			foreach ($res as $lrm) {
+
+				$lrm['meta'] = json_decode($lrm['meta'], true);
+				unset($lrm['lab_metric_meta']);
+				unset($lrm['flag']);
+				// $lrm['lab_metric_meta'] = json_decode($lrm['lab_metric_meta'], true);
+
 				$lab_metric_list[ $lrm['lab_metric_id'] ] = $lrm;
-				// $lab_metric_type_list[ $lrm['lab_metric_type_id'] ][]
+
 			}
 		}
 
@@ -299,7 +306,6 @@ class View extends \OpenTHC\Lab\Controller\Base
 		// $lr0 = $dbc->fetchRow('SELECT id FROM lab_report WHERE lab_sample_id = :ls0 ORDER BY id DESC', [
 		// 	':ls0' => $Lab_Sample['id']
 		// ]);
-
 
 		// Create a Lab Report
 		$lr1 = [];
@@ -314,9 +320,8 @@ class View extends \OpenTHC\Lab\Controller\Base
 		$lr1['name'] = sprintf('%s-LR', $Lab_Sample['name']);
 		$lr1['meta'] = json_encode([
 			'@version' => '420.18.097',
-			'lab_report_list' => $_POST['lab-result'], // @deprecated
 			'lab_result_list' => $_POST['lab-result'],
-			'lab_metric_list' => $lab_metric_list, // @deprecated
+			// 'lab_metric_list' => $lab_metric_list, // @deprecated
 			'lab_result_metric_list' => $lab_metric_list,
 		]);
 

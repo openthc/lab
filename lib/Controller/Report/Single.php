@@ -322,6 +322,15 @@ class Single extends \OpenTHC\Lab\Controller\Base
 
 		$Lab_Report->save('Lab Report Committed by User');
 
+		// Change All Others NOT This One Just Made to STAT 410
+		$arg = [
+			':ls0' => $Lab_Report['lab_sample_id'],
+			':lr0' => $Lab_Report['id'],
+			':f1' => 0x08000000,
+			':s1' => 410,
+		];
+		// $dbc->query('UPDATE lab_report SET flag = (flag | :f1), stat = :s1 WHERE lab_sample_id = :ls0 AND id != :lr0', $arg);
+
 		return $RES;
 
 	}
@@ -458,52 +467,32 @@ class Single extends \OpenTHC\Lab\Controller\Base
 		]);
 
 		// Metric Types
-		$res = $dbc_user->fetchAll('SELECT id, name, meta, sort FROM lab_metric_type ORDER BY sort');
+		$sql = <<<SQL
+		SELECT id, name, meta, sort
+		FROM lab_metric_type
+		WHERE id NOT IN ('018NY6XC00LMT0000000000000')
+		ORDER BY sort, name
+		SQL;
+		$res = $dbc_user->fetchAll($sql);
 		foreach ($res as $rec) {
 			$rec['meta'] = json_decode($rec['meta'], true);
 			$data['lab_metric_type_list'][ $rec['id'] ] = $rec;
 		}
 
 		// Metrics
-		$res = $dbc_user->fetchAll("SELECT id, name, meta->>'uom' AS uom, meta, sort FROM lab_metric ORDER BY sort");
+		$sql = <<<SQL
+		SELECT id, lab_metric_type_id, name, type, sort, meta
+		FROM lab_metric
+		ORDER BY sort, name
+		SQL;
+		$res = $dbc_user->fetchAll($sql);
 		foreach ($res as $rec) {
 			$rec['meta'] = json_decode($rec['meta'], true);
 			$data['lab_metric_list'][ $rec['id'] ] = $rec;
 		}
 
-		// Upscale Data for PDF, JSON, etc
-		$data['Lab_Result_Metric_list'] = [];
-		foreach ($data['Lab_Report']['meta']['lab_result_metric_list'] as $x) {
-
-			$lm = $dbc_user->fetchRow('SELECT * FROM lab_metric WHERE id = :lm0', [ ':lm0' => $x['lab_metric_id'] ]);
-			$lm['meta'] = json_decode($lm['meta'], true);
-
-			$x['name'] = $lm['name'];
-			$x['meta']['max'] = $lm['meta']['max'];
-
-			$data['Lab_Result_Metric_list'][ $x['lab_metric_id'] ] = $x;
-		}
-
-		$data['Lab_Result_Section_Metric_list'] = [];
-		foreach ($data['lab_metric_type_list'] as $lmt) {
-			$lmt['metric_list'] = [];
-			$data['Lab_Result_Section_Metric_list'][ $lmt['id'] ] = $lmt;
-		}
-
-		foreach ($data['Lab_Result_Metric_list'] as $lrm) {
-			$lmt_id = $lrm['lab_metric_type_id'];
-			$data['Lab_Result_Section_Metric_list'][ $lmt_id ]['metric_list'][ $lrm['lab_metric_id'] ] = [
-				'id' => $lrm['lab_metric_id'],
-			];
-		}
-
-		// Another Name for the THing
-		// $data['Lab_Result_Section_Metric_list'] = $Lab_Result->getMetrics_Grouped();
-
-		// Another Name for the Stuff
-		// $data['Lab_Result_Metric_Type_list'] = $Lab_Result->getMetricListGrouped();
-
 		return $data;
+
 	}
 
 	/**

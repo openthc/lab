@@ -17,6 +17,23 @@ use OpenTHC\Lab\Lab_Result;
 
 use OpenTHC\CRE\CCRS;
 
+if (empty($data['Lab_Result'])) {
+	if ( ! empty($data['Lab_Report'])) {
+		$data['Lab_Result'] = $data['Lab_Report'];
+		unset($data['Lab_Report']);
+	}
+}
+
+if (empty($data['Lab_Result_Metric_list'])) {
+	// $data['Lab_Result_Metric_list']
+	// __exit_text($data['Lab_Result']['meta']);
+	$data['Lab_Result_Metric_list'] = $data['Lab_Result']['meta']['lab_result_metric_list'];
+}
+if (empty($data['Lab_Result_Metric_list'])) {
+	throw new \Exception('Invalid Data [VPC-033]');
+}
+
+
 // Get Some Configuration Options
 $csv_config = [];
 $csv_config['lab_name'] = $data['License_Laboratory']['name'] ?: $_SESSION['Company']['name'];
@@ -268,9 +285,13 @@ function _ccrs_qom_uom_format($lrm)
 
 	$ret = sprintf('%0.2f', $lrm['qom']);
 
-	if ($lrm['qom'] <= 0) {
-		$ret = sprintf('<%0.2f', $lrm['loq']);
-		// $lrm['qom'] = 0;
+	// Promote LOQ-LB (Level of Quantization Lower Bound)
+	// @todo this code should be moved up-stream where maybe Lab_Result->getMetricsDatabase() does something?
+	$loq = floatval($lrm['loq-lb'] ?: $lrm['meta']['loq-lb'] ?: $lrm['lab_metric_meta']['loq-lb'] ?: $lrm['lab_metric_meta']['loq']);
+	if ($loq > 0) {
+		if ($lrm['qom'] <= $loq) {
+			$ret = sprintf('<%0.2f', $loq);
+		}
 	}
 
 	return $ret;
