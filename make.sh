@@ -30,59 +30,14 @@ PHP
 
 echo "DONE"
 
-# /**
-#  * not sure how to implement this yet
-#  */
-# function install_fonts()
-# {
-	Google Fonts
-	# // curl -O https://openthc.com/pub/font/CedarvilleCursive-Regular.ttf
-	# // curl -O https://openthc.com/pub/font/HomemadeApple-Regular.ttf
+# not sure how to implement this yet
+# Google Fonts
+# curl -O https://openthc.com/pub/font/CedarvilleCursive-Regular.ttf
+# curl -O https://openthc.com/pub/font/HomemadeApple-Regular.ttf
+
+# vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php --fonts=CedarvilleCursive-Regular.ttf
+# vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php --fonts=HomemadeApple-Regular.ttf
 #
-	# // vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php --fonts=CedarvilleCursive-Regular.ttf
-	# // vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php --fonts=HomemadeApple-Regular.ttf
+# rm CedarvilleCursive-Regular.ttf
+# rm HomemadeApple-Regular.ttf
 #
-	# // rm CedarvilleCursive-Regular.ttf
-	# // rm HomemadeApple-Regular.ttf
-#
-# }
-
-
-# libsodium is a special case
-#if [ -d "libsodium.js" ]
-#then
-#	cd libsodium.js
-#	git checkout master
-#	git pull
-#	cd -
-#	git checkout 0.7.13
-#else
-#	mkdir libsodium.js
-#	cd libsodium.js
-#	git clone https://github.com/jedisct1/libsodium.js.git ./
-#	git checkout 0.7.13
-#	cd -
-#fi
-#mkdir -p webroot/vendor/libsodium/
-#cp libsodium.js/dist/browsers/sodium.js webroot/vendor/libsodium/
-
-
-#
-# Document CrashCourse?
-# mkdir -p ./webroot/crash-course
-
-#asciidoctor \
-#	--verbose \
-#	--backend=html5 \
-#	--require=asciidoctor-diagram \
-#	--section-numbers \
-#	--out-file=./webroot/crash-course.html \
-#	./content/crash-course.ad
-
-#asciidoctor \
-#	--verbose \
-#	--backend=revealjs \
-#	--require=asciidoctor-diagram \
-#	--require=asciidoctor-revealjs \
-#	--out-file=./webroot/crash-course-slides.html \
-#	./content/crash-course.ad
